@@ -7,12 +7,15 @@ import '@fontsource/manrope/700.css';
 import '@fontsource/manrope/800.css';
 import './styles.css';
 import { App } from './App';
+import { ErrorBoundary } from './ui/ErrorBoundary';
 import { registerSW } from 'virtual:pwa-register';
 
 registerSW({ immediate: true });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );
