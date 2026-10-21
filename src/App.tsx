@@ -52,7 +52,9 @@ export function App() {
   }, [dark]);
 
   // Écran allumé tant que l'app est ouverte (réglage).
-  useEffect(() => setKeepAwake(settings.keepAwake), [settings.keepAwake]);
+  useEffect(() => {
+    setKeepAwake(settings.keepAwake);
+  }, [settings.keepAwake]);
 
   // Nettoyage automatique de l'historique ancien.
   useEffect(() => {
@@ -69,7 +71,11 @@ export function App() {
     return () => setFinishHandler(null);
   }, []);
 
-  useEffect(() => window.scrollTo(0, 0), [head, rest[0]]);
+  // Accolades obligatoires : scrollTo renvoie une Promise dans les Chrome récents,
+  // que React prendrait pour une fonction de nettoyage.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [head, rest[0]]);
 
   let screen: JSX.Element;
   let nav = true;

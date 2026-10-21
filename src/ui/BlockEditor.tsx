@@ -7,7 +7,9 @@ import { fmtClock } from '../lib/format';
 /** Petite saisie m:ss pour les listes. */
 function MiniDuration({ value, onChange, label }: { value: number; onChange: (v: number) => void; label: string }) {
   const [text, setText] = useState(fmtClock(value));
-  useEffect(() => setText(fmtClock(value)), [value]);
+  useEffect(() => {
+    setText(fmtClock(value));
+  }, [value]);
   const commit = () => {
     const parts = text.trim().split(':').map(Number);
     if (parts.some((p) => Number.isNaN(p))) return setText(fmtClock(value));

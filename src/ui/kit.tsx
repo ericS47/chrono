@@ -59,7 +59,9 @@ export function DurationField({
 }: { label: string; value: number; onChange: (v: number) => void; step?: number; min?: number; max?: number; hint?: string }) {
   const [text, setText] = useState(fmtClock(value));
   const id = useId();
-  useEffect(() => setText(fmtClock(value)), [value]);
+  useEffect(() => {
+    setText(fmtClock(value));
+  }, [value]);
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
   const commit = () => {
     const parts = text.trim().split(':').map((p) => Number(p.replace(',', '.')));
