@@ -4,8 +4,11 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // Chemins relatifs : fonctionne sur GitHub Pages (/chrono/), en local et dans Capacitor.
+import pkg from './package.json';
+
 export default defineConfig({
   base: './',
+  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
     VitePWA({
