@@ -9,14 +9,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "typecheck": "tsc -b",
-    "cap:sync": "npm run build && npx cap sync android"
+    "typecheck": "tsc -b"
   },
   "license": "MIT",
   "dependencies": {
-    "@capacitor/android": "^6.2.0",
-    "@capacitor/core": "^6.2.0",
-    "@capacitor/local-notifications": "^6.1.1",
     "@fontsource/manrope": "^5.1.0",
     "dexie": "^4.0.10",
     "dexie-react-hooks": "^1.1.7",
@@ -25,7 +21,6 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.2.0",
     "@playwright/test": "^1.48.2",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.12",

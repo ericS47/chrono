@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-// Chemins relatifs : fonctionne sur GitHub Pages (/chrono/), en local et dans Capacitor.
+// Chemins relatifs : fonctionne sur GitHub Pages (/chrono/) et en local.
 import pkg from './package.json';
 
 export default defineConfig({

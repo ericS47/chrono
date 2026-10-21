@@ -1,4 +1,4 @@
-// Routeur minimal par hash (#/planning) : marche sur GitHub Pages, hors-ligne et dans Capacitor.
+// Routeur minimal par hash (#/planning) : marche sur GitHub Pages et hors-ligne.
 
 import { useSyncExternalStore } from 'react';
 

@@ -1,7 +1,6 @@
 // Fonctions du téléphone : écran allumé, vibration, contrôles média,
-// stockage persistant, et rappels (notifications locales via Capacitor).
+// stockage persistant, et rappels (notifications du navigateur).
 
-import { Capacitor } from '@capacitor/core';
 import type { ScheduledSession, Workout } from '../data/types';
 import { upcomingReminders } from '../data/schedule';
 
@@ -89,63 +88,27 @@ export async function storageInfo(): Promise<{ usage: number; quota: number; per
 
 // ---------- Rappels ----------
 
-export const isNativeApp = () => Capacitor.isNativePlatform();
-
-function hashId(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  return Math.abs(h) % 2_000_000_000;
-}
-
 let webTimers: number[] = [];
 
 export async function notificationPermission(): Promise<'granted' | 'denied' | 'default' | 'unsupported'> {
-  if (isNativeApp()) {
-    const { LocalNotifications } = await import('@capacitor/local-notifications');
-    const p = await LocalNotifications.checkPermissions();
-    return p.display === 'granted' ? 'granted' : p.display === 'denied' ? 'denied' : 'default';
-  }
   if (typeof Notification === 'undefined') return 'unsupported';
   return Notification.permission;
 }
 
 export async function requestNotifications(): Promise<boolean> {
-  if (isNativeApp()) {
-    const { LocalNotifications } = await import('@capacitor/local-notifications');
-    return (await LocalNotifications.requestPermissions()).display === 'granted';
-  }
   if (typeof Notification === 'undefined') return false;
   return (await Notification.requestPermission()) === 'granted';
 }
 
 /**
- * Programme les rappels des 30 prochains jours.
- * App Android (Capacitor) : vraies notifications locales, même app fermée.
- * PWA : rappel uniquement si l'app est ouverte (limite du navigateur).
+ * Programme les rappels des prochaines 24 h.
+ * Rappel uniquement si l'app est ouverte (limite du navigateur).
  */
 export async function syncReminders(schedules: ScheduledSession[], workouts: Workout[]): Promise<number> {
   const names = new Map(workouts.map((w) => [w.id, w.name]));
   const list = upcomingReminders(schedules, new Date(), 30).slice(0, 60);
   const body = (sid: string, at: Date, minutes: number | null) =>
     `${names.get(sid) ?? 'Séance'} à ${new Date(at.getTime() + (minutes ?? 0) * 60_000).toTimeString().slice(0, 5)}`;
-
-  if (isNativeApp()) {
-    const { LocalNotifications } = await import('@capacitor/local-notifications');
-    if ((await LocalNotifications.checkPermissions()).display !== 'granted') return 0;
-    const pending = await LocalNotifications.getPending();
-    if (pending.notifications.length) await LocalNotifications.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) });
-    if (!list.length) return 0;
-    await LocalNotifications.schedule({
-      notifications: list.map((r) => ({
-        id: hashId(r.sched.id + r.date),
-        title: 'Séance prévue',
-        body: body(r.sched.workoutId, r.at, r.sched.reminderMinutes),
-        schedule: { at: r.at, allowWhileIdle: true },
-        extra: { scheduleId: r.sched.id, date: r.date },
-      })),
-    });
-    return list.length;
-  }
 
   webTimers.forEach((t) => clearTimeout(t));
   webTimers = [];

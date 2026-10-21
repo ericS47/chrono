@@ -1,6 +1,5 @@
-# Tests + build web + APK Android à chaque push sur main.
-# L'APK est publié dans la release « latest » (onglet Releases du dépôt).
-name: CI et APK
+# Tests + build web à chaque push sur main et sur les pull requests.
+name: CI
 
 on:
   push:
@@ -9,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -26,38 +25,3 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
 
-  apk:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - run: npm ci
-      - run: npm run build
-      - run: npx cap sync android
-      - name: Compiler l'APK
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-          cp app/build/outputs/apk/debug/app-debug.apk ../chrono.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: chrono-apk
-          path: chrono.apk
-      - name: Publier l'APK dans la release « latest »
-        if: github.event_name != 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release delete latest --yes --cleanup-tag || true
-          gh release create latest chrono.apk \
-            --title "Chrono – dernière version (build ${{ github.run_number }})" \
-            --notes "APK Android de Chrono, compilé automatiquement depuis le commit ${{ github.sha }}. Téléchargez chrono.apk sur le téléphone puis ouvrez-le pour l'installer."

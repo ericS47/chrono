@@ -4,6 +4,3 @@ dev-dist
 test-results
 playwright-report
 *.local
-android/app/build
-android/build
-android/.gradle

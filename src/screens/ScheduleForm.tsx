@@ -4,7 +4,7 @@ import { useWorkouts } from '../data/hooks';
 import type { ScheduledSession } from '../data/types';
 import { dayShort, isoDate, uid } from '../lib/format';
 import { back, go, useQuery } from '../lib/router';
-import { isNativeApp, notificationPermission, requestNotifications } from '../lib/platform';
+import { notificationPermission, requestNotifications } from '../lib/platform';
 import { TopBar } from '../ui/kit';
 
 const REMINDERS = [null, 0, 5, 10, 15, 30, 60, 120];
@@ -99,8 +99,8 @@ export function ScheduleForm() {
               Autoriser les notifications
             </button>
           )}
-          {s.reminderMinutes !== null && !isNativeApp() && (
-            <span className="hint">Dans la version web, le rappel ne s’affiche que si Chrono est ouvert. L’app Android (Capacitor) envoie de vraies notifications, même fermée.</span>
+          {s.reminderMinutes !== null && (
+            <span className="hint">Le rappel ne s’affiche que si Chrono est ouvert (limite du navigateur).</span>
           )}
         </div>
       </div>

@@ -4,7 +4,7 @@ Résumé du plan fonctionnel validé avant le développement. Il remplace le doc
 
 ## Vision
 
-Une app Android (PWA installable, et APK via Capacitor) qui sert de chrono de séance : on prépare ses séances à l'avance, on les lance d'un tap, et l'app guide à la voix et au bip, même téléphone posé au sol. Inspirée de Smart WOD Timer, centrée sur trois choses : construire une séance, la planifier, garder une trace.
+Une PWA installable sur le téléphone (Android) qui sert de chrono de séance : on prépare ses séances à l'avance, on les lance d'un tap, et l'app guide à la voix et au bip, même téléphone posé au sol. Inspirée de Smart WOD Timer, centrée sur trois choses : construire une séance, la planifier, garder une trace.
 
 **Décisions fermes**
 
@@ -14,7 +14,8 @@ Une app Android (PWA installable, et APK via Capacitor) qui sert de chrono de s�
 - Tous les types d'entraînement : CrossFit/HIIT, musculation, course (sans GPS), mobilité (mode Personnalisé).
 - Préparation réglable de 0 à 60 s (défaut 10 s dans les réglages, modifiable par séance et juste avant de lancer).
 - Contrôle complet du son.
-- Rappels : vraies notifications locales via l'app Android Capacitor (plugin Local Notifications), sans serveur.
+- Rappels : notifications du navigateur, sans serveur ; elles ne s'affichent que si l'app est ouverte.
+- PWA uniquement : l'APK Capacitor a été abandonné (décision du 21/10/2026).
 
 ## Modes de chrono (10)
 
@@ -55,12 +56,12 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 
 | Sujet | Solution |
 |---|---|
-| Installation | PWA (manifeste + service worker) ou APK Capacitor |
+| Installation | PWA (manifeste + service worker) |
 | Hors-ligne | Tout est pré-caché |
-| Écran qui s'éteint | Wake Lock (PWA) / FLAG_KEEP_SCREEN_ON (APK) |
+| Écran qui s'éteint | Wake Lock |
 | Précision | Temps calculé depuis l'heure de départ |
 | Sons en arrière-plan | Bips pré-programmés dans Web Audio ; à valider sur le téléphone |
-| Rappels | APK : notifications locales programmées ; PWA : seulement app ouverte |
+| Rappels | Seulement app ouverte (limite du navigateur) |
 | Données | Stockage persistant demandé + export JSON conseillé |
 
 ## Feuille de route
@@ -68,13 +69,12 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 1. ✅ Socle et chrono (tous les modes, sons, voix, vibration, wake lock)
 2. ✅ Séances et bibliothèque (éditeur multi-blocs, Personnalisé, exercices, favoris, étiquettes, WOD connus, partage)
 3. ✅ Enregistrement et historique (Résultat, saisie manuelle, comparaison, stats)
-4. ✅ Planification (calendrier, récurrence, Aujourd'hui, APK Capacitor avec notifications locales)
-5. ✅ Finitions (export/import, thèmes, réglages audio fins) · ⏳ Play Store éventuel
+4. ✅ Planification (calendrier, récurrence, Aujourd'hui, rappels app ouverte)
+5. ✅ Finitions (export/import, thèmes, réglages audio fins)
 
 ## Reste à faire / idées
 
-- **Tester sur le vrai téléphone** : une séance Tabata complète écran verrouillé (sons en arrière-plan), les notifications de l'APK.
-- **Baisser Spotify pendant les bips** (coché dans le plan) : impossible en PWA ; demande un petit plugin natif Android (« audio focus » avec atténuation) dans l'APK.
+- **Tester sur le vrai téléphone** : une séance Tabata complète écran verrouillé (sons en arrière-plan), les rappels.
 - Voix : la synthèse vocale du téléphone est utilisée ; des fichiers voix enregistrés seraient plus fiables en arrière-plan.
 - Réordonner les blocs : boutons ↑ ↓ (le glisser-déposer tactile reste à faire).
-- Publication Play Store (clé de signature de release, fiche, captures).
+- Mettre la PWA en ligne : rendre le dépôt public (GitHub Pages) ou utiliser Netlify / Cloudflare Pages.

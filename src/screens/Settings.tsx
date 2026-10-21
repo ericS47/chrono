@@ -3,7 +3,7 @@ import { exportBackup, importBackup, pruneHistory, saveSettings } from '../data/
 import { useSettings } from '../data/hooks';
 import type { Settings, SoundEvent, SoundName, SoundSettings } from '../data/types';
 import { audio, SOUND_LABELS } from '../audio/audio';
-import { isNativeApp, notificationPermission, requestNotifications, requestPersistentStorage, storageInfo, wakeLockSupported } from '../lib/platform';
+import { notificationPermission, requestNotifications, requestPersistentStorage, storageInfo, wakeLockSupported } from '../lib/platform';
 import { Segmented, Stepper, Toggle } from '../ui/kit';
 
 const EVENT_LABELS: Record<SoundEvent, string> = {
@@ -151,7 +151,7 @@ export function SettingsScreen() {
               <span>Notifications</span>
               <span className="hint">
                 {perm === 'granted' ? 'Autorisées' : perm === 'denied' ? 'Refusées : à réactiver dans les réglages du téléphone' : perm === 'unsupported' ? 'Non prises en charge ici' : 'Pas encore autorisées'}
-                {!isNativeApp() && ' · version web : rappel seulement si l’app est ouverte'}
+                {' · rappel seulement si l’app est ouverte'}
               </span>
             </span>
             {perm === 'default' && <button className="btn small" onClick={() => void requestNotifications().then(() => notificationPermission().then(setPerm))}>Autoriser</button>}

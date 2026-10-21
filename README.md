@@ -1,21 +1,20 @@
 # Chrono
 
-Chrono de séance sportive pour Android : AMRAP, EMOM, For Time, Tabata, intervalles, chrono, compte à rebours, étapes personnalisées, musculation et course. On prépare ses séances, on les planifie, l'app guide au bip et à la voix, et on garde un historique. **100 % local** : pas de compte, pas de serveur, tout reste sur le téléphone.
+Chrono de séance sportive (PWA, pensée pour un téléphone Android) : AMRAP, EMOM, For Time, Tabata, intervalles, chrono, compte à rebours, étapes personnalisées, musculation et course. On prépare ses séances, on les planifie, l'app guide au bip et à la voix, et on garde un historique. **100 % local** : pas de compte, pas de serveur, tout reste sur le téléphone.
 
 - Plan fonctionnel : [docs/PLAN.md](docs/PLAN.md)
 - Choix de design : [docs/DESIGN.md](docs/DESIGN.md)
 
-## Installer l'app sur le téléphone (APK)
+## Installer l'app sur le téléphone
 
-À chaque mise à jour de la branche `main`, GitHub compile automatiquement l'APK Android.
+Chrono est une PWA : une app web qui s'installe sur l'écran d'accueil et marche hors-ligne.
 
-1. Sur le téléphone, connecté à GitHub, ouvrir l'onglet **Releases** du dépôt, puis la release **latest**.
-2. Télécharger **chrono.apk** et l'ouvrir. Android demande d'autoriser l'installation depuis le navigateur : accepter.
-3. Pour mettre à jour, refaire pareil : la nouvelle version s'installe par-dessus, les données sont conservées.
+1. Mettre l'app en ligne (une seule fois) :
+   - **GitHub Pages** : rendre le dépôt public, puis **Settings › Pages › Source : GitHub Actions**. L'app sera sur `https://<compte>.github.io/chrono/` et se met à jour à chaque push sur `main`.
+   - ou **Netlify / Cloudflare Pages** (le dépôt peut rester privé) : relier le dépôt, commande `npm run build`, dossier `dist`.
+2. Sur le téléphone, ouvrir l'adresse dans Chrome, puis menu ⋮ › **Ajouter à l'écran d'accueil**.
 
-Au premier lancement d'une séance planifiée avec rappel, autoriser les notifications.
-
-> Version web (PWA) : si le dépôt devient public, activer **Settings › Pages › Source : GitHub Actions** ; l'app sera alors en ligne sur `https://<compte>.github.io/chrono/` et installable depuis Chrome (« Ajouter à l'écran d'accueil »). Netlify ou Cloudflare Pages marchent aussi (dossier `dist`, commande `npm run build`).
+Les rappels de séance ne s'affichent que si Chrono est ouvert (limite des navigateurs). Au premier rappel, autoriser les notifications.
 
 ## Travailler sur le code
 
@@ -31,17 +30,7 @@ npm run test:e2e     # parcours dans un navigateur (Playwright ; d'abord : npx p
 npm run build        # version de production dans dist/
 ```
 
-Pour tester sur le téléphone sans APK : `npm run dev -- --host`, puis ouvrir l'adresse affichée (même Wi-Fi).
-
-### Compiler l'APK soi-même (optionnel)
-
-GitHub le fait déjà. En local il faut [Android Studio](https://developer.android.com/studio) (avec le SDK Android 34 et Java 17) :
-
-```bash
-npm run cap:sync                 # build web + copie dans android/
-npx cap open android             # ouvre Android Studio → Run ▶ sur le téléphone branché
-# ou en ligne de commande : cd android && ./gradlew assembleDebug
-```
+Pour tester sur le téléphone pendant le développement : `npm run dev -- --host`, puis ouvrir l'adresse affichée (même Wi-Fi).
 
 ## Organisation du code
 
@@ -52,6 +41,5 @@ npx cap open android             # ouvre Android Studio → Run ▶ sur le tél�
 | `src/audio/` | Sons synthétisés (Web Audio) et voix française |
 | `src/screens/` | Écrans : Accueil, Planning, Séances (bibliothèque, historique, WOD), Éditeur, Chrono, Résultat, Réglages |
 | `src/ui/` | Composants communs et icônes |
-| `android/` | Projet Android Capacitor (notifications locales, écran allumé) |
 | `tests/e2e/` | Parcours Playwright |
-| `.github/workflows/` | Tests + APK à chaque push ; déploiement Pages si le dépôt est public |
+| `.github/workflows/` | Tests à chaque push ; déploiement Pages si le dépôt est public |
