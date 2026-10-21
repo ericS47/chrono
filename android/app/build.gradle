@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+// Numéro de build fourni par GitHub Actions pour que chaque APK remplace le précédent.
+def buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
 android {
     namespace "app.chrono.timer"
     compileSdk rootProject.ext.compileSdkVersion
@@ -7,9 +10,8 @@ android {
         applicationId "app.chrono.timer"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // Numéro de build fourni par GitHub Actions pour que chaque APK remplace le précédent.
-        versionCode (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
-        versionName "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
+        versionCode buildNumber
+        versionName "1.0." + buildNumber
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
