@@ -51,18 +51,56 @@ class AudioEngine {
 
   /** À appeler depuis un geste utilisateur (tap) pour débloquer l'audio. */
   unlock(): void {
-    if (typeof window === 'undefined') return;
-    if (!this.ctx) {
-      const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!AC) return;
-      this.ctx = new AC({ latencyHint: 'interactive' });
-    }
-    if (this.ctx.state === 'suspended') void this.ctx.resume();
-    this.pickVoice();
+    void this.ready();
   }
+
+  /**
+   * Crée (ou recrée) le contexte audio et attend qu'il tourne vraiment.
+   * Un contexte fermé ou resté bloqué (mise en veille, autre app audio) est remplacé.
+   */
+  private async ready(recreate = false): Promise<Ctx | null> {
+    if (typeof window === 'undefined') return null;
+    this.pickVoice();
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    if (this.ctx && (this.ctx.state as string) === 'closed') this.ctx = null;
+    if (!this.ctx) this.ctx = new AC({ latencyHint: 'interactive' });
+    if (this.ctx.state !== 'running') {
+      try {
+        await Promise.race([this.ctx.resume(), new Promise((r) => setTimeout(r, 400))]);
+      } catch {
+        /* reprise refusée : on recrée ci-dessous */
+      }
+    }
+    if (recreate && this.ctx.state !== 'running') {
+      // Contexte bloqué : on le remplace par un neuf, créé pendant le geste en cours.
+      try {
+        void this.ctx.close();
+      } catch {
+        /* déjà fermé */
+      }
+      this.ctx = new AC({ latencyHint: 'interactive' });
+      try {
+        await Promise.race([this.ctx.resume(), new Promise((r) => setTimeout(r, 400))]);
+      } catch {
+        /* rien de plus à faire */
+      }
+    }
+    return this.ctx;
+  }
+
+  private voicesHooked = false;
 
   private pickVoice(): void {
     if (this.voice || typeof speechSynthesis === 'undefined') return;
+    if (!this.voicesHooked) {
+      // Sur Android, la liste des voix arrive après coup.
+      this.voicesHooked = true;
+      speechSynthesis.addEventListener?.('voiceschanged', () => {
+        this.voice = null;
+        this.pickVoice();
+      });
+    }
     const voices = speechSynthesis.getVoices();
     this.voice = voices.find((v) => v.lang === 'fr-FR' && v.localService) ?? voices.find((v) => v.lang.startsWith('fr')) ?? null;
   }
@@ -94,11 +132,26 @@ class AudioEngine {
     return nodes;
   }
 
-  /** Joue un son tout de suite (bouton « Tester »). */
-  test(name: SoundName, s: SoundSettings): void {
-    this.unlock();
-    if (!this.ctx) return;
-    this.play(name, this.ctx.currentTime + 0.02, s.master * s.beepVolume);
+  /** Joue un son tout de suite (bouton « Tester »), même en mode silencieux. */
+  async test(name: SoundName, s: SoundSettings): Promise<boolean> {
+    const ctx = await this.ready(true);
+    if (!ctx || ctx.state !== 'running') return false;
+    // Volume réglé à zéro : on joue quand même doucement pour que le test serve à quelque chose.
+    const vol = s.master * s.beepVolume > 0 ? s.master * s.beepVolume : 0.3;
+    this.play(name, ctx.currentTime + 0.03, vol);
+    return true;
+  }
+
+  /** Fait dire une phrase d'essai (bouton « Tester » de la voix). */
+  testVoice(text: string, s: SoundSettings): boolean {
+    if (typeof speechSynthesis === 'undefined') return false;
+    void this.ready();
+    speechSynthesis.cancel();
+    this.voice = null;
+    this.pickVoice();
+    const vol = s.master * s.voiceVolume > 0 ? s.master * s.voiceVolume : 0.5;
+    this.say(text, { ...s, silent: false, voice: true, master: 1, voiceVolume: Math.min(1, vol) });
+    return true;
   }
 
   say(text: string, s: SoundSettings): void {

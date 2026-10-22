@@ -17,7 +17,7 @@ Thème sombre disponible en option (jetons dans `src/styles.css`, `:root[data-th
 
 ## Mise en page
 
-- **Accueil** : date + titre, carte « Séance du jour » pleine couleur accent (Démarrer, Décaler), grille 3 × 2 de chronos rapides **remplies de la couleur du mode**, liste « Mes séances », dernière séance, barre d'onglets en bas (Accueil / Planning / Séances / Réglages).
+- **Accueil** : date + titre, carte « Séance du jour » pleine couleur accent (Démarrer, Décaler), grille de chronos rapides (les 10 modes + « WOD connus », toutes en tuiles **remplies de la couleur du mode**), dernière séance (« Mes séances » est dans l'onglet Séances), barre d'onglets en bas (Accueil / Planning / Séances / Réglages).
 - **Planning** : bandeau de la semaine (ou grille du mois), séances du jour sous forme de créneaux horaires, stats de la semaine, bouton flottant « Planifier ».
 - **Chrono** : anneau de progression, nom de phase + très grand chiffre, deux cartes (Tour, Restant), liste des prochaines phases, boutons Revenir / Pause / action principale. En paysage, l'anneau passe à gauche.
 
@@ -33,4 +33,4 @@ Thème sombre disponible en option (jetons dans `src/styles.css`, `:root[data-th
 
 ## Couleurs des modes (tuiles)
 
-AMRAP `#FFBE98` · EMOM `#3DD6C6` · For Time `#FFC93C` · Tabata `#B9A6FF` · Intervalles `#FF9F5A` · Chrono `#8FA3FF` · Compte à rebours `#9BD3F5` · Personnalisé `#F5A8C8` · Musculation `#B5D98A` · Course `#7FD1A8`
+AMRAP `#FFBE98` · EMOM `#3DD6C6` · For Time `#FFC93C` · Tabata `#B9A6FF` · Intervalles `#FF9F5A` · Chrono `#8FA3FF` · Compte à rebours `#9BD3F5` · Personnalisé `#F5A8C8` · Musculation `#B5D98A` · Course `#7FD1A8` · WOD connus `#E6CBA8`
