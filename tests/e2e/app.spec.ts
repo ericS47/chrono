@@ -7,9 +7,14 @@ test.beforeEach(async ({ page }) => {
 test('accueil : chrono rapide et navigation', async ({ page }) => {
   await page.goto('./');
   await expect(page.getByRole('heading', { name: 'Chrono rapide' })).toBeVisible();
-  for (const m of ['AMRAP', 'EMOM', 'For Time', 'Tabata', 'Intervalles', 'Chrono']) {
+  for (const m of ['AMRAP', 'EMOM', 'For Time', 'Tabata', 'Intervalles', 'Chrono', 'Compte à rebours', 'Personnalisé', 'Musculation', 'Course', 'WOD connus']) {
     await expect(page.locator('.tile', { hasText: m }).first()).toBeVisible();
   }
+  await expect(page.locator('.tile')).toHaveCount(11);
+  await expect(page.getByRole('heading', { name: 'Mes séances' })).toHaveCount(0);
+  await page.locator('.tile', { hasText: 'WOD connus' }).click();
+  await expect(page.getByRole('link', { name: /Cindy/ })).toBeVisible();
+  await page.getByRole('link', { name: 'Accueil' }).click();
   await page.getByRole('link', { name: 'Planning' }).click();
   await expect(page.getByRole('heading', { name: 'Octobre' })).toBeVisible();
   await page.getByRole('link', { name: 'Réglages' }).click();
@@ -121,6 +126,21 @@ test('réglages enregistrés et thème sombre', async ({ page }) => {
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('output', { hasText: '15 s' })).toBeVisible();
+});
+
+test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __started: number };
+    w.__started = 0;
+    const orig = OscillatorNode.prototype.start;
+    OscillatorNode.prototype.start = function (this: OscillatorNode, ...a: [number?]) {
+      w.__started++;
+      return orig.apply(this, a);
+    };
+  });
+  await page.goto('./#/reglages');
+  await page.getByRole('button', { name: 'Tester' }).first().click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __started: number }).__started)).toBeGreaterThan(0);
 });
 
 test('PWA : manifeste et service worker', async ({ page, request }) => {

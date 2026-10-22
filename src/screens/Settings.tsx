@@ -100,7 +100,7 @@ export function SettingsScreen() {
                 <select aria-label={`Son : ${EVENT_LABELS[e]}`} value={s.sound.events[e].sound} disabled={!s.sound.events[e].enabled} onChange={(x) => ev(e, { sound: x.target.value as SoundName })}>
                   {(Object.keys(SOUND_LABELS) as SoundName[]).map((n) => <option key={n} value={n}>{SOUND_LABELS[n]}</option>)}
                 </select>
-                <button className="btn small secondary" onClick={() => audio.test(s.sound.events[e].sound, s.sound)}>Tester</button>
+                <button className="btn small secondary" onClick={() => void audio.test(s.sound.events[e].sound, s.sound).then((ok) => { if (!ok) setMsg('Son bloqué par le navigateur : vérifie le volume média du téléphone'); })}>Tester</button>
               </div>
             </div>
           ))}
@@ -114,7 +114,7 @@ export function SettingsScreen() {
               <Toggle label="Temps restant" hint="« 30 secondes », « Plus qu’une minute »" checked={s.sound.announceRemaining} onChange={(v) => snd({ announceRemaining: v })} />
               <div className="row">
                 <span className="row-text">Voix</span>
-                <button className="btn small secondary" onClick={() => { audio.unlock(); audio.say('Tour 3 sur 8. Repos', { ...s.sound, silent: false }); }}>Tester</button>
+                <button className="btn small secondary" onClick={() => { if (!audio.testVoice('Tour 3 sur 8. Repos', s.sound)) setMsg('Synthèse vocale non disponible sur ce navigateur'); }}>Tester</button>
               </div>
             </>
           )}
