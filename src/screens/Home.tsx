@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLogs, useSchedules, useSettings, useWorkouts } from '../data/hooks';
 import { occurrencesBetween } from '../data/schedule';
-import { ALL_MODES, MODE_COLORS, MODE_DESC, MODE_LABELS } from '../data/types';
+import { ALL_MODES, MODE_COLORS, MODE_LABELS } from '../data/types';
 import { blockSummary, estimateWorkout } from '../engine/phases';
 import { addDays, fmtClock, fmtDuration, fmtLongDate, isoDate, parseIsoDate } from '../lib/format';
 import { launchWorkout } from '../lib/launch';
@@ -94,13 +94,11 @@ export function Home() {
         <h2 className="section-title">Chrono rapide</h2>
         <div className="tiles">
           {ALL_MODES.map((m) => (
-            <button key={m} className="tile" style={{ background: MODE_COLORS[m] }} onClick={() => go(`/rapide/${m}`)}>
-              <small>{MODE_DESC[m]}</small>
+            <button key={m} className="tile solo" style={{ background: MODE_COLORS[m] }} onClick={() => go(`/rapide/${m}`)}>
               {MODE_LABELS[m]}
             </button>
           ))}
-          <button className="tile" style={{ background: WOD_COLOR }} onClick={() => go('/seances?tab=wod')}>
-            <small>Cindy, Fran, Murph…</small>
+          <button className="tile solo" style={{ background: WOD_COLOR }} onClick={() => go('/seances?tab=wod')}>
             WOD connus
           </button>
         </div>
