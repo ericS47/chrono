@@ -197,7 +197,7 @@ h1, h2, h3 { margin: 0; }
   color: var(--phase-ink);
 }
 .tile small { font-size: 12px; font-weight: 600; }
-.tile.solo { justify-content: flex-end; }
+.tile.solo { align-items: center; justify-content: center; text-align: center; }
 
 .list { display: flex; flex-direction: column; gap: 10px; }
 .item {
