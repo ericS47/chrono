@@ -45,10 +45,7 @@ export function Home() {
   return (
     <main className="screen">
       <div className="page-head">
-        <div>
-          <span className="eyebrow">{fmtLongDate(today)}</span>
-          <h1 className="page-title">{greeting(today)}</h1>
-        </div>
+        <h1 className="page-title">{greeting(today)}</h1>
         <a className="icon-btn" href="#/seances?tab=historique" aria-label="Historique">
           <IconHistory size={20} />
         </a>
