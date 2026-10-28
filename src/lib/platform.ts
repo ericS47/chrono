@@ -5,54 +5,52 @@ import type { ScheduledSession, Workout } from '../data/types';
 import { upcomingReminders } from '../data/schedule';
 
 // ---------- Écran toujours allumé ----------
-// API Wake Lock quand elle marche ; sinon (anciens iPhone, app sur l'écran d'accueil)
-// une petite vidéo muette jouée en boucle empêche aussi la mise en veille.
+// API Wake Lock. Elle peut être refusée hors d'un geste (iPhone) : on la redemande
+// à chaque tap tant qu'elle n'est pas accordée, et à chaque retour dans l'app.
+// Navigateurs sans cette API : vidéo en lecture (avec piste son silencieuse,
+// non répétée en boucle, sinon le téléphone l'ignore pour la mise en veille).
 
 let lock: WakeLockSentinel | null = null;
 let wantLock = false;
+let requesting = false;
 let video: HTMLVideoElement | null = null;
 
-// Sur iPhone, l'API Wake Lock est acceptée mais inopérante dans l'app installée
-// avant iOS 18.4 : on garde la vidéo en plus.
-const isIOS = typeof navigator !== 'undefined'
-  && (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+const hasWakeLock = () => typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
 function fallbackVideo(): HTMLVideoElement {
   if (!video) {
-    video = document.createElement('video');
-    video.src = 'keep-awake.mp4';
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.setAttribute('playsinline', '');
-    video.setAttribute('aria-hidden', 'true');
-    Object.assign(video.style, { position: 'fixed', width: '1px', height: '1px', opacity: '0', pointerEvents: 'none', top: '0', left: '0' });
-    document.body.appendChild(video);
+    const v = document.createElement('video');
+    v.src = 'keep-awake.mp4';
+    v.playsInline = true;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('aria-hidden', 'true');
+    v.volume = 0;
+    // Pas de « loop » : on revient au début juste avant la fin.
+    v.addEventListener('timeupdate', () => {
+      if (v.duration && v.currentTime > v.duration - 1) v.currentTime = 0.1;
+    });
+    Object.assign(v.style, { position: 'fixed', width: '2px', height: '2px', opacity: '0.01', pointerEvents: 'none', bottom: '0', left: '0' });
+    document.body.appendChild(v);
+    video = v;
   }
   return video;
 }
 
-const hasWakeLock = () => 'wakeLock' in navigator;
-const useVideo = () => isIOS || !hasWakeLock();
-let requesting = false;
-
-function playVideo(): void {
-  const v = fallbackVideo();
-  if (v.paused) void v.play().catch(() => undefined);
-}
-
 function acquire(): void {
   if (!wantLock || document.visibilityState !== 'visible') return;
-  // Lancée tout de suite (sans attendre) : iPhone exige qu'elle démarre pendant le tap.
-  if (useVideo()) playVideo();
-  if (!hasWakeLock() || lock || requesting) return;
+  if (!hasWakeLock()) {
+    const v = fallbackVideo();
+    if (v.paused) void v.play().catch(() => undefined);
+    return;
+  }
+  if (lock || requesting) return;
   requesting = true;
   navigator.wakeLock.request('screen')
     .then((l) => {
       lock = l;
       l.addEventListener('release', () => (lock = null));
     })
-    .catch(() => playVideo())
+    .catch(() => undefined)
     .finally(() => (requesting = false));
 }
 
@@ -67,11 +65,9 @@ export function setKeepAwake(on: boolean): void {
 }
 
 /** Vrai si l'écran est réellement maintenu allumé en ce moment. */
-export const keepingAwake = () => (useVideo() ? !!video && !video.paused : !!lock);
+export const keepingAwake = () => (hasWakeLock() ? !!lock : !!video && !video.paused);
 
 if (typeof document !== 'undefined') {
-  // Le verrou est perdu quand l'app passe en arrière-plan : on le reprend au retour,
-  // et à chaque tap (certains navigateurs exigent un geste pour l'accorder).
   document.addEventListener('visibilitychange', acquire);
   document.addEventListener('pointerdown', () => {
     if (wantLock && !keepingAwake()) acquire();

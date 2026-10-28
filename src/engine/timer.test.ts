@@ -90,4 +90,14 @@ describe('moteur de chrono', () => {
     expect(T.activeTime(s)).toBe(15_000);
     expect(T.blockWorkTime(s, 0)).toBe(15_000);
   });
+
+  it('reprend une séance enregistrée au même point, horloge décalée', () => {
+    const s = T.pause(T.start(T.createRun(tabata()), 1000), 16_000);
+    const moved = T.shiftRun(s, -900_000);
+    expect(T.elapsed(moved, 5)).toBe(T.elapsed(s, 999_999));
+    expect(moved.startedAt).toBe(1000 - 900_000);
+    const r = T.shiftRun(T.start(T.createRun(tabata()), 1000), 50_000);
+    expect(T.remaining(r, 51_000 + 4000)).toBe(6000);
+    expect(T.shiftRun(T.createRun(tabata()), 500).phaseStart).toBe(0);
+  });
 });

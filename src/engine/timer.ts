@@ -189,3 +189,18 @@ export function blockWorkTime(s: RunState, blockIndex: number): number {
     0,
   );
 }
+
+/**
+ * Décale tous les instants d'un état de `delta` ms. Sert à reprendre une séance
+ * enregistrée : l'horloge de la page repart de zéro à chaque ouverture.
+ */
+export function shiftRun(s: RunState, delta: number): RunState {
+  const sh = (t: number | null) => (t === null ? null : t + delta);
+  return {
+    ...s,
+    phaseStart: s.status === 'idle' ? s.phaseStart : s.phaseStart + delta,
+    pausedAt: sh(s.pausedAt),
+    startedAt: sh(s.startedAt),
+    endedAt: sh(s.endedAt),
+  };
+}

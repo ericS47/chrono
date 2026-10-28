@@ -147,6 +147,8 @@ export interface SoundSettings {
   /** Nombre de bips du décompte final (0 à 5). */
   countdownBeeps: number;
   silent: boolean;
+  /** Bips joués comme une piste audio, audibles app en arrière-plan ou écran verrouillé. */
+  background: boolean;
 }
 
 export interface Settings {

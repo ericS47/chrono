@@ -19,6 +19,7 @@ export const DEFAULT_SOUND: SoundSettings = {
   announceRemaining: true,
   countdownBeeps: 3,
   silent: false,
+  background: true,
 };
 
 export const DEFAULT_SETTINGS: Settings = {

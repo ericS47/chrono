@@ -87,6 +87,7 @@ export function SettingsScreen() {
           <Range label="Volume général" value={s.sound.master} onChange={(v) => snd({ master: v })} />
           <Range label="Volume des bips" value={s.sound.beepVolume} onChange={(v) => snd({ beepVolume: v })} />
           <Range label="Volume de la voix" value={s.sound.voiceVolume} onChange={(v) => snd({ voiceVolume: v })} />
+          <Toggle label="Son en arrière-plan" hint="Les bips continuent quand vous changez d’app ou verrouillez l’écran. Met en pause la musique d’une autre app (Spotify…) : à couper si vous en écoutez." checked={s.sound.background} onChange={(v) => snd({ background: v })} />
           <Stepper label="Bips du décompte final" hint="Nombre de secondes bipées avant chaque fin de phase" value={s.sound.countdownBeeps} min={0} max={5} onChange={(v) => snd({ countdownBeeps: v })} />
         </div>
         <div className="form">

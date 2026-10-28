@@ -31,8 +31,49 @@ let onFinish: (() => void) | null = null;
 const emit = () => listeners.forEach((l) => l());
 const now = () => performance.now();
 
+// ---------- Sauvegarde de la séance en cours ----------
+// Le téléphone peut fermer l'app en arrière-plan : la séance est enregistrée à chaque
+// changement, avec l'heure réelle, pour être reprise au même point à la réouverture.
+
+const SAVE_KEY = 'chrono.session';
+/** Au-delà, une séance enregistrée est considérée comme abandonnée. */
+const SAVE_MAX_AGE = 12 * 3600_000;
+
+interface Saved {
+  session: Session;
+  perf: number;
+  wall: number;
+}
+
+function save(s: Session | null): void {
+  try {
+    if (!s || s.run.status === 'idle') localStorage.removeItem(SAVE_KEY);
+    else localStorage.setItem(SAVE_KEY, JSON.stringify({ session: s, perf: now(), wall: Date.now() } satisfies Saved));
+  } catch {
+    /* stockage indisponible : la séance reste en mémoire seulement */
+  }
+}
+
+function load(): Session | null {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as Saved;
+    if (Date.now() - saved.wall > SAVE_MAX_AGE || !saved.session?.run) {
+      localStorage.removeItem(SAVE_KEY);
+      return null;
+    }
+    // Même instant réel, exprimé dans l'horloge de cette nouvelle ouverture.
+    const delta = now() - (Date.now() - saved.wall) - saved.perf;
+    return { ...saved.session, run: T.shiftRun(saved.session.run, delta) };
+  } catch {
+    return null;
+  }
+}
+
 function set(s: Session | null): void {
   current = s;
+  save(s);
   emit();
 }
 
@@ -218,6 +259,36 @@ export function discard(): void {
 
 export const clock = now;
 
+/**
+ * Reprend la séance enregistrée si l'app a été fermée pendant une séance.
+ * Renvoie la séance reprise (ou null).
+ */
+export function restoreSession(): Session | null {
+  if (current) return current;
+  const s = load();
+  if (!s) return null;
+  current = s;
+  emit();
+  if (s.run.status === 'running') {
+    // Rattrape les phases écoulées pendant la fermeture, puis relance le chrono.
+    const { state, events } = T.tick(s.run, now());
+    const caught = { ...s, run: state };
+    set(caught);
+    if (events.some((e) => e.type === 'finish')) finished();
+    else {
+      reschedule(caught, false);
+      media(caught);
+      loop();
+    }
+  }
+  return current;
+}
+
+audio.setTrackEndHandler(() => {
+  // Piste terminée avant la séance (durée bornée) : on prépare la suite.
+  if (current?.run.status === 'running') reschedule(current, false);
+});
+
 if (typeof document !== 'undefined') {
   // Écran verrouillé, appel, autre app : le téléphone peut suspendre l'audio, et les bips
   // programmés à l'avance repartiraient en retard. Au retour, on les reprogramme
@@ -225,6 +296,8 @@ if (typeof document !== 'undefined') {
   const resync = (needGesture: boolean) => {
     if (!current || current.run.status !== 'running') return;
     if (needGesture && audio.isRunning()) return;
+    // La piste de séance a continué à jouer : elle est toujours calée, rien à refaire.
+    if (audio.trackPlaying()) return;
     audio.unlock();
     reschedule(current, false);
   };

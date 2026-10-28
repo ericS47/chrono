@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRoute, go } from './lib/router';
 import { useSchedules, useSettings, useWorkouts } from './data/hooks';
 import { pruneHistory } from './data/db';
-import { setFinishHandler } from './engine/session';
+import { restoreSession, setFinishHandler } from './engine/session';
 import { setKeepAwake, syncReminders } from './lib/platform';
 import { IconCalendar, IconHome, IconList, IconSettings } from './ui/icons';
 import { Home } from './screens/Home';
@@ -68,6 +68,9 @@ export function App() {
 
   useEffect(() => {
     setFinishHandler(() => go('/resultat', true));
+    // App fermée par le téléphone pendant une séance : on la reprend là où elle en est.
+    const restored = restoreSession();
+    if (restored) go(restored.run.status === 'finished' ? '/resultat' : '/chrono', true);
     return () => setFinishHandler(null);
   }, []);
 

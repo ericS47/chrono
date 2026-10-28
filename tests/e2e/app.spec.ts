@@ -143,6 +143,35 @@ test('chrono : affichage agrandi avec le tour en cours', async ({ page }) => {
   await expect(page.getByTestId('timer-value')).toBeVisible();
 });
 
+test('séance reprise au même point après fermeture de l’app', async ({ page }) => {
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(10_500 + 20_000 + 2_000);
+  await expect(page.locator('.timer.rest')).toBeVisible();
+  await page.goto('./');
+  await page.reload();
+  await expect(page.locator('.timer.rest, .timer.work')).toBeVisible();
+  await expect(page.locator('.timer-stats')).toContainText('/ 8');
+});
+
+test('séance : les bips sont joués par une piste audio (arrière-plan)', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __tracks: number };
+    w.__tracks = 0;
+    const orig = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
+      if (this.src.startsWith('blob:') && this.duration > 5) w.__tracks++;
+      return orig.call(this);
+    };
+  });
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(3000);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __tracks: number }).__tracks), { timeout: 15_000 }).toBeGreaterThan(0);
+});
+
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __started: number };
