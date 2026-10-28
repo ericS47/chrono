@@ -3,7 +3,7 @@ import { exportBackup, importBackup, pruneHistory, saveSettings } from '../data/
 import { useSettings } from '../data/hooks';
 import type { Settings, SoundEvent, SoundName, SoundSettings } from '../data/types';
 import { audio, SOUND_LABELS } from '../audio/audio';
-import { notificationPermission, requestNotifications, requestPersistentStorage, storageInfo, wakeLockSupported } from '../lib/platform';
+import { notificationPermission, requestNotifications, requestPersistentStorage, storageInfo } from '../lib/platform';
 import { Segmented, Stepper, Toggle } from '../ui/kit';
 
 const EVENT_LABELS: Record<SoundEvent, string> = {
@@ -126,7 +126,7 @@ export function SettingsScreen() {
         <div className="form">
           <Stepper label="Préparation par défaut" hint="Modifiable pour chaque séance" value={s.prepSeconds} min={0} max={60} step={5} format={(v) => `${v} s`} onChange={(v) => up({ prepSeconds: v })} />
           <Toggle label="Vibration" hint="À chaque changement de phase" checked={s.vibration} onChange={(v) => up({ vibration: v })} />
-          <Toggle label="Écran toujours allumé" hint={wakeLockSupported() ? 'Tant que Chrono est ouvert' : 'Non pris en charge par ce navigateur'} checked={s.keepAwake} onChange={(v) => up({ keepAwake: v })} />
+          <Toggle label="Écran toujours allumé" hint="Tant que Chrono est ouvert : le téléphone ne se met pas en veille" checked={s.keepAwake} onChange={(v) => up({ keepAwake: v })} />
           <div className="field">
             <label htmlFor="savemode">À la fin d’une séance</label>
             <select id="savemode" value={s.saveMode} onChange={(e) => up({ saveMode: e.target.value as Settings['saveMode'] })}>

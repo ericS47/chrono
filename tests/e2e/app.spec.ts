@@ -128,6 +128,21 @@ test('réglages enregistrés et thème sombre', async ({ page }) => {
   await expect(page.locator('output', { hasText: '15 s' })).toBeVisible();
 });
 
+test('chrono : affichage agrandi avec le tour en cours', async ({ page }) => {
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(10_500);
+  await page.getByRole('button', { name: 'Agrandir le chrono' }).click();
+  await expect(page.getByTestId('zoom-value')).toBeVisible();
+  await expect(page.locator('.zoom-info')).toContainText('Tour 1 / 8');
+  await expect(page.locator('.zoom-phase')).toHaveText('EFFORT');
+  await page.clock.runFor(20_000);
+  await expect(page.locator('.zoom-phase')).toHaveText('REPOS');
+  await page.locator('.timer.zoom').click();
+  await expect(page.getByTestId('timer-value')).toBeVisible();
+});
+
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __started: number };

@@ -58,7 +58,7 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 |---|---|
 | Installation | PWA (manifeste + service worker) |
 | Hors-ligne | Tout est pré-caché |
-| Écran qui s'éteint | Wake Lock |
+| Écran qui s'éteint | Wake Lock, et vidéo muette en boucle en secours (iPhone) ; repris à chaque retour dans l'app et à chaque tap |
 | Précision | Temps calculé depuis l'heure de départ |
 | Sons en arrière-plan | Bips pré-programmés dans Web Audio ; à valider sur le téléphone |
 | Rappels | Seulement app ouverte (limite du navigateur) |
@@ -73,6 +73,9 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 5. ✅ Finitions (export/import, thèmes, réglages audio fins)
 
 ## Reste à faire / idées
+
+- **Reprendre une séance après fermeture de l'app** : iPhone ferme souvent les apps en arrière-plan ; la séance en cours est alors perdue. Proposition : l'enregistrer au fil de l'eau et proposer « Reprendre » à la réouverture.
+- Tests unitaires de `src/engine/session.ts` (la liaison moteur / son), aujourd'hui couverte seulement par les parcours Playwright.
 
 - **Tester sur le vrai téléphone** : une séance Tabata complète écran verrouillé (sons en arrière-plan), les rappels.
 - Voix : la synthèse vocale du téléphone est utilisée ; des fichiers voix enregistrés seraient plus fiables en arrière-plan.

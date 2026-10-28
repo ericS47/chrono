@@ -7,8 +7,9 @@ import { fmtClock, fmtShort } from '../lib/format';
 import { go } from '../lib/router';
 import { useSettings } from '../data/hooks';
 import { launchWorkout } from '../lib/launch';
+import { enterFullscreen, exitFullscreen } from '../lib/platform';
 import {
-  IconArrowRight, IconClose, IconFlag, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
+  IconArrowRight, IconClose, IconExpand, IconFlag, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
 
 const R = 138;
@@ -81,6 +82,14 @@ export function TimerScreen() {
   const running = session?.run.status === 'running';
   const now = useNow(!!running);
   const [confirm, setConfirm] = useState(false);
+  const [zoom, setZoom] = useState(false);
+  const zoomed = zoom && !!session && session.run.status !== 'idle' && session.run.status !== 'finished';
+
+  // On quitte le plein écran du téléphone en quittant le chrono ou l'affichage agrandi.
+  useEffect(() => {
+    if (!zoomed) return;
+    return () => exitFullscreen();
+  }, [zoomed]);
 
   if (!session) {
     return (
@@ -136,6 +145,28 @@ export function TimerScreen() {
     roundValue = `${ph.set} / ${ph.sets}`;
   }
 
+  const openZoom = () => {
+    enterFullscreen();
+    setZoom(true);
+  };
+
+  if (zoomed) {
+    const reps = [sub, sub2].filter(Boolean).join(' · ');
+    return (
+      <div className={`timer zoom ${cls}`} role="button" tabIndex={0} aria-label="Quitter l’affichage agrandi" onClick={() => setZoom(false)}>
+        <span className="zoom-phase">{run.status === 'paused' ? 'EN PAUSE' : phaseWord(ph)}</span>
+        <span className={`zoom-time num ${big.long ? 'long' : ''}`} data-testid="zoom-value">{big.text}</span>
+        <div className="zoom-info">
+          {ph.roundCounter
+            ? <b>{rounds} tour{rounds > 1 ? 's' : ''}</b>
+            : roundValue !== '—' && <b>{roundLabel} {roundValue}</b>}
+          {reps && <span>{reps}</span>}
+        </div>
+        <span className="zoom-hint">Touchez l’écran pour revenir</span>
+      </div>
+    );
+  }
+
   const upcoming = phases.slice(run.index, run.index + 3);
   const block = workout.blocks[ph.blockIndex];
   const showExercises = ph.roundCounter && block && block.exercises.some((e) => e.name.trim());
@@ -150,9 +181,16 @@ export function TimerScreen() {
           <span>{blocks > 1 ? `Bloc ${ph.blockIndex + 1} / ${blocks}` : block && blockTitle(block) !== workout.name ? blockTitle(block) : 'Chrono'}</span>
           <b>{workout.name}</b>
         </div>
-        <button className="icon-btn" aria-label={session.muted ? 'Réactiver le son' : 'Couper le son'} onClick={() => S.setMuted(!session.muted)}>
-          {session.muted ? <IconMute size={18} /> : <IconSound size={18} />}
-        </button>
+        <div className="timer-top-right">
+          {!idle && (
+            <button className="icon-btn" aria-label="Agrandir le chrono" onClick={openZoom}>
+              <IconExpand size={18} />
+            </button>
+          )}
+          <button className="icon-btn" aria-label={session.muted ? 'Réactiver le son' : 'Couper le son'} onClick={() => S.setMuted(!session.muted)}>
+            {session.muted ? <IconMute size={18} /> : <IconSound size={18} />}
+          </button>
+        </div>
       </div>
 
       <div className="timer-body">

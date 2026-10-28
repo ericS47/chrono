@@ -217,3 +217,20 @@ export function discard(): void {
 }
 
 export const clock = now;
+
+if (typeof document !== 'undefined') {
+  // Écran verrouillé, appel, autre app : le téléphone peut suspendre l'audio, et les bips
+  // programmés à l'avance repartiraient en retard. Au retour, on les reprogramme
+  // depuis le temps réel de la séance.
+  const resync = (needGesture: boolean) => {
+    if (!current || current.run.status !== 'running') return;
+    if (needGesture && audio.isRunning()) return;
+    audio.unlock();
+    reschedule(current, false);
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') resync(false);
+  });
+  // iPhone ne relance l'audio que pendant un tap.
+  document.addEventListener('pointerdown', () => resync(true), { capture: true, passive: true });
+}

@@ -51,4 +51,5 @@ export const IconFlag = make(<><path d="M5 21V4" /><path d="M5 4h12l-2 4 2 4H5" 
 export const IconCheck = make(<path d="M5 12l5 5 9-10" />);
 export const IconUser = make(<><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></>);
 export const IconClock = make(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>);
+export const IconExpand = make(<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />);
 export const IconHistory = make(<><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.4" /><path d="M3 4v4h4M12 7v5l3 2" /></>);

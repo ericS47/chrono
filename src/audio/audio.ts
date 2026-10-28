@@ -27,6 +27,8 @@ const SOUNDS: Record<SoundName, Tone[]> = {
     { freq: 196, start: 0, dur: 1.8, type: 'sine', gain: 1, decay: true },
     { freq: 294, start: 0, dur: 1.4, type: 'sine', gain: 0.6, decay: true },
     { freq: 392, start: 0, dur: 1.0, type: 'triangle', gain: 0.3, decay: true },
+    // Harmonique aiguë : les graves passent mal dans le haut-parleur d'un téléphone.
+    { freq: 784, start: 0, dur: 0.9, type: 'triangle', gain: 0.35, decay: true },
   ],
   cloche: [
     { freq: 1568, start: 0, dur: 0.9, type: 'triangle', gain: 0.8, decay: true },
@@ -46,8 +48,15 @@ export const SOUND_LABELS: Record<SoundName, string> = {
 
 class AudioEngine {
   private ctx: Ctx | null = null;
+  /** Entrée de la chaîne de sortie : amplification puis limiteur, pour des bips plus forts sans saturer. */
+  private out: AudioNode | null = null;
   private scheduled: { nodes: AudioScheduledSourceNode[]; timers: number[] } = { nodes: [], timers: [] };
   private voice: SpeechSynthesisVoice | null = null;
+
+  /** Vrai si le son peut sortir maintenant (contexte audio actif). */
+  isRunning(): boolean {
+    return this.ctx?.state === 'running';
+  }
 
   /** À appeler depuis un geste utilisateur (tap) pour débloquer l'audio. */
   unlock(): void {
@@ -73,9 +82,25 @@ class AudioEngine {
       }
     }
     if (this.ctx && (this.ctx.state as string) === 'closed') this.ctx = null;
-    if (!this.ctx) this.ctx = new AC({ latencyHint: 'interactive' });
+    if (!this.ctx) {
+      this.ctx = new AC({ latencyHint: 'interactive' });
+      this.out = this.outputChain(this.ctx);
+    }
     if (this.ctx.state !== 'running') void this.ctx.resume().catch(() => undefined);
     return this.ctx;
+  }
+
+  private outputChain(ctx: Ctx): AudioNode {
+    const boost = ctx.createGain();
+    boost.gain.value = 2.2;
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -10;
+    limiter.knee.value = 4;
+    limiter.ratio.value = 20;
+    limiter.attack.value = 0.002;
+    limiter.release.value = 0.12;
+    boost.connect(limiter).connect(ctx.destination);
+    return boost;
   }
 
   private async running(ctx: Ctx): Promise<boolean> {
@@ -108,7 +133,7 @@ class AudioEngine {
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
       const t0 = when + t.start;
-      const peak = Math.max(0.0001, volume * t.gain * 0.6);
+      const peak = Math.max(0.0001, volume * t.gain);
       osc.type = t.type;
       osc.frequency.setValueAtTime(t.freq, t0);
       if (t.freqEnd) osc.frequency.linearRampToValueAtTime(t.freqEnd, t0 + t.dur);
@@ -119,7 +144,7 @@ class AudioEngine {
         g.gain.setValueAtTime(peak, t0 + t.dur - 0.03);
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + t.dur);
       }
-      osc.connect(g).connect(ctx.destination);
+      osc.connect(g).connect(this.out ?? ctx.destination);
       osc.start(t0);
       osc.stop(t0 + t.dur + 0.05);
       nodes.push(osc);
