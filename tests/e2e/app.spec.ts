@@ -139,6 +139,7 @@ test('chrono : affichage agrandi avec le tour en cours', async ({ page }) => {
   await expect(page.locator('.zoom-phase')).toHaveText('EFFORT');
   await expect(page.getByTestId('zoom-rest')).toContainText('Reste');
   await expect(page.getByTestId('zoom-rest')).toContainText('Ensuite : Repos');
+  await expect(page.getByTestId('zoom-count')).toHaveText('1/8');
   await page.clock.runFor(20_000);
   await expect(page.locator('.zoom-phase')).toHaveText('REPOS');
   await page.locator('.timer.zoom').click();

@@ -407,9 +407,10 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .zoom-next { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.8; min-width: 0; }
 .zoom-bar { height: 4px; border-radius: 2px; background: rgba(20, 24, 58, 0.15); overflow: hidden; }
 .zoom-bar i { display: block; height: 100%; background: var(--phase-ink); }
+.zoom-count { align-self: flex-start; font-size: 15px; font-weight: 800; }
 .zoom-hint { position: absolute; bottom: calc(14px + env(safe-area-inset-bottom)); left: 0; right: 0; font-size: 12px; font-weight: 700; opacity: 0.55; }
 @media (orientation: landscape) {
-  .timer.zoom { gap: 1vh; padding-top: calc(40px + env(safe-area-inset-top)); }
+  .timer.zoom { gap: 1vh; padding-top: calc(64px + env(safe-area-inset-top)); }
   .zoom-time { font-size: min(34vw, 50vh); }
   .zoom-time.long { font-size: min(22vw, 40vh); }
   .zoom-hint { display: none; }

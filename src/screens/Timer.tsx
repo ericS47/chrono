@@ -166,6 +166,7 @@ export function TimerScreen() {
             <span className="zoom-next">{nextText}</span>
           </div>
           {total > 0 && <div className="zoom-bar"><i style={{ width: `${done * 100}%` }} /></div>}
+          {roundValue !== '—' && <span className="zoom-count num" data-testid="zoom-count">{roundValue.replace(/ /g, '')}</span>}
         </div>
         <span className="zoom-phase">{run.status === 'paused' ? 'EN PAUSE' : phaseWord(ph)}</span>
         <span className={`zoom-time num ${big.long ? 'long' : ''}`} data-testid="zoom-value">{big.text}</span>
