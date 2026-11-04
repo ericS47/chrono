@@ -80,6 +80,32 @@ class AudioEngine {
   /** Applique le réglage « Son en arrière-plan » (à appeler dès que les réglages sont connus). */
   setBackground(on: boolean): void {
     this.background = on;
+    this.applySessionType();
+  }
+
+  private sessionType: string | null = null;
+
+  /**
+   * iPhone : en catégorie « lecture », le son passe malgré le bouton silencieux et
+   * continue en arrière-plan, mais met en pause la musique des autres apps.
+   * En « ambiance », il se mélange à la musique (Spotify…). Le mode par défaut
+   * de l'iPhone, lui, couperait aussi la musique : on le fixe toujours, au plus tôt.
+   * Renvoie vrai si le mode a changé.
+   */
+  private applySessionType(): boolean {
+    const session = typeof navigator !== 'undefined'
+      ? (navigator as unknown as { audioSession?: { type: string } }).audioSession
+      : undefined;
+    const type = this.background ? 'playback' : 'ambient';
+    if (!session || this.sessionType === type) return false;
+    try {
+      session.type = type;
+    } catch {
+      /* non pris en charge */
+    }
+    const changed = this.sessionType !== null;
+    this.sessionType = type;
+    return changed;
   }
 
   /** Vrai si le son peut sortir maintenant (contexte audio actif). */
@@ -137,17 +163,10 @@ class AudioEngine {
     this.pickVoice();
     const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AC) return null;
-    // iPhone : en catégorie « lecture », le son passe malgré le bouton silencieux et
-    // continue en arrière-plan, mais met en pause la musique des autres apps.
-    // En « ambiance », il se mélange à la musique (Spotify…). Le mode par défaut
-    // de l'iPhone, lui, couperait aussi la musique : on le fixe toujours.
-    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
-    if (session) {
-      try {
-        session.type = this.background ? 'playback' : 'ambient';
-      } catch {
-        /* non pris en charge */
-      }
+    // Mode changé alors qu'un contexte existe : on le recrée, l'ancien garderait l'ancien mode.
+    if (this.applySessionType() && this.ctx) {
+      void this.ctx.close().catch(() => undefined);
+      this.ctx = null;
     }
     if (this.ctx && (this.ctx.state as string) === 'closed') this.ctx = null;
     if (!this.ctx) {

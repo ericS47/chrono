@@ -116,7 +116,9 @@ function buzz(s: Session, ph: Phase | undefined): void {
 
 function media(s: Session): void {
   const ph = s.phases[s.run.index];
-  if (s.run.status === 'finished' || !ph) {
+  // Contrôles de l'écran verrouillé : sur iPhone, ils font passer Chrono pour le lecteur
+  // de musique et mettent Spotify en pause. Seulement avec le son en arrière-plan.
+  if (s.run.status === 'finished' || !ph || !s.sound.background) {
     setMediaSession('', '', null);
     return;
   }
