@@ -402,9 +402,14 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .zoom-info { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: 100%; }
 .zoom-info b { font-weight: 800; font-size: clamp(28px, 9vmin, 72px); line-height: 1.05; }
 .zoom-info span { font-weight: 700; font-size: clamp(18px, 5.5vmin, 44px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.zoom-rest { position: absolute; top: calc(14px + env(safe-area-inset-top)); left: var(--side-l); right: var(--side-r); display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; }
+.zoom-rest-row { display: flex; justify-content: space-between; gap: 12px; }
+.zoom-next { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.8; min-width: 0; }
+.zoom-bar { height: 4px; border-radius: 2px; background: rgba(20, 24, 58, 0.15); overflow: hidden; }
+.zoom-bar i { display: block; height: 100%; background: var(--phase-ink); }
 .zoom-hint { position: absolute; bottom: calc(14px + env(safe-area-inset-bottom)); left: 0; right: 0; font-size: 12px; font-weight: 700; opacity: 0.55; }
 @media (orientation: landscape) {
-  .timer.zoom { gap: 1vh; }
+  .timer.zoom { gap: 1vh; padding-top: calc(40px + env(safe-area-inset-top)); }
   .zoom-time { font-size: min(34vw, 50vh); }
   .zoom-time.long { font-size: min(22vw, 40vh); }
   .zoom-hint { display: none; }

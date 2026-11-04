@@ -152,8 +152,21 @@ export function TimerScreen() {
 
   if (zoomed) {
     const reps = [sub, sub2].filter(Boolean).join(' · ');
+    // Reste de la séance : une ligne discrète en haut, avec une fine barre de progression.
+    const total = phases.reduce((t, p) => t + (p.duration ?? 0), 0);
+    const done = total > 0 ? Math.min(1, 1 - totalLeft / total) : 0;
+    const nextText = nextPh
+      ? `Ensuite : ${nextPh.kind === 'rest' ? 'Repos' : nextPh.label}${nextPh.duration ? ` ${fmtShort(nextPh.duration)}` : ''}`
+      : 'Dernière phase';
     return (
       <div className={`timer zoom ${cls}`} role="button" tabIndex={0} aria-label="Quitter l’affichage agrandi" onClick={() => setZoom(false)}>
+        <div className="zoom-rest" data-testid="zoom-rest">
+          <div className="zoom-rest-row">
+            <span className="num">{totalLeft > 0 ? `Reste ${fmtClock(totalLeft)}` : `Écoulé ${fmtClock(el / 1000)}`}</span>
+            <span className="zoom-next">{nextText}</span>
+          </div>
+          {total > 0 && <div className="zoom-bar"><i style={{ width: `${done * 100}%` }} /></div>}
+        </div>
         <span className="zoom-phase">{run.status === 'paused' ? 'EN PAUSE' : phaseWord(ph)}</span>
         <span className={`zoom-time num ${big.long ? 'long' : ''}`} data-testid="zoom-value">{big.text}</span>
         <div className="zoom-info">
