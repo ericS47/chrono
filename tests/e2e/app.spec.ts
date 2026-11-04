@@ -168,6 +168,11 @@ test('séance : les bips sont joués par une piste audio (arrière-plan)', async
       return orig.call(this);
     };
   });
+  // Réglage désactivé par défaut (il met en pause Spotify) : on l'active.
+  await page.goto('./#/reglages');
+  const bg = page.getByRole('switch', { name: 'Son en arrière-plan' });
+  await bg.click();
+  await expect(bg).toBeChecked();
   await page.goto('./#/rapide/tabata');
   await page.getByRole('button', { name: 'Démarrer' }).click();
   await page.getByRole('button', { name: 'Démarrer' }).click();

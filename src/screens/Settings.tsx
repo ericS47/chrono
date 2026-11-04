@@ -3,7 +3,7 @@ import { exportBackup, importBackup, pruneHistory, saveSettings } from '../data/
 import { useSettings } from '../data/hooks';
 import type { Settings, SoundEvent, SoundName, SoundSettings } from '../data/types';
 import { audio, SOUND_LABELS } from '../audio/audio';
-import { notificationPermission, requestNotifications, requestPersistentStorage, storageInfo } from '../lib/platform';
+import { notificationPermission, platformInfo, requestNotifications, requestPersistentStorage, storageInfo } from '../lib/platform';
 import { Segmented, Stepper, Toggle } from '../ui/kit';
 
 const EVENT_LABELS: Record<SoundEvent, string> = {
@@ -200,6 +200,7 @@ export function SettingsScreen() {
       </section>
 
       <p className="hint" style={{ margin: 0, textAlign: 'center' }}>Chrono {__APP_VERSION__} · 100 % local, sans compte</p>
+      <p className="hint" style={{ margin: 0, textAlign: 'center' }} data-testid="platform-info">{platformInfo()}</p>
       {msg && <div className="toast" role="status">{msg}</div>}
     </main>
   );

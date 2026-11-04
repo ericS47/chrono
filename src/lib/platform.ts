@@ -7,13 +7,16 @@ import { upcomingReminders } from '../data/schedule';
 // ---------- Écran toujours allumé ----------
 // API Wake Lock. Elle peut être refusée hors d'un geste (iPhone) : on la redemande
 // à chaque tap tant qu'elle n'est pas accordée, et à chaque retour dans l'app.
-// Navigateurs sans cette API : vidéo en lecture (avec piste son silencieuse,
-// non répétée en boucle, sinon le téléphone l'ignore pour la mise en veille).
+// Navigateurs sans cette API (anciens iPhone) : vidéo en lecture (avec piste son
+// silencieuse, non répétée en boucle, sinon le téléphone l'ignore pour la veille).
+// Sur iPhone, cette piste son met en pause la musique des autres apps (Spotify) :
+// elle n'est utilisée que si l'on a choisi le son en arrière-plan.
 
 let lock: WakeLockSentinel | null = null;
 let wantLock = false;
 let requesting = false;
 let video: HTMLVideoElement | null = null;
+let videoAllowed = false;
 
 const hasWakeLock = () => typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
@@ -39,6 +42,7 @@ function fallbackVideo(): HTMLVideoElement {
 function acquire(): void {
   if (!wantLock || document.visibilityState !== 'visible') return;
   if (!hasWakeLock()) {
+    if (!videoAllowed) return;
     const v = fallbackVideo();
     if (v.paused) void v.play().catch(() => undefined);
     return;
@@ -62,6 +66,24 @@ export function setKeepAwake(on: boolean): void {
     lock = null;
     video?.pause();
   }
+}
+
+/** Autorise la vidéo de secours (qui coupe la musique des autres apps sur iPhone). */
+export function allowKeepAwakeVideo(on: boolean): void {
+  videoAllowed = on;
+  if (!on) video?.pause();
+  else acquire();
+}
+
+/** Ce que le téléphone permet, affiché dans les réglages pour aider au diagnostic. */
+export function platformInfo(): string {
+  const ua = navigator.userAgent;
+  const ios = /OS (\d+)_(\d+)/.exec(ua);
+  const android = /Android (\d+(\.\d+)?)/.exec(ua);
+  const os = /iPhone|iPad|iPod/.test(ua) && ios ? `iOS ${ios[1]}.${ios[2]}` : android ? `Android ${android[1]}` : 'Navigateur';
+  const awake = hasWakeLock() ? 'écran allumé : natif' : videoAllowed ? 'écran allumé : vidéo' : 'écran allumé : non pris en charge';
+  const mix = 'audioSession' in navigator ? 'mélange musique : oui' : 'mélange musique : non pris en charge';
+  return [os, awake, /iPhone|iPad|iPod/.test(ua) ? mix : ''].filter(Boolean).join(' · ');
 }
 
 /** Vrai si l'écran est réellement maintenu allumé en ce moment. */

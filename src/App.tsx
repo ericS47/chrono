@@ -4,7 +4,7 @@ import { useSchedules, useSettings, useWorkouts } from './data/hooks';
 import { pruneHistory } from './data/db';
 import { restoreSession, setFinishHandler } from './engine/session';
 import { audio } from './audio/audio';
-import { setKeepAwake, syncReminders } from './lib/platform';
+import { allowKeepAwakeVideo, setKeepAwake, syncReminders } from './lib/platform';
 import { IconCalendar, IconHome, IconList, IconSettings } from './ui/icons';
 import { Home } from './screens/Home';
 import { Planning } from './screens/Planning';
@@ -55,6 +55,7 @@ export function App() {
   // Son en arrière-plan ou mélangé à la musique des autres apps (réglage).
   useEffect(() => {
     audio.setBackground(settings.sound.background);
+    allowKeepAwakeVideo(settings.sound.background);
   }, [settings.sound.background]);
 
   // Écran allumé tant que l'app est ouverte (réglage).
