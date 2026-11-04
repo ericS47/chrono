@@ -3,6 +3,7 @@ import { useRoute, go } from './lib/router';
 import { useSchedules, useSettings, useWorkouts } from './data/hooks';
 import { pruneHistory } from './data/db';
 import { restoreSession, setFinishHandler } from './engine/session';
+import { audio } from './audio/audio';
 import { setKeepAwake, syncReminders } from './lib/platform';
 import { IconCalendar, IconHome, IconList, IconSettings } from './ui/icons';
 import { Home } from './screens/Home';
@@ -50,6 +51,11 @@ export function App() {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#14161B' : '#F7F6F3');
   }, [dark]);
+
+  // Son en arrière-plan ou mélangé à la musique des autres apps (réglage).
+  useEffect(() => {
+    audio.setBackground(settings.sound.background);
+  }, [settings.sound.background]);
 
   // Écran allumé tant que l'app est ouverte (réglage).
   useEffect(() => {

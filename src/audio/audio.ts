@@ -73,9 +73,14 @@ class AudioEngine {
   private trackUrl: string | null = null;
   private trackGen = 0;
   private onTrackEnd: (() => void) | null = null;
-  /** Réglage « Son en arrière-plan ». */
-  private background = true;
+  /** Réglage « Son en arrière-plan ». Coupé tant que les réglages ne sont pas lus : on ne coupe jamais la musique par défaut. */
+  private background = false;
   private voice: SpeechSynthesisVoice | null = null;
+
+  /** Applique le réglage « Son en arrière-plan » (à appeler dès que les réglages sont connus). */
+  setBackground(on: boolean): void {
+    this.background = on;
+  }
 
   /** Vrai si le son peut sortir maintenant (contexte audio actif). */
   isRunning(): boolean {
@@ -134,11 +139,12 @@ class AudioEngine {
     if (!AC) return null;
     // iPhone : en catégorie « lecture », le son passe malgré le bouton silencieux et
     // continue en arrière-plan, mais met en pause la musique des autres apps.
-    // Sinon (« auto »), il se mélange à la musique.
+    // En « ambiance », il se mélange à la musique (Spotify…). Le mode par défaut
+    // de l'iPhone, lui, couperait aussi la musique : on le fixe toujours.
     const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
     if (session) {
       try {
-        session.type = this.background ? 'playback' : 'auto';
+        session.type = this.background ? 'playback' : 'ambient';
       } catch {
         /* non pris en charge */
       }

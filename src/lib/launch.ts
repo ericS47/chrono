@@ -9,10 +9,12 @@ export function launchWorkout(
   settings: Settings,
   opts: { quick?: boolean; scheduledId?: string; scheduledDate?: string; prepSeconds?: number } = {},
 ): void {
+  const sound = mergeSound(settings.sound, w.sound);
+  audio.setBackground(sound.background);
   audio.unlock();
   prepareSession(w, {
     prepSeconds: opts.prepSeconds ?? w.prepSeconds ?? settings.prepSeconds,
-    sound: mergeSound(settings.sound, w.sound),
+    sound,
     vibration: settings.vibration,
     quick: opts.quick,
     scheduledId: opts.scheduledId,
