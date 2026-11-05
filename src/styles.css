@@ -430,10 +430,16 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .zoom-ctl button.main { width: 76px; height: 76px; background: var(--phase-ink); color: #FFFFFF; }
 .zoom-hint { position: absolute; bottom: calc(14px + env(safe-area-inset-bottom)); left: 0; right: 0; font-size: 12px; font-weight: 700; opacity: 0.55; }
 @media (orientation: landscape) {
-  .timer.zoom { gap: 1vh; padding-top: calc(64px + env(safe-area-inset-top)); padding-bottom: calc(12px + env(safe-area-inset-bottom)); padding-right: calc(110px + var(--side-r)); }
-  .zoom-ctl { left: auto; right: var(--side-r); top: 64px; bottom: 12px; flex-direction: column; gap: 14px; }
-  .zoom-time { font-size: min(34vw, 50vh); }
-  .zoom-time.long { font-size: min(22vw, 40vh); }
+  /* Paysage : chrono plus petit, raccourcis en ligne dessous (pause au centre, petits boutons). */
+  .timer.zoom { gap: 0.5vh; padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .zoom-ctl { bottom: calc(12px + env(safe-area-inset-bottom)); gap: 28px; }
+  .zoom-ctl button { width: 46px; height: 46px; }
+  .zoom-ctl button.main { width: 54px; height: 54px; }
+  .zoom-ctl svg { width: 22px; height: 22px; }
+  .zoom-time { font-size: min(26vw, 38vh); }
+  .zoom-time.long { font-size: min(18vw, 30vh); }
+  .zoom-info b { font-size: clamp(22px, 7vmin, 48px); }
+  .zoom-info span { font-size: clamp(16px, 4.5vmin, 30px); }
   .zoom-hint { display: none; }
 }
 
