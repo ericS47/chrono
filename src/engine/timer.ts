@@ -204,3 +204,18 @@ export function shiftRun(s: RunState, delta: number): RunState {
     endedAt: sh(s.endedAt),
   };
 }
+
+/**
+ * Insère une phase juste après la phase courante (étape oubliée, ajoutée
+ * pendant la séance). Le temps de la phase courante n'est pas touché.
+ */
+export function insertPhase(s: RunState, ph: Phase): RunState {
+  if (s.status === 'finished') return s;
+  const at = s.index + 1;
+  const phases = [...s.phases.slice(0, at), ph, ...s.phases.slice(at)];
+  const spent = [...s.spent.slice(0, at), 0, ...s.spent.slice(at)];
+  // Les temps intermédiaires sont rangés par numéro de phase : on décale ceux d'après.
+  const laps: Record<number, number[]> = {};
+  for (const [k, v] of Object.entries(s.laps)) laps[+k >= at ? +k + 1 : +k] = v;
+  return { ...s, phases, spent, laps };
+}

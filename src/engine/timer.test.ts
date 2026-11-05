@@ -100,4 +100,20 @@ describe('moteur de chrono', () => {
     expect(T.remaining(r, 51_000 + 4000)).toBe(6000);
     expect(T.shiftRun(T.createRun(tabata()), 500).phaseStart).toBe(0);
   });
+
+  it('insère une étape oubliée juste après la phase en cours, sans toucher au temps', () => {
+    let s = T.start(T.createRun(tabata()), 1000);
+    s = T.tick(s, 1000 + 12_000).state; // dans le 1er effort
+    const before = T.elapsed(s, 15_000);
+    const extra = { kind: 'rest' as const, label: 'Repos', duration: 30, countUp: false, blockIndex: 0, mode: null };
+    const r = T.insertPhase(s, extra);
+    expect(r.phases).toHaveLength(s.phases.length + 1);
+    expect(r.phases[s.index + 1]).toBe(extra);
+    expect(r.spent).toHaveLength(r.phases.length);
+    expect(T.elapsed(r, 15_000)).toBe(before);
+    // À la fin de l'effort, on passe bien à l'étape ajoutée.
+    const n = T.tick(r, 1000 + 10_000 + 20_000 + 1);
+    expect(n.state.phases[n.state.index]).toBe(extra);
+    expect(T.insertPhase(T.stop(r, 20_000), extra).phases).toHaveLength(r.phases.length);
+  });
 });

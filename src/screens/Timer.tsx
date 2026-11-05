@@ -8,6 +8,7 @@ import { go } from '../lib/router';
 import { useSettings } from '../data/hooks';
 import { launchWorkout } from '../lib/launch';
 import { enterFullscreen, exitFullscreen } from '../lib/platform';
+import { Sheet } from '../ui/kit';
 import {
   IconArrowRight, IconClose, IconExpand, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
@@ -76,6 +77,29 @@ function mainLabel(phases: Phase[], i: number): string {
   return 'Suivant';
 }
 
+const ADD_DURATIONS = [15, 30, 45, 60, 90, 120, 180];
+
+/** Étape oubliée : effort ou repos ajouté juste après l'étape en cours. */
+function AddStepSheet({ onClose }: { onClose: () => void }) {
+  const [kind, setKind] = useState<'work' | 'rest'>('rest');
+  const [dur, setDur] = useState(30);
+  return (
+    <Sheet title="Ajouter une étape" onClose={onClose}>
+      <div className="add-kind">
+        <button className="effort" aria-pressed={kind === 'work'} onClick={() => setKind('work')}>Effort</button>
+        <button className="rest" aria-pressed={kind === 'rest'} onClick={() => setKind('rest')}>Repos</button>
+      </div>
+      <div className="chips">
+        {ADD_DURATIONS.map((v) => (
+          <button key={v} className="chip" aria-pressed={v === dur} onClick={() => setDur(v)}>{v < 60 ? `${v} s` : fmtClock(v)}</button>
+        ))}
+      </div>
+      <p className="hint">L’étape se place juste après celle en cours. La séance continue pendant ce temps.</p>
+      <button className="btn block" onClick={() => { S.insertStep(kind, dur); onClose(); }}>Ajouter après l’étape en cours</button>
+    </Sheet>
+  );
+}
+
 export function TimerScreen() {
   const session = S.useSession();
   const settings = useSettings();
@@ -83,6 +107,7 @@ export function TimerScreen() {
   const now = useNow(!!running);
   const [confirm, setConfirm] = useState(false);
   const [zoom, setZoom] = useState(false);
+  const [adding, setAdding] = useState(false);
   const zoomed = zoom && !!session && session.run.status !== 'idle' && session.run.status !== 'finished';
 
   // On quitte le plein écran du téléphone en quittant le chrono ou l'affichage agrandi.
@@ -184,6 +209,12 @@ export function TimerScreen() {
           </button>
           <button aria-label="Étape suivante" onClick={() => S.skip()}><IconSkip size={26} /></button>
         </div>
+        <button className="zoom-add" aria-label="Ajouter une étape" onClick={(e) => { e.stopPropagation(); setAdding(true); }}><IconPlus size={26} /></button>
+        {adding && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <AddStepSheet onClose={() => setAdding(false)} />
+          </div>
+        )}
         <span className="zoom-hint">Touchez l’écran pour revenir</span>
       </div>
     );

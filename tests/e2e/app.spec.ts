@@ -159,6 +159,15 @@ test('chrono : affichage agrandi avec le tour en cours', async ({ page }) => {
   await expect(page.locator('.zoom-info')).toContainText('Tour 2 / 8');
   await page.getByRole('button', { name: 'Revenir en arrière' }).click();
   await expect(page.locator('.zoom-phase')).toBeVisible();
+  // Étape oubliée, ajoutée pendant la séance : 1 min d'effort juste après l'étape en cours
+  await page.getByRole('button', { name: 'Ajouter une étape' }).click();
+  await page.getByRole('dialog', { name: 'Ajouter une étape' }).getByRole('button', { name: 'Effort' }).click();
+  await page.getByRole('button', { name: '1:00', exact: true }).click();
+  await page.getByRole('button', { name: 'Ajouter après l’étape en cours' }).click();
+  await expect(page.locator('.timer.zoom')).toBeVisible();
+  await page.getByRole('button', { name: 'Étape suivante' }).click();
+  await expect(page.locator('.zoom-phase')).toHaveText('EFFORT');
+  await expect(page.getByTestId('zoom-value')).toHaveText('1:00');
   await page.locator('.timer.zoom').click();
   await expect(page.getByTestId('timer-value')).toBeVisible();
 });

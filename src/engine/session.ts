@@ -243,6 +243,21 @@ export function setMuted(muted: boolean): void {
   reschedule(s, false);
 }
 
+/** Étape oubliée : un effort ou un repos ajouté juste après l'étape en cours. */
+export function insertStep(kind: 'work' | 'rest', duration: number): void {
+  if (!current || current.run.status === 'finished') return;
+  const cur = current.phases[current.run.index];
+  const ph: Phase = {
+    kind, label: kind === 'work' ? 'Effort' : 'Repos', duration, countUp: false,
+    blockIndex: cur?.blockIndex ?? 0, mode: cur?.mode ?? null, detail: 'Ajouté pendant la séance',
+  };
+  const run = T.insertPhase(current.run, ph);
+  const s = { ...current, phases: run.phases, run };
+  set(s);
+  reschedule(s, false);
+  media(s);
+}
+
 /** Arrête la séance (bouton « Terminer ») : elle passe à l'état terminé. */
 export function finishNow(): void {
   if (!current) return;
