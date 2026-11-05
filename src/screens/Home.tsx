@@ -1,17 +1,14 @@
 import { useMemo } from 'react';
 import { useLogs, useSchedules, useSettings, useWorkouts } from '../data/hooks';
 import { occurrencesBetween } from '../data/schedule';
-import { ALL_MODES, MODE_COLORS, MODE_LABELS } from '../data/types';
+import { MODE_COLORS } from '../data/types';
 import { blockSummary, estimateWorkout } from '../engine/phases';
 import { addDays, fmtClock, fmtDuration, fmtLongDate, isoDate, parseIsoDate } from '../lib/format';
 import { launchWorkout } from '../lib/launch';
 import { go } from '../lib/router';
 import { postpone } from '../data/actions';
-import { IconHistory, IconPlay } from '../ui/icons';
+import { IconGrid, IconHistory, IconList, IconPlay } from '../ui/icons';
 import { useSession } from '../engine/session';
-
-/** Couleur de la tuile « WOD connus » (même famille que les couleurs des modes). */
-const WOD_COLOR = '#E6CBA8';
 
 function greeting(d: Date): string {
   const h = d.getHours();
@@ -90,18 +87,15 @@ export function Home() {
         </section>
       )}
 
-      <section className="section">
-        <h2 className="section-title">Chrono rapide</h2>
-        <div className="tiles">
-          {ALL_MODES.map((m) => (
-            <button key={m} className="tile solo" style={{ background: MODE_COLORS[m] }} onClick={() => go(`/rapide/${m}`)}>
-              {MODE_LABELS[m]}
-            </button>
-          ))}
-          <button className="tile solo" style={{ background: WOD_COLOR }} onClick={() => go('/seances?tab=wod')}>
-            WOD connus
-          </button>
-        </div>
+      <section className="big-tiles" aria-label="Lancer une séance">
+        <button className="big-tile" style={{ background: MODE_COLORS.tabata }} onClick={() => go('/seances')}>
+          <IconList size={40} />
+          Ma séance
+        </button>
+        <button className="big-tile" style={{ background: MODE_COLORS.emom }} onClick={() => go('/types')}>
+          <IconGrid size={40} />
+          Types de séances
+        </button>
       </section>
 
       {last && (

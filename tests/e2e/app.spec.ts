@@ -6,7 +6,9 @@ test.beforeEach(async ({ page }) => {
 
 test('accueil : chrono rapide et navigation', async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: 'Chrono rapide' })).toBeVisible();
+  await expect(page.locator('.big-tile')).toHaveCount(2);
+  await page.locator('.big-tile', { hasText: 'Types de séances' }).click();
+  await expect(page.getByRole('heading', { name: 'Types de séances' })).toBeVisible();
   for (const m of ['AMRAP', 'EMOM', 'For Time', 'Tabata', 'Intervalles', 'Chrono', 'Compte à rebours', 'Personnalisé', 'Musculation', 'Course', 'WOD connus']) {
     await expect(page.locator('.tile', { hasText: m }).first()).toBeVisible();
   }
@@ -14,6 +16,9 @@ test('accueil : chrono rapide et navigation', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Mes séances' })).toHaveCount(0);
   await page.locator('.tile', { hasText: 'WOD connus' }).click();
   await expect(page.getByRole('link', { name: /Cindy/ })).toBeVisible();
+  await page.getByRole('link', { name: 'Accueil' }).click();
+  await page.locator('.big-tile', { hasText: 'Ma séance' }).click();
+  await expect(page).toHaveURL(/#\/seances/);
   await page.getByRole('link', { name: 'Accueil' }).click();
   await page.getByRole('link', { name: 'Planning' }).click();
   await expect(page.getByRole('heading', { name: 'Octobre' })).toBeVisible();

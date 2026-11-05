@@ -18,6 +18,7 @@ import { ResultScreen } from './screens/Result';
 import { LogDetail } from './screens/LogDetail';
 import { ImportShared } from './screens/ImportShared';
 import { ScheduleForm } from './screens/ScheduleForm';
+import { SessionTypes } from './screens/SessionTypes';
 
 const TABS = [
   { path: '', label: 'Accueil', Icon: IconHome },
@@ -103,6 +104,7 @@ export function App() {
     case 'historique': screen = <LogDetail id={rest[0]} />; nav = false; break;
     case 'partage': screen = <ImportShared code={rest[0]} />; nav = false; break;
     case 'planifier': screen = <ScheduleForm />; nav = false; break;
+    case 'types': screen = <SessionTypes />; nav = false; break;
     default: screen = <Home />;
   }
 
