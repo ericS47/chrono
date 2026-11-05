@@ -21,7 +21,7 @@ const PREP_PRESETS = [0, 5, 10, 15, 20, 30, 45, 60];
 
 type Container = TimelineSeries | TimelineGroup;
 type SheetState =
-  | { kind: 'step' | 'series' | 'group' | 'long' | 'insert'; id: string; isNew?: boolean }
+  | { kind: 'step' | 'series' | 'group' | 'long'; id: string; isNew?: boolean }
   | { kind: 'prep' | 'clear' };
 
 interface Found {
@@ -71,11 +71,6 @@ const fmtPreset = (v: number) => (v === 0 ? 'Aucune' : v < 60 ? `${v} s` : fmtCl
 
 export function isBuilderWorkout(w: Pick<Workout, 'blocks'>): boolean {
   return w.blocks.length === 1 && w.blocks[0].mode === 'custom' && !!w.blocks[0].params.timeline;
-}
-
-/** « + » sur le côté d'un bloc : ajouter un bloc oublié juste après. */
-function AddAfter({ id, label = 'Ajouter un bloc juste après' }: { id: string; label?: string }) {
-  return <span className="bd-add" role="button" tabIndex={0} aria-label={label} data-add={id}>+</span>;
 }
 
 function Grip() {
@@ -164,25 +159,13 @@ export function Builder({ id }: { id?: string }) {
   });
 
   // ---------- Ajout ----------
-  /** Nouveau bloc : reprend la durée du dernier bloc du même type. */
-  const newStep = (type: 'effort' | 'rest'): TimelineStep => {
-    const prev = allSteps(items).filter((x) => x.type === type).at(-1);
-    return { id: uid(), type, duration: prev ? prev.duration : DEFAULT_DUR[type] };
-  };
   const add = (type: 'effort' | 'rest') => {
     if (selecting) return;
-    const b = newStep(type);
+    const prev = allSteps(items).filter((x) => x.type === type).at(-1);
+    const b: TimelineStep = { id: uid(), type, duration: prev ? prev.duration : DEFAULT_DUR[type] };
     setItems([...items, b]);
     setLastAdded(b.id);
     requestAnimationFrame(() => document.querySelector(`[data-node="${b.id}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
-  };
-
-  /** Bloc oublié : inséré juste après `afterId` (« prep » = en tête de séance). */
-  const insertAfter = (afterId: string, type: 'effort' | 'rest') => {
-    const b = newStep(type);
-    if (afterId === 'prep') setItems([b, ...items]);
-    else withItem(afterId, (f) => f.list.splice(f.index + 1, 0, b));
-    setLastAdded(b.id);
   };
 
   const copy = (xid: string) => {
@@ -278,7 +261,6 @@ export function Builder({ id }: { id?: string }) {
   const onPointerDown = (e: React.PointerEvent) => {
     if (selecting) return;
     const t = e.target as HTMLElement;
-    if (t.closest('.bd-add')) return;
     if (t.closest('.bd-grip')) {
       const node = t.closest<HTMLElement>('[data-node]');
       if (!node) return;
@@ -382,11 +364,6 @@ export function Builder({ id }: { id?: string }) {
     }
     const t = e.target as HTMLElement;
     if (t.closest('.bd-grip')) return;
-    const plus = t.closest<HTMLElement>('[data-add]');
-    if (plus) {
-      if (!selecting) setSheet({ kind: 'insert', id: plus.dataset.add! });
-      return;
-    }
     if (t.closest('.bd-prep')) {
       if (!selecting) setSheet({ kind: 'prep' });
       return;
@@ -468,7 +445,7 @@ export function Builder({ id }: { id?: string }) {
       </span>
       <span className="bd-end">
         <span className="bd-time">{fmtClock(b.duration)}</span>
-        {!selecting && <><AddAfter id={b.id} /><Grip /></>}
+        {!selecting && <Grip />}
       </span>
     </button>
   );
@@ -478,7 +455,7 @@ export function Builder({ id }: { id?: string }) {
         <section key={it.id} className={`bd-series${top ? ' top' : ''}${picked.includes(it.id) ? ' picked' : ''}`} data-node={it.id} data-pick={top ? it.id : undefined} aria-label={`Série × ${it.reps}`}>
           <button className="bd-series-head" data-press={it.id} data-open={it.id}>
             <span>Série × {it.reps}</span>
-            <span className="bd-end"><span>{fmtClock(timelineDuration([it]))}</span>{!selecting && <><AddAfter id={it.id} label="Ajouter un bloc après la série" /><Grip /></>}</span>
+            <span className="bd-end"><span>{fmtClock(timelineDuration([it]))}</span>{!selecting && <Grip />}</span>
           </button>
           {it.children.map((k) => stepHtml(k, false))}
           <div className="bd-foot">{recupText(it, 'séries')}</div>
@@ -490,7 +467,7 @@ export function Builder({ id }: { id?: string }) {
         <section key={it.id} className="bd-group" data-node={it.id} aria-label={it.name || 'Bloc de travail'}>
           <button className="bd-group-head" data-press={it.id} data-open={it.id}>
             <span>{it.name || 'Bloc de travail'}<small>{it.reps > 1 ? `Répété ${it.reps} fois` : 'Une fois'}</small></span>
-            <span className="bd-end"><span>{fmtClock(timelineDuration([it]))}</span>{!selecting && <><AddAfter id={it.id} label="Ajouter un bloc après le bloc de travail" /><Grip /></>}</span>
+            <span className="bd-end"><span>{fmtClock(timelineDuration([it]))}</span>{!selecting && <Grip />}</span>
           </button>
           {it.children.map((k) => itemHtml(k, false))}
           {it.reps > 1 && <div className="bd-foot muted">{recupText(it, 'deux passages')}</div>}
@@ -552,7 +529,7 @@ export function Builder({ id }: { id?: string }) {
               <span className="bd-kind">Préparation</span>
               <span className="bd-note">{prepSec > 0 ? 'Touchez pour régler' : 'Aucune · touchez pour régler'}</span>
             </span>
-            <span className="bd-end"><span className="bd-time">{fmtClock(prepSec)}</span>{!selecting && !!items.length && <AddAfter id="prep" label="Ajouter un bloc au début" />}</span>
+            <span className="bd-end"><span className="bd-time">{fmtClock(prepSec)}</span></span>
           </button>
           {items.length
             ? items.map((it) => itemHtml(it, true))
@@ -587,14 +564,13 @@ export function Builder({ id }: { id?: string }) {
         unwrap={unwrap}
         clearAll={() => setItems([])}
         open={setSheet}
-        insertAfter={insertAfter}
       />}
     </main>
   );
 }
 
 function BuilderSheet({
-  sheet, items, prep, onPrep, close, withItem, copy, remove, move, unwrap, clearAll, open, insertAfter,
+  sheet, items, prep, onPrep, close, withItem, copy, remove, move, unwrap, clearAll, open,
 }: {
   sheet: SheetState;
   items: TimelineItem[];
@@ -608,23 +584,7 @@ function BuilderSheet({
   unwrap: (id: string) => void;
   clearAll: () => void;
   open: (s: SheetState) => void;
-  insertAfter: (afterId: string, type: 'effort' | 'rest') => void;
 }) {
-  if (sheet.kind === 'insert') {
-    const pick = (type: 'effort' | 'rest') => {
-      insertAfter(sheet.id, type);
-      close();
-    };
-    return (
-      <Sheet title={sheet.id === 'prep' ? 'Ajouter au début' : 'Ajouter juste après'} onClose={close}>
-        <div className="bd-insert">
-          <button className="bd-pal effort" onClick={() => pick('effort')}>Effort</button>
-          <button className="bd-pal rest" onClick={() => pick('rest')}>Repos</button>
-        </div>
-        <p className="hint">Le bloc se place juste après celui où vous avez touché « + », dans la même série s’il y en a une.</p>
-      </Sheet>
-    );
-  }
   if (sheet.kind === 'prep') {
     return (
       <Sheet title="Préparation" onClose={close}>
