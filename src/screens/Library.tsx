@@ -12,7 +12,7 @@ import type { SessionLog, Workout } from '../data/types';
 
 type Tab = 'mes' | 'historique' | 'wod';
 
-function WorkoutItem({ w, star }: { w: Workout; star?: boolean }) {
+export function WorkoutItem({ w, star }: { w: Workout; star?: boolean }) {
   return (
     <div className="item" style={{ padding: 0, overflow: 'hidden' }}>
       <a href={`#/seance/${w.id}`} className="item" style={{ border: 'none', borderRadius: 0, flex: 1, minWidth: 0 }}>

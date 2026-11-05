@@ -18,6 +18,8 @@ test('accueil : chrono rapide et navigation', async ({ page }) => {
   await expect(page.getByRole('link', { name: /Cindy/ })).toBeVisible();
   await page.getByRole('link', { name: 'Accueil' }).click();
   await page.locator('.big-tile', { hasText: 'Ma séance' }).click();
+  await expect(page.getByRole('heading', { name: 'Favoris' })).toBeVisible();
+  await page.getByRole('button', { name: 'Toutes mes séances' }).click();
   await expect(page).toHaveURL(/#\/seances/);
   await page.getByRole('link', { name: 'Accueil' }).click();
   await page.getByRole('link', { name: 'Planning' }).click();
@@ -183,6 +185,21 @@ test('séance : les bips sont joués par une piste audio (arrière-plan)', async
   await page.getByRole('button', { name: 'Démarrer' }).click();
   await page.clock.runFor(3000);
   await expect.poll(() => page.evaluate(() => (window as unknown as { __tracks: number }).__tracks), { timeout: 15_000 }).toBeGreaterThan(0);
+});
+
+test('Ma séance : 2 favoris au plus, puis toutes les séances', async ({ page }) => {
+  for (const name of ['Séance A', 'Séance B', 'Séance C']) {
+    await page.goto('./#/editer/nouvelle');
+    await page.getByLabel('Nom', { exact: true }).fill(name);
+    await page.getByRole('button', { name: 'Enregistrer la séance' }).click();
+    await expect(page.getByRole('heading', { name })).toBeVisible();
+    await page.getByRole('button', { name: 'Ajouter aux favoris' }).click();
+    await expect(page.getByRole('button', { name: 'Retirer des favoris' })).toBeVisible();
+  }
+  await page.goto('./#/ma-seance');
+  await expect(page.locator('.list .item-title')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Toutes mes séances' }).click();
+  await expect(page.locator('.item-title', { hasText: 'Séance A' })).toBeVisible();
 });
 
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
