@@ -193,8 +193,9 @@ test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async
   for (const name of ['Séance A', 'Séance B', 'Séance C']) {
     await page.goto('./#/seances');
     await page.getByRole('button', { name: 'Créer' }).click();
-    await page.getByLabel('Nom', { exact: true }).fill(name);
-    await page.getByRole('button', { name: 'Enregistrer la séance' }).click();
+    await page.getByLabel('Nom de la séance').fill(name);
+    await page.getByRole('button', { name: 'Effort', exact: true }).click();
+    await page.getByRole('button', { name: 'Enregistrer' }).click();
     await expect(page.getByRole('heading', { name })).toBeVisible();
     await page.getByRole('button', { name: 'Ajouter aux favoris' }).click();
     await expect(page.getByRole('button', { name: 'Retirer des favoris' })).toBeVisible();
@@ -203,6 +204,41 @@ test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async
   await expect(page.getByRole('region', { name: 'Favoris' }).locator('.item-title')).toHaveCount(2);
   await page.getByRole('button', { name: /Toutes mes séances/ }).click();
   await expect(page.getByRole('region', { name: 'Toutes mes séances' }).locator('.item-title')).toHaveCount(3);
+});
+
+test('créateur : blocs, série, durée totale, enregistrement et lancement', async ({ page }) => {
+  await page.goto('./#/creer');
+  await expect(page.getByTestId('builder-total')).toHaveText('0:10');
+  await page.getByLabel('Nom de la séance').fill('Fractionné maison');
+  await page.getByRole('button', { name: 'Effort', exact: true }).click();
+  await page.getByRole('button', { name: 'Repos', exact: true }).click();
+  await expect(page.getByTestId('builder-total')).toHaveText('0:55');
+  // Série de 4 : 30 s d'effort, 15 s de repos (retiré à la fin) → 4×30 + 3×15 = 165 s, + 10 s de préparation.
+  await page.getByRole('button', { name: 'Série', exact: true }).click();
+  await page.getByRole('button', { name: /^Effort 0:30/ }).click();
+  await page.getByRole('button', { name: /^Repos 0:15/ }).click();
+  await page.getByRole('button', { name: 'Créer', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Nouvelle série' })).toBeVisible();
+  await page.getByRole('button', { name: 'Terminé' }).click();
+  await expect(page.getByTestId('builder-total')).toHaveText('2:55');
+  // Commentaire sur l'effort
+  await page.getByRole('button', { name: /^Effort 0:30/ }).click();
+  await page.getByLabel('Commentaire').fill('Burpees');
+  await page.getByRole('button', { name: 'Terminé' }).click();
+  await page.getByRole('button', { name: 'Lancer la séance' }).click();
+  await expect(page.locator('.timer')).toBeVisible();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(10_500);
+  await expect(page.locator('.ring-phase')).toHaveText('EFFORT');
+  await expect(page.locator('.ring-sub').first()).toContainText('Burpees');
+  await expect(page.locator('.timer-stats')).toContainText('1 / 4');
+  // La séance est enregistrée et se rouvre dans le créateur.
+  await page.goto('./#/seances');
+  await page.getByRole('button', { name: /Toutes mes séances/ }).click();
+  await page.locator('.item-title', { hasText: 'Fractionné maison' }).click();
+  await page.getByRole('button', { name: 'Modifier' }).click();
+  await expect(page.getByLabel('Nom de la séance')).toHaveValue('Fractionné maison');
+  await expect(page.getByTestId('builder-total')).toHaveText('2:55');
 });
 
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {

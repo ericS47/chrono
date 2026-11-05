@@ -75,6 +75,8 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 
 ## Reste à faire / idées
 
+- Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.
+
 - Tests unitaires de `src/engine/session.ts` (la liaison moteur / son), aujourd'hui couverte seulement par les parcours Playwright.
 
 - **Tester sur le vrai téléphone** : une séance Tabata complète écran verrouillé (sons en arrière-plan), les rappels.

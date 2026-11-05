@@ -19,6 +19,7 @@ import { LogDetail } from './screens/LogDetail';
 import { ImportShared } from './screens/ImportShared';
 import { ScheduleForm } from './screens/ScheduleForm';
 import { SessionTypes } from './screens/SessionTypes';
+import { Builder } from './screens/Builder';
 
 const TABS = [
   { path: '', label: 'Accueil', Icon: IconHome },
@@ -105,6 +106,7 @@ export function App() {
     case 'partage': screen = <ImportShared code={rest[0]} />; nav = false; break;
     case 'planifier': screen = <ScheduleForm />; nav = false; break;
     case 'types': screen = <SessionTypes />; nav = false; break;
+    case 'creer': screen = <Builder id={rest[0]} />; nav = false; break;
     default: screen = <Home />;
   }
 

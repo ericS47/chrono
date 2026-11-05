@@ -11,6 +11,7 @@ import { fmtClock, fmtDuration, fmtLongDate, fmtShort } from '../lib/format';
 import { launchWorkout } from '../lib/launch';
 import { go } from '../lib/router';
 import { Chip, Empty, Sheet, TopBar } from '../ui/kit';
+import { isBuilderWorkout } from './Builder';
 import { IconCalendar, IconCopy, IconEdit, IconPlay, IconShare, IconStar, IconStarFill, IconTrash } from '../ui/icons';
 
 function blockLines(b: Block): string[] {
@@ -133,7 +134,7 @@ export function WorkoutDetail({ id }: { id?: string }) {
           <button className="btn secondary" onClick={() => void duplicate()}><IconCopy size={18} />Copier dans mes séances</button>
         ) : (
           <>
-            <button className="btn secondary" onClick={() => go(`/editer/${w.id}`)}><IconEdit size={18} />Modifier</button>
+            <button className="btn secondary" onClick={() => go(isBuilderWorkout(w) ? `/creer/${w.id}` : `/editer/${w.id}`)}><IconEdit size={18} />Modifier</button>
             <button className="btn secondary" onClick={() => go(`/planifier?workout=${w.id}`)}><IconCalendar size={18} />Planifier</button>
           </>
         )}

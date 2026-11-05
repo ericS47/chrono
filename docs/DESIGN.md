@@ -34,3 +34,13 @@ Thème sombre disponible en option (jetons dans `src/styles.css`, `:root[data-th
 ## Couleurs des modes (tuiles)
 
 AMRAP `#FFBE98` · EMOM `#3DD6C6` · For Time `#FFC93C` · Tabata `#B9A6FF` · Intervalles `#FF9F5A` · Chrono `#8FA3FF` · Compte à rebours `#9BD3F5` · Personnalisé `#F5A8C8` · Musculation `#B5D98A` · Course `#7FD1A8` · WOD connus `#E6CBA8`
+
+## Créateur de séance
+
+Ouvert par le bouton rond « Créer » (Séances › Mes séances). Colonne de blocs à gauche (Effort, Repos, Série, Bloc de travail), timeline à droite, durée totale et bande colorée du déroulé en haut, « Lancer la séance » en bas.
+- Préparation toujours en tête, réglable (0 à 60 s), la séance démarre vide.
+- Toucher un bloc : durée et commentaire ; appui long : copier ; poignée ⋮⋮ : glisser pour déplacer.
+- Série : blocs qui se suivent, répétés ; son dernier repos sert de récupération entre deux séries et disparaît après la dernière.
+- Bloc de travail : regroupe blocs et séries, avec un nom, répétable (pas de bloc de travail dans un autre).
+- Enregistrée comme un bloc « Personnalisé » portant la timeline ; « Modifier » rouvre le créateur. Les autres séances gardent l'éditeur par blocs.
+

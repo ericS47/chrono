@@ -4,6 +4,7 @@
 import type { Block, Mode, Workout } from '../data/types';
 import { MODE_LABELS } from '../data/types';
 import { fmtShort } from '../lib/format';
+import { expandTimeline } from './timeline';
 
 export type PhaseKind = 'prep' | 'work' | 'rest';
 
@@ -74,7 +75,10 @@ export function blockSummary(block: Block): string {
       s = `Minuteur ${fmtShort(p.duration ?? DEFAULTS.countdown)}`;
       break;
     case 'custom':
-      s = `${(p.steps ?? []).length} étapes${(p.repeats ?? 1) > 1 ? ` × ${p.repeats}` : ''}`;
+      if (p.timeline?.length) {
+        const n = expandTimeline(p.timeline).filter((x) => x.kind === 'work').length;
+        s = `${n} effort${n > 1 ? 's' : ''}`;
+      } else s = `${(p.steps ?? []).length} étapes${(p.repeats ?? 1) > 1 ? ` × ${p.repeats}` : ''}`;
       break;
     case 'strength': {
       const n = (p.lifts ?? []).length;
@@ -166,6 +170,16 @@ export function buildBlockPhases(block: Block, blockIndex: number): Phase[] {
       break;
     }
     case 'custom': {
+      if (p.timeline?.length) {
+        // Séance faite avec le créateur : blocs, séries et blocs de travail.
+        for (const st of expandTimeline(p.timeline)) {
+          out.push({
+            ...base, kind: st.kind, label: st.label, duration: st.duration, countUp: false,
+            set: st.set, sets: st.sets, round: st.round, rounds: st.rounds, detail: st.group,
+          });
+        }
+        break;
+      }
       const steps = (p.steps ?? []).filter((st) => st.duration > 0);
       const repeats = Math.max(1, p.repeats ?? 1);
       for (let r = 1; r <= repeats; r++) {

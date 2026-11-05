@@ -25,6 +25,36 @@ export interface CustomStep {
   kind: 'work' | 'rest';
 }
 
+/** Créateur de séance : un bloc d'effort ou de repos. */
+export interface TimelineStep {
+  id: string;
+  type: 'effort' | 'rest';
+  duration: number;
+  note?: string;
+}
+
+/** Série : des blocs répétés. Son dernier repos sert de récupération entre deux répétitions. */
+export interface TimelineSeries {
+  id: string;
+  type: 'series';
+  reps: number;
+  /** Récupération ajoutée entre deux répétitions quand la série ne finit pas par un repos. */
+  between: number;
+  children: TimelineStep[];
+}
+
+/** Bloc de travail : regroupe blocs et séries, avec un nom ; peut être répété. */
+export interface TimelineGroup {
+  id: string;
+  type: 'group';
+  name: string;
+  reps: number;
+  between: number;
+  children: (TimelineStep | TimelineSeries)[];
+}
+
+export type TimelineItem = TimelineStep | TimelineSeries | TimelineGroup;
+
 export interface StrengthExercise {
   name: string;
   sets: number;
@@ -56,6 +86,8 @@ export interface BlockParams {
   rotate?: boolean;
   /** Personnalisé. */
   steps?: CustomStep[];
+  /** Personnalisé, fait avec le créateur de séance : blocs, séries et blocs de travail. */
+  timeline?: TimelineItem[];
   /** Personnalisé / Course : répétitions de la liste. */
   repeats?: number;
   /** Musculation. */

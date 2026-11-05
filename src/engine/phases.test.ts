@@ -81,4 +81,17 @@ describe('buildPhases', () => {
     expect(blockSummary(block('emom', { interval: 120, rounds: 5 }))).toBe('E2MOM × 5');
     expect(blockSummary(block('interval', { work: 40, rest: 20, rounds: 10 }))).toBe('Intervalles 40/20 × 10');
   });
+
+  it('séance du créateur : phases de la timeline, préparation en tête', () => {
+    const phases = buildPhases({
+      blocks: [{
+        ...defaultBlock('custom'),
+        params: { timeline: [{ id: 's', type: 'series', reps: 2, between: 0, children: [{ id: 'a', type: 'effort', duration: 40, note: 'Burpees' }, { id: 'b', type: 'rest', duration: 20 }] }] },
+      }],
+    }, 10);
+    expect(phases.map((p) => [p.kind, p.duration, p.label])).toEqual([
+      ['prep', 10, 'Préparation'], ['work', 40, 'Burpees'], ['rest', 20, 'Repos'], ['work', 40, 'Burpees'],
+    ]);
+    expect(phases[3]).toMatchObject({ set: 2, sets: 2 });
+  });
 });

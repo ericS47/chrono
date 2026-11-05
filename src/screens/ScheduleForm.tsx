@@ -42,7 +42,7 @@ export function ScheduleForm() {
         <TopBar title="Planifier" />
         <p className="empty">Crée d’abord une séance (ou copie un WOD connu) pour pouvoir la planifier.</p>
         <button className="btn" onClick={() => go('/seances?tab=wod', true)}>Voir les WOD connus</button>
-        <button className="btn secondary" onClick={() => go('/editer/nouvelle', true)}>Créer une séance</button>
+        <button className="btn secondary" onClick={() => go('/creer', true)}>Créer une séance</button>
       </main>
     );
   }
