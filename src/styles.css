@@ -200,6 +200,14 @@ h1, h2, h3 { margin: 0; }
   color: var(--phase-ink);
 }
 .tile small { font-size: 12px; font-weight: 600; }
+.create-btn {
+  align-self: center; margin: 18px 0;
+  width: 132px; height: 132px; border-radius: 50%; border: none;
+  background: var(--accent); color: var(--accent-ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  font-weight: 800; font-size: 18px;
+  box-shadow: 0 8px 24px rgba(79, 91, 213, 0.3);
+}
 .big-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-block: auto; }
 .big-tile {
   height: 150px; border: none; border-radius: var(--radius);

@@ -55,7 +55,7 @@ function Mine() {
 
   return (
     <>
-      <button className="btn block" onClick={() => go('/editer/nouvelle')}><IconPlus size={18} />Créer</button>
+      <button className="create-btn" onClick={() => go('/editer/nouvelle')}><IconPlus size={40} />Créer</button>
 
       <section className="section" aria-label="Favoris">
         <h2 className="section-title">Favoris</h2>
