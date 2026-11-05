@@ -9,7 +9,7 @@ import { useSettings } from '../data/hooks';
 import { launchWorkout } from '../lib/launch';
 import { enterFullscreen, exitFullscreen } from '../lib/platform';
 import {
-  IconArrowRight, IconClose, IconExpand, IconFlag, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
+  IconArrowRight, IconClose, IconExpand, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
 
 const R = 138;
@@ -175,6 +175,14 @@ export function TimerScreen() {
             ? <b>{rounds} tour{rounds > 1 ? 's' : ''}</b>
             : roundValue !== '—' && <b>{roundLabel} {roundValue}</b>}
           {reps && <span>{reps}</span>}
+        </div>
+        {/* Raccourcis : sans quitter l'affichage agrandi. */}
+        <div className="zoom-ctl" onClick={(e) => e.stopPropagation()}>
+          <button aria-label="Revenir en arrière" onClick={() => S.back()}><IconPrev size={26} /></button>
+          <button className="main" aria-label={running ? 'Pause' : 'Reprendre'} onClick={() => S.toggle()}>
+            {running ? <IconPause size={30} /> : <IconPlay size={30} />}
+          </button>
+          <button aria-label="Étape suivante" onClick={() => S.skip()}><IconSkip size={26} /></button>
         </div>
         <span className="zoom-hint">Touchez l’écran pour revenir</span>
       </div>

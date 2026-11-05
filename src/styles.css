@@ -412,7 +412,7 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .laps { font-size: 14px; font-weight: 700; display: flex; flex-direction: column; gap: 4px; max-height: 120px; overflow: auto; }
 
 /* Affichage agrandi : le temps en très grand, avec la série et les répétitions. */
-.timer.zoom { align-items: center; justify-content: center; gap: 2vh; text-align: center; cursor: pointer; }
+.timer.zoom { align-items: center; justify-content: center; gap: 2vh; text-align: center; cursor: pointer; padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
 .zoom-phase { font-weight: 800; font-size: clamp(24px, 7vmin, 56px); letter-spacing: 0.08em; }
 .zoom-time { font-weight: 800; line-height: 0.9; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; font-size: min(46vw, 52vh); }
 .zoom-time.long { font-size: min(27vw, 40vh); }
@@ -425,9 +425,13 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .zoom-bar { height: 4px; border-radius: 2px; background: rgba(20, 24, 58, 0.15); overflow: hidden; }
 .zoom-bar i { display: block; height: 100%; background: var(--phase-ink); }
 .zoom-count { align-self: flex-start; font-size: 15px; font-weight: 800; }
+.zoom-ctl { position: absolute; left: 0; right: 0; bottom: calc(40px + env(safe-area-inset-bottom)); display: flex; justify-content: center; align-items: center; gap: 22px; cursor: default; }
+.zoom-ctl button { width: 60px; height: 60px; border-radius: 50%; border: none; background: var(--glass); color: var(--phase-ink); display: inline-flex; align-items: center; justify-content: center; }
+.zoom-ctl button.main { width: 76px; height: 76px; background: var(--phase-ink); color: #FFFFFF; }
 .zoom-hint { position: absolute; bottom: calc(14px + env(safe-area-inset-bottom)); left: 0; right: 0; font-size: 12px; font-weight: 700; opacity: 0.55; }
 @media (orientation: landscape) {
-  .timer.zoom { gap: 1vh; padding-top: calc(64px + env(safe-area-inset-top)); }
+  .timer.zoom { gap: 1vh; padding-top: calc(64px + env(safe-area-inset-top)); padding-bottom: calc(12px + env(safe-area-inset-bottom)); padding-right: calc(110px + var(--side-r)); }
+  .zoom-ctl { left: auto; right: var(--side-r); top: 64px; bottom: 12px; flex-direction: column; gap: 14px; }
   .zoom-time { font-size: min(34vw, 50vh); }
   .zoom-time.long { font-size: min(22vw, 40vh); }
   .zoom-hint { display: none; }

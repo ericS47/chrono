@@ -151,6 +151,14 @@ test('chrono : affichage agrandi avec le tour en cours', async ({ page }) => {
   await expect(page.getByTestId('zoom-count')).toHaveText('1/8');
   await page.clock.runFor(20_000);
   await expect(page.locator('.zoom-phase')).toHaveText('REPOS');
+  // Raccourcis sans quitter l'affichage agrandi
+  await page.getByRole('button', { name: 'Pause' }).click();
+  await expect(page.locator('.zoom-phase')).toHaveText('EN PAUSE');
+  await page.getByRole('button', { name: 'Reprendre' }).click();
+  await page.getByRole('button', { name: 'Étape suivante' }).click();
+  await expect(page.locator('.zoom-info')).toContainText('Tour 2 / 8');
+  await page.getByRole('button', { name: 'Revenir en arrière' }).click();
+  await expect(page.locator('.zoom-phase')).toBeVisible();
   await page.locator('.timer.zoom').click();
   await expect(page.getByTestId('timer-value')).toBeVisible();
 });
