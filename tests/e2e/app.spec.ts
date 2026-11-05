@@ -229,6 +229,15 @@ test('créateur : blocs, série, durée totale, enregistrement et lancement', as
   await expect(page.getByRole('dialog', { name: 'Nouvelle série' })).toBeVisible();
   await page.getByRole('button', { name: 'Terminé' }).click();
   await expect(page.getByTestId('builder-total')).toHaveText('2:55');
+  // Bloc oublié : « + » sur le côté de l'effort de la série → repos inséré juste après, dans la série.
+  await page.getByRole('button', { name: 'Ajouter un bloc juste après' }).first().click();
+  await page.getByRole('dialog', { name: 'Ajouter juste après' }).getByRole('button', { name: 'Repos' }).click();
+  await expect(page.locator('.bd-series .bd-blk')).toHaveCount(3);
+  // 4 × (30 + 15) + 3 × 15 = 225 s, + 10 s de préparation
+  await expect(page.getByTestId('builder-total')).toHaveText('3:55');
+  await page.getByRole('button', { name: /^Repos 0:15/ }).first().click();
+  await page.getByRole('button', { name: 'Supprimer' }).click();
+  await expect(page.getByTestId('builder-total')).toHaveText('2:55');
   // Commentaire sur l'effort
   await page.getByRole('button', { name: /^Effort 0:30/ }).click();
   await page.getByLabel('Commentaire').fill('Burpees');
