@@ -18,9 +18,10 @@ test('accueil : chrono rapide et navigation', async ({ page }) => {
   await expect(page.getByRole('link', { name: /Cindy/ })).toBeVisible();
   await page.getByRole('link', { name: 'Accueil' }).click();
   await page.locator('.big-tile', { hasText: 'Ma séance' }).click();
-  await expect(page.getByRole('heading', { name: 'Favoris' })).toBeVisible();
-  await page.getByRole('button', { name: 'Toutes mes séances' }).click();
   await expect(page).toHaveURL(/#\/seances/);
+  await expect(page.getByRole('tab', { name: 'Mes séances' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Favoris' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Créer' })).toBeVisible();
   await page.getByRole('link', { name: 'Accueil' }).click();
   await page.getByRole('link', { name: 'Planning' }).click();
   await expect(page.getByRole('heading', { name: 'Octobre' })).toBeVisible();
@@ -121,6 +122,7 @@ test('WOD connu, partage par lien et import', async ({ page }) => {
   await page.getByRole('button', { name: 'Ajouter à mes séances' }).click();
   await expect(page.getByRole('button', { name: 'Modifier' })).toBeVisible();
   await page.goto('./#/seances');
+  await page.getByRole('button', { name: /Toutes mes séances/ }).click();
   await expect(page.locator('.item-title', { hasText: 'Cindy' })).toHaveCount(2);
 });
 
@@ -187,19 +189,20 @@ test('séance : les bips sont joués par une piste audio (arrière-plan)', async
   await expect.poll(() => page.evaluate(() => (window as unknown as { __tracks: number }).__tracks), { timeout: 15_000 }).toBeGreaterThan(0);
 });
 
-test('Ma séance : 2 favoris au plus, puis toutes les séances', async ({ page }) => {
+test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {
   for (const name of ['Séance A', 'Séance B', 'Séance C']) {
-    await page.goto('./#/editer/nouvelle');
+    await page.goto('./#/seances');
+    await page.getByRole('button', { name: 'Créer' }).click();
     await page.getByLabel('Nom', { exact: true }).fill(name);
     await page.getByRole('button', { name: 'Enregistrer la séance' }).click();
     await expect(page.getByRole('heading', { name })).toBeVisible();
     await page.getByRole('button', { name: 'Ajouter aux favoris' }).click();
     await expect(page.getByRole('button', { name: 'Retirer des favoris' })).toBeVisible();
   }
-  await page.goto('./#/ma-seance');
-  await expect(page.locator('.list .item-title')).toHaveCount(2);
-  await page.getByRole('button', { name: 'Toutes mes séances' }).click();
-  await expect(page.locator('.item-title', { hasText: 'Séance A' })).toBeVisible();
+  await page.goto('./#/seances');
+  await expect(page.getByRole('region', { name: 'Favoris' }).locator('.item-title')).toHaveCount(2);
+  await page.getByRole('button', { name: /Toutes mes séances/ }).click();
+  await expect(page.getByRole('region', { name: 'Toutes mes séances' }).locator('.item-title')).toHaveCount(3);
 });
 
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {

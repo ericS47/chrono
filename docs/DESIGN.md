@@ -17,7 +17,7 @@ Thème sombre disponible en option (jetons dans `src/styles.css`, `:root[data-th
 
 ## Mise en page
 
-- **Accueil** : titre, carte « Séance du jour » pleine couleur accent (Démarrer, Décaler), deux grandes tuiles avec icône : « Ma séance » (à gauche, ouvre un écran épuré : 2 favoris au plus, la dernière séance faite, et « Toutes mes séances ») et « Types de séances » (à droite, ouvre l'écran des 10 modes + « WOD connus », tuiles **remplies de la couleur du mode**, 2 par ligne), dernière séance, barre d'onglets en bas (Accueil / Planning / Séances / Réglages).
+- **Accueil** : titre, carte « Séance du jour » pleine couleur accent (Démarrer, Décaler), deux grandes tuiles avec icône : « Ma séance » (à gauche, ouvre l'onglet Séances › Mes séances : bouton « Créer », 2 favoris au plus, la dernière séance faite, puis « Toutes mes séances » repliées) et « Types de séances » (à droite, ouvre l'écran des 10 modes + « WOD connus », tuiles **remplies de la couleur du mode**, 2 par ligne), dernière séance, barre d'onglets en bas (Accueil / Planning / Séances / Réglages).
 - **Planning** : bandeau de la semaine (ou grille du mois), séances du jour sous forme de créneaux horaires, stats de la semaine, bouton flottant « Planifier ».
 - **Chrono** : anneau de progression, nom de phase + très grand chiffre, deux cartes (Tour, Restant), liste des prochaines phases, boutons Revenir / Pause / action principale. En paysage, l'anneau passe à gauche.
 

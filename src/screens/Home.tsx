@@ -88,7 +88,7 @@ export function Home() {
       )}
 
       <section className="big-tiles" aria-label="Lancer une séance">
-        <button className="big-tile" style={{ background: MODE_COLORS.tabata }} onClick={() => go('/ma-seance')}>
+        <button className="big-tile" style={{ background: MODE_COLORS.tabata }} onClick={() => go('/seances')}>
           <IconList size={40} />
           Ma séance
         </button>

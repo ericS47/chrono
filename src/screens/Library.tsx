@@ -4,7 +4,7 @@ import { saveWorkout } from '../data/db';
 import { knownWods } from '../data/wods';
 import { activeWeekStreak } from '../data/schedule';
 import { blockSummary, estimateWorkout } from '../engine/phases';
-import { cap, fmtClock, fmtDuration, monthName, startOfWeek } from '../lib/format';
+import { cap, fmtClock, fmtDuration, fmtLongDate, monthName, startOfWeek } from '../lib/format';
 import { go, useQuery } from '../lib/router';
 import { Empty, Segmented } from '../ui/kit';
 import { IconPlus, IconSearch, IconStar, IconStarFill } from '../ui/icons';
@@ -12,7 +12,7 @@ import type { SessionLog, Workout } from '../data/types';
 
 type Tab = 'mes' | 'historique' | 'wod';
 
-export function WorkoutItem({ w, star }: { w: Workout; star?: boolean }) {
+function WorkoutItem({ w, star }: { w: Workout; star?: boolean }) {
   return (
     <div className="item" style={{ padding: 0, overflow: 'hidden' }}>
       <a href={`#/seance/${w.id}`} className="item" style={{ border: 'none', borderRadius: 0, flex: 1, minWidth: 0 }}>
@@ -31,8 +31,14 @@ export function WorkoutItem({ w, star }: { w: Workout; star?: boolean }) {
   );
 }
 
+/** Nombre de favoris montrés en haut de « Mes séances ». */
+const MAX_FAVORITES = 2;
+
+/** Mes séances : créer, 2 favoris, la dernière séance faite, puis toutes les séances (repliées). */
 function Mine() {
   const workouts = useWorkouts();
+  const logs = useLogs();
+  const [showAll, setShowAll] = useState(false);
   const [q, setQ] = useState('');
   const [tag, setTag] = useState<string | null>(null);
   const [favOnly, setFavOnly] = useState(false);
@@ -40,25 +46,66 @@ function Mine() {
   const list = (workouts ?? [])
     .filter((w) => (!favOnly || w.favorite) && (!tag || w.tags.includes(tag)) && (!q || `${w.name} ${w.description ?? ''} ${w.tags.join(' ')}`.toLowerCase().includes(q.toLowerCase())))
     .sort((a, b) => Number(b.favorite) - Number(a.favorite) || b.updatedAt - a.updatedAt);
+  const favorites = (workouts ?? [])
+    .filter((w) => w.favorite)
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, MAX_FAVORITES);
+  const last = logs?.[0];
+  const lastWorkout = last?.workoutId ? workouts?.find((w) => w.id === last.workoutId) : undefined;
 
   return (
     <>
-      <div className="search">
-        <IconSearch size={18} />
-        <input type="search" placeholder="Rechercher une séance" aria-label="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} />
-      </div>
-      <div className="chips">
-        <button className="chip" aria-pressed={favOnly} onClick={() => setFavOnly(!favOnly)}>★ Favoris</button>
-        {tags.map((t) => <button key={t} className="chip" aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)}>{t}</button>)}
-      </div>
-      {workouts && !workouts.length ? (
-        <Empty>Pas encore de séance. Crée la tienne ou pars d’un WOD connu.</Empty>
-      ) : list.length ? (
-        <div className="list">{list.map((w) => <WorkoutItem key={w.id} w={w} star />)}</div>
-      ) : (
-        workouts && <Empty>Aucune séance ne correspond.</Empty>
+      <button className="btn block" onClick={() => go('/editer/nouvelle')}><IconPlus size={18} />Créer</button>
+
+      <section className="section" aria-label="Favoris">
+        <h2 className="section-title">Favoris</h2>
+        {favorites.length ? (
+          <div className="list">{favorites.map((w) => <WorkoutItem key={w.id} w={w} star />)}</div>
+        ) : (
+          workouts && <Empty>Pas encore de favori. Touchez ★ sur une séance pour la retrouver ici.</Empty>
+        )}
+      </section>
+
+      {last && (
+        <section className="section" aria-label="Dernière séance">
+          <h2 className="section-title">Dernière séance</h2>
+          {lastWorkout ? (
+            <div className="list"><WorkoutItem w={lastWorkout} /></div>
+          ) : (
+            <a className="item" href={`#/historique/${last.id}`}>
+              <div className="item-main">
+                <span className="item-title">{last.workoutName}</span>
+                <span className="item-sub">{fmtLongDate(new Date(last.startedAt))}</span>
+              </div>
+              <span className="item-end">{fmtClock(last.durationSec)}</span>
+            </a>
+          )}
+        </section>
       )}
-      <button className="fab" onClick={() => go('/editer/nouvelle')}><IconPlus size={18} />Nouvelle séance</button>
+
+      {!!workouts?.length && (
+        <button className="btn secondary block" aria-expanded={showAll} onClick={() => setShowAll(!showAll)}>
+          {showAll ? 'Masquer mes séances' : `Toutes mes séances (${workouts.length})`}
+        </button>
+      )}
+      {showAll && (
+        <section className="section" aria-label="Toutes mes séances">
+          <div className="search">
+            <IconSearch size={18} />
+            <input type="search" placeholder="Rechercher une séance" aria-label="Rechercher" value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
+          <div className="chips">
+            <button className="chip" aria-pressed={favOnly} onClick={() => setFavOnly(!favOnly)}>★ Favoris</button>
+            {tags.map((t) => <button key={t} className="chip" aria-pressed={tag === t} onClick={() => setTag(tag === t ? null : t)}>{t}</button>)}
+          </div>
+          {list.length ? (
+            <div className="list">{list.map((w) => <WorkoutItem key={w.id} w={w} star />)}</div>
+          ) : (
+            <Empty>Aucune séance ne correspond.</Empty>
+          )}
+        </section>
+      )}
+      {workouts && !workouts.length && <Empty>Pas encore de séance. Créez la vôtre ou partez d’un WOD connu.</Empty>}
     </>
   );
 }
