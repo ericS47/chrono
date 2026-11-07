@@ -299,3 +299,24 @@ test('PWA : manifeste et service worker', async ({ page, request }) => {
   expect(m.icons.length).toBeGreaterThanOrEqual(3);
   expect((await request.get('./sw.js')).ok()).toBe(true);
 });
+
+test('créateur : copier un bloc de travail l’ajoute à la fin de la séance', async ({ page }) => {
+  await page.goto('./#/creer');
+  await page.getByRole('button', { name: 'Effort', exact: true }).click();
+  await page.getByRole('button', { name: 'Bloc de travail', exact: true }).click();
+  await page.getByRole('button', { name: /^Effort 0:30/ }).click();
+  await page.getByRole('button', { name: 'Créer', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Nouveau bloc de travail' })).toBeVisible();
+  await page.getByLabel('Nom', { exact: true }).fill('Cardio');
+  await page.getByRole('button', { name: 'Terminé' }).click();
+  // Un repos après le bloc de travail.
+  await page.getByRole('button', { name: 'Repos', exact: true }).click();
+  await expect(page.locator('.bd-group')).toHaveCount(1);
+  // Copier le bloc de travail : la copie va tout en bas, après le repos.
+  await page.locator('.bd-group-head').first().click();
+  await page.getByRole('button', { name: 'Copier à la fin' }).click();
+  await expect(page.locator('.bd-group')).toHaveCount(2);
+  const order = await page.locator('[data-node]').evaluateAll((els) =>
+    els.filter((e) => !e.parentElement?.closest('[data-node]')).map((e) => (e.classList.contains('bd-group') ? 'bloc' : e.textContent?.includes('Repos') ? 'repos' : 'autre')));
+  expect(order.slice(-3)).toEqual(['bloc', 'repos', 'bloc']);
+});
