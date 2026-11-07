@@ -258,6 +258,18 @@ test('créateur : blocs, série, durée totale, enregistrement et lancement', as
   await expect(page.getByTestId('builder-total')).toHaveText('2:55');
 });
 
+test('créateur : le dernier bloc ajouté reste visible, la durée reste en haut', async ({ page }) => {
+  await page.goto('./#/creer');
+  for (let i = 0; i < 12; i++) await page.getByRole('button', { name: i % 2 ? 'Repos' : 'Effort', exact: true }).click();
+  const last = page.locator('.bd-timeline [data-node]').last();
+  await expect.poll(async () => {
+    const b = await last.boundingBox();
+    const bar = await page.locator('.bd-bottom').boundingBox();
+    return !!b && !!bar && b.y + b.height <= bar.y + 1;
+  }).toBe(true);
+  await expect(page.getByTestId('builder-total')).toBeInViewport();
+});
+
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __started: number };

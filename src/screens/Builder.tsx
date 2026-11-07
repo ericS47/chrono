@@ -165,8 +165,14 @@ export function Builder({ id }: { id?: string }) {
     const b: TimelineStep = { id: uid(), type, duration: prev ? prev.duration : DEFAULT_DUR[type] };
     setItems([...items, b]);
     setLastAdded(b.id);
-    requestAnimationFrame(() => document.querySelector(`[data-node="${b.id}"]`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
   };
+
+  // Dernier ajout toujours visible, juste au-dessus du bouton « Lancer la séance ».
+  useEffect(() => {
+    if (!lastAdded) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    document.querySelector(`[data-node="${lastAdded}"]`)?.scrollIntoView({ block: 'end', behavior: reduce ? 'auto' : 'smooth' });
+  }, [lastAdded]);
 
   const copy = (xid: string) => {
     withItem(xid, (f) => f.list.splice(f.index + 1, 0, cloneWithIds(f.item)));

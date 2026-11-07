@@ -471,7 +471,7 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 
 /* ---------- Créateur de séance ---------- */
 
-.bd-screen { padding-bottom: calc(110px + env(safe-area-inset-bottom)); gap: 14px; }
+.screen.bd-screen { padding-bottom: calc(120px + env(safe-area-inset-bottom)); gap: 14px; }
 .bd-head { position: sticky; top: env(safe-area-inset-top); z-index: 5; background: var(--bg); padding-block: 6px 10px; display: flex; flex-direction: column; gap: 10px; }
 .bd-name { width: 100%; height: 46px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); color: var(--ink); font: inherit; font-weight: 800; font-size: 17px; padding: 0 14px; }
 .bd-head-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
@@ -512,6 +512,8 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .bd-blk.rest { background: var(--rest); }
 .bd-blk.bd-prep { background: var(--prep); }
 .bd-blk.new { animation: bd-pop 0.28s ease; }
+/* Défilement vers un bloc : il s'arrête sous l'en-tête et au-dessus de la barre du bas. */
+.bd-timeline [data-node] { scroll-margin-top: 130px; scroll-margin-bottom: calc(96px + env(safe-area-inset-bottom)); }
 @keyframes bd-pop { from { transform: scale(0.85); opacity: 0.2; } to { transform: none; opacity: 1; } }
 .bd-pressing { transform: scale(0.97); }
 .bd-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
