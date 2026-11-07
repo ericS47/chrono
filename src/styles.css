@@ -505,6 +505,26 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 .bd-ex-preview { background: var(--effort); border-radius: var(--radius); display: flex; justify-content: center; padding: 6px; }
 .bd-ex-preview .figure { height: 140px; width: auto; max-width: 100%; display: block; }
 
+.ex-picker { display: flex; flex-direction: column; gap: 8px; }
+.ex-picker-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 48px;
+  padding: 10px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--ink);
+  font: inherit; font-size: 16px; font-weight: 600; text-align: left; cursor: pointer;
+}
+.ex-picker-list { display: flex; flex-direction: column; gap: 12px; padding: 10px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); }
+.ex-picker-group { display: flex; flex-direction: column; gap: 6px; }
+.ex-picker-head { font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.ex-picker-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.ex-opt {
+  display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 4px 8px 4px 4px; border-radius: 12px;
+  border: 1.5px solid transparent; background: var(--card); color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer;
+}
+.ex-opt.wide { justify-content: center; padding: 10px; }
+.ex-opt[aria-selected='true'] { border-color: var(--accent); background: var(--accent-tint); }
+.ex-opt-thumb { flex: none; width: 40px; height: 40px; border-radius: 9px; background: var(--effort); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ex-opt-thumb .figure { width: 100%; height: 100%; display: block; }
+.ex-opt-name { min-width: 0; line-height: 1.15; overflow-wrap: anywhere; }
+
 /* ---------- Créateur de séance ---------- */
 
 .screen.bd-screen { padding-bottom: calc(120px + env(safe-area-inset-bottom)); gap: 14px; }
