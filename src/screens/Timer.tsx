@@ -11,7 +11,7 @@ import { enterFullscreen, exitFullscreen } from '../lib/platform';
 import { Sheet } from '../ui/kit';
 import { armPip, closePip, openPip, pipSupported, togglePip } from '../lib/pip';
 import {
-  IconArrowRight, IconClose, IconExpand, IconPip, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
+  IconArrowRight, IconClose, IconExpand, IconDoor, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
 
 const R = 138;
@@ -261,11 +261,6 @@ export function TimerScreen() {
           <b>{workout.name}</b>
         </div>
         <div className="timer-top-right">
-          {!idle && pipSupported() && (
-            <button className="icon-btn" aria-label="Mini-fenêtre" title="Mini-fenêtre : le chrono reste affiché quand vous quittez l’app" onClick={() => void togglePip()}>
-              <IconPip size={18} />
-            </button>
-          )}
           {!idle && (
             <button className="icon-btn" aria-label="Agrandir le chrono" onClick={openZoom}>
               <IconExpand size={18} />
@@ -274,6 +269,12 @@ export function TimerScreen() {
           <button className="icon-btn" aria-label={session.muted ? 'Réactiver le son' : 'Couper le son'} onClick={() => S.setMuted(!session.muted)}>
             {session.muted ? <IconMute size={18} /> : <IconSound size={18} />}
           </button>
+          {/* Sortir : le chrono reste en mini-fenêtre par-dessus les autres apps, la séance continue. */}
+          {!idle && pipSupported() && (
+            <button className="icon-btn quiet" aria-label="Mini-fenêtre" title="Sortir : le chrono reste en mini-fenêtre" onClick={() => void togglePip()}>
+              <IconDoor size={18} />
+            </button>
+          )}
         </div>
       </div>
 

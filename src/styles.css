@@ -374,6 +374,8 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .timer.prep, .timer.idle { --phase: var(--prep); }
 .timer.done { --phase: var(--done); }
 .timer .icon-btn, .timer .glass-btn { background: var(--glass); border: none; color: var(--phase-ink); }
+/* Bouton discret (porte : sortir en mini-fenêtre). */
+.timer .icon-btn.quiet { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(20, 24, 58, 0.16); }
 .timer-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
 .timer-top > .icon-btn { justify-self: start; }
 .timer-top-right { justify-self: end; display: flex; gap: 8px; }
