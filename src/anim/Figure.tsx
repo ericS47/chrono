@@ -8,6 +8,8 @@ import type { ExerciseId } from './exercises';
 import { EXERCISE_BY_ID, frameAt, frameBox, GROUND, place, VIEW_W } from './exercises';
 import type { Dims, Joints, Pt } from './pose';
 import { dims } from './pose';
+import type { BodyStyle } from './Body';
+import { FrontBody, SideBody } from './Body';
 
 const SHOE = '#2B2F3A';
 
@@ -134,7 +136,7 @@ function FrontFigure({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Color
 const REF = dims({ ...DEFAULT_AVATAR, sex: 'm', build: 'forte', height: 'grande' });
 
 /** Image fixe de l'avatar à l'instant `sec` du mouvement. */
-export function FigureFrame({ exercise, avatar, sec, title }: { exercise: ExerciseId; avatar: Avatar; sec: number; title?: string }) {
+export function FigureFrame({ exercise, avatar, sec, title, body = 'simple' }: { exercise: ExerciseId; avatar: Avatar; sec: number; title?: string; body?: BodyStyle | 'simple' }) {
   const placed = useMemo(() => place(EXERCISE_BY_ID[exercise], dims(avatar)), [exercise, avatar]);
   const c = useMemo(() => colors(avatar), [avatar]);
   const { j } = frameAt(placed, sec);
@@ -143,7 +145,9 @@ export function FigureFrame({ exercise, avatar, sec, title }: { exercise: Exerci
   return (
     <svg viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`} className={`figure ${b.w > b.h * 1.25 ? 'wide' : ''}`} role="img" aria-label={title ?? `Animation : ${ex.label}`}>
       <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={Math.min(ex.view === 'front' ? 26 : 48, b.w / 2 - 3)} ry={3.2} fill="rgba(20,24,58,0.12)" />
-      {ex.view === 'front' ? <FrontFigure j={j} d={placed.d} av={avatar} c={c} /> : <SideFigure j={j} d={placed.d} av={avatar} c={c} />}
+      {body === 'simple'
+        ? ex.view === 'front' ? <FrontFigure j={j} d={placed.d} av={avatar} c={c} /> : <SideFigure j={j} d={placed.d} av={avatar} c={c} />
+        : ex.view === 'front' ? <FrontBody j={j} d={placed.d} av={avatar} c={c} style={body} /> : <SideBody j={j} d={placed.d} av={avatar} c={c} style={body} />}
     </svg>
   );
 }
