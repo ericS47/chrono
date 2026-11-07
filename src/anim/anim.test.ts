@@ -37,6 +37,12 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Goblet squat')).toBe('kbgoblet');
     expect(matchExercise('Curl biceps')).toBe('bandcurl');
     expect(matchExercise('Élévations latérales')).toBe('bandraise');
+    expect(matchExercise('Curl haltères')).toBe('dbcurl');
+    expect(matchExercise('Développé épaules')).toBe('dbpress');
+    expect(matchExercise('Rowing haltère')).toBe('dbrow');
+    expect(matchExercise('Assis-debout')).toBe('sittostand');
+    expect(matchExercise('Extension de genou')).toBe('kneeext');
+    expect(matchExercise('Dips sur chaise')).toBe('chairdips');
     expect(matchExercise('Pas chassé D')).toBe('shuffleright');
     expect(matchExercise('Pas chassés droite')).toBe('shuffleright');
     expect(matchExercise('Pas chassé G')).toBe('shuffleleft');

@@ -21,6 +21,10 @@ const EQUIPMENT_ICONS: Record<Equipment, ReactNode> = {
   kettlebell: <svg {...ICON}><path d="M7.6 11.2C6.6 6.6 8.8 3.6 12 3.6s5.4 3 4.4 7.6" strokeWidth={2.3} /><circle cx="12" cy="15" r="6" fill="currentColor" stroke="none" /></svg>,
   // Élastique : tube souple entre deux poignées.
   band: <svg {...ICON}><rect x="1.8" y="7.5" width="4.4" height="7" rx="1.6" fill="currentColor" stroke="none" /><rect x="17.8" y="7.5" width="4.4" height="7" rx="1.6" fill="currentColor" stroke="none" /><path d="M6.2 11c3.2 6 8.4 6 11.6 0" strokeWidth={2.2} /></svg>,
+  // Haltère : barre et deux disques.
+  dumbbell: <svg {...ICON}><path d="M7 12h10" strokeWidth={2.4} /><rect x="3.2" y="7.5" width="3.8" height="9" rx="1.3" fill="currentColor" stroke="none" /><rect x="17" y="7.5" width="3.8" height="9" rx="1.3" fill="currentColor" stroke="none" /></svg>,
+  // Chaise de profil.
+  chair: <svg {...ICON}><path d="M7 3.5v17M7 13h10.5M17.5 13v7.5M7 13" strokeWidth={2.2} /><path d="M6.2 12.8h12" strokeWidth={2.6} /></svg>,
 };
 
 export function ExercisePicker({ value, onChange, avatar, label = 'Exercice animé' }: {
