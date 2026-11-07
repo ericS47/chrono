@@ -335,6 +335,12 @@ test('chrono : mini-fenêtre (image dans l’image) qui suit la séance', async 
   // Un second appui la referme.
   await page.getByRole('button', { name: 'Mini-fenêtre' }).click();
   await expect.poll(() => page.evaluate(() => !!document.pictureInPictureElement)).toBe(false);
+  // Aussi en plein écran (affichage agrandi), sans quitter cet affichage.
+  await page.getByRole('button', { name: 'Agrandir le chrono' }).click();
+  await expect(page.getByTestId('zoom-value')).toBeVisible();
+  await page.getByRole('button', { name: 'Mini-fenêtre' }).click();
+  await expect.poll(() => page.evaluate(() => !!document.pictureInPictureElement)).toBe(true);
+  await expect(page.getByTestId('zoom-value')).toBeVisible();
 });
 
 test('créateur : copier un effort l’ajoute à la fin de la séance', async ({ page }) => {

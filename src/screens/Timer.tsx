@@ -211,7 +211,13 @@ export function TimerScreen() {
       : 'Dernière phase';
     return (
       <div className={`timer zoom ${cls}`} role="button" tabIndex={0} aria-label="Quitter l’affichage agrandi" onClick={() => setZoom(false)}>
-        <div className="zoom-rest" data-testid="zoom-rest">
+        {/* Sortir : retour à l'écran d'accueil du téléphone, le chrono reste en mini-fenêtre. */}
+        {pipSupported() && (
+          <button className="zoom-door" aria-label="Mini-fenêtre" title="Sortir : le chrono reste en mini-fenêtre" onClick={(e) => { e.stopPropagation(); void togglePip(); }}>
+            <IconDoor size={20} />
+          </button>
+        )}
+        <div className={`zoom-rest${pipSupported() ? ' with-door' : ''}`} data-testid="zoom-rest">
           <div className="zoom-rest-row">
             <span className="num">{totalLeft > 0 ? `Reste ${fmtClock(totalLeft)}` : `Écoulé ${fmtClock(el / 1000)}`}</span>
             <span className="zoom-next">{nextText}</span>
