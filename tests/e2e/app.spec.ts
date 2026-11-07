@@ -313,7 +313,10 @@ test('créateur : copier un bloc de travail l’ajoute à la fin de la séance',
   await page.getByRole('button', { name: 'Repos', exact: true }).click();
   await expect(page.locator('.bd-group')).toHaveCount(1);
   // Copier le bloc de travail : la copie va tout en bas, après le repos.
+  // Toucher l'en-tête du bloc de travail : même menu que l'appui long.
   await page.locator('.bd-group-head').first().click();
+  await expect(page.getByRole('dialog', { name: 'Cardio' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Cardio' }).getByRole('button', { name: 'Régler' })).toBeVisible();
   await page.getByRole('button', { name: 'Copier', exact: true }).click();
   await expect(page.locator('.bd-group')).toHaveCount(2);
   const order = await page.locator('[data-node]').evaluateAll((els) =>
