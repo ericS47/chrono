@@ -145,6 +145,19 @@ export function SettingsScreen() {
       </section>
 
       <section className="section">
+        <h2 className="section-title">Exercices animés</h2>
+        <div className="form">
+          <div className="row">
+            <span className="row-text">
+              <span>Personnages</span>
+              <span className="hint">Exercices expliqués par des personnages animés</span>
+            </span>
+            <a className="btn small secondary" href="#/personnages">Voir</a>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
         <h2 className="section-title">Rappels</h2>
         <div className="form">
           <div className="row">

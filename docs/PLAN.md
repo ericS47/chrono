@@ -75,6 +75,8 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 
 ## Reste à faire / idées
 
+- **Personnages animés** (branche `feature/personnages-animes`) : personnages dessinés en SVG qui font les exercices (fentes, levées de jambe, mobilité sur chaise…), galerie dans Réglages › Exercices animés, export en GIF avec `npx tsx scripts/export-gifs.ts`. Reste : les relier aux exercices des séances (WOD, mobilité) et ajouter d’autres exercices.
+
 - Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.
 
 - Tests unitaires de `src/engine/session.ts` (la liaison moteur / son), aujourd'hui couverte seulement par les parcours Playwright.

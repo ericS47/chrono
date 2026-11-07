@@ -568,3 +568,11 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 @media (min-width: 700px) {
   .tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
+
+/* Personnages animés (galerie) */
+.figure-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
+.figure-card { margin: 0; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.figure-card .figure { background: var(--accent-tint); }
+.figure-card figcaption { padding: 10px 12px 12px; text-align: center; font-weight: 800; font-size: 13px; letter-spacing: 0.02em; text-transform: uppercase; }
+.figure svg { display: block; width: 100%; height: auto; }
+@media (min-width: 700px) { .figure-grid { grid-template-columns: repeat(4, 1fr); } }
