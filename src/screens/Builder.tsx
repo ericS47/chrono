@@ -174,6 +174,15 @@ export function Builder({ id }: { id?: string }) {
     document.querySelector(`[data-node="${lastAdded}"]`)?.scrollIntoView({ block: 'end', behavior: reduce ? 'auto' : 'smooth' });
   }, [lastAdded]);
 
+  // À l'ouverture (séance existante ou brouillon), la vue démarre sur les derniers blocs.
+  const openedAtEnd = useRef(false);
+  useEffect(() => {
+    if (!ready || openedAtEnd.current) return;
+    openedAtEnd.current = true;
+    const nodes = document.querySelectorAll('.bd-timeline > [data-node]');
+    nodes[nodes.length - 1]?.scrollIntoView({ block: 'end', behavior: 'auto' });
+  }, [ready]);
+
   const copy = (xid: string) => {
     withItem(xid, (f) => f.list.splice(f.index + 1, 0, cloneWithIds(f.item)));
     setToast('Copié');

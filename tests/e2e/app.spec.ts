@@ -268,6 +268,11 @@ test('créateur : le dernier bloc ajouté reste visible, la durée reste en haut
     return !!b && !!bar && b.y + b.height <= bar.y + 1;
   }).toBe(true);
   await expect(page.getByTestId('builder-total')).toBeInViewport();
+  // En rouvrant le créateur (brouillon), la vue démarre sur les derniers blocs.
+  await page.goto('./#/seances');
+  await page.goto('./#/creer');
+  await expect(last).toBeInViewport();
+  await expect(page.getByTestId('builder-total')).toBeInViewport();
 });
 
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
