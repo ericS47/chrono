@@ -3,6 +3,7 @@
 
 import type { Pose, Dims, Joints, Pt } from './pose';
 import { lerpPose, lowest, solve, translate } from './pose';
+import { setExerciseLabels } from '../engine/timeline';
 
 export type ExerciseId =
   | 'squat' | 'pushup' | 'plank' | 'jumpingjack' | 'lunge' | 'burpee' | 'climber' | 'situp' | 'highknees';
@@ -105,6 +106,13 @@ export const EXERCISES: ExerciseAnim[] = [
 ];
 
 export const EXERCISE_BY_ID: Record<ExerciseId, ExerciseAnim> = Object.fromEntries(EXERCISES.map((e) => [e.id, e])) as Record<ExerciseId, ExerciseAnim>;
+
+export function isExerciseId(id: string | undefined): id is ExerciseId {
+  return !!id && id in EXERCISE_BY_ID;
+}
+
+// Un bloc du créateur sans commentaire prend le nom de l'exercice choisi (affichage et voix).
+setExerciseLabels((id) => (isExerciseId(id) ? EXERCISE_BY_ID[id].label : undefined));
 
 /** Minuscules, sans accents ni ponctuation, pluriels simples retirés. */
 export function normalizeName(s: string): string {

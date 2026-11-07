@@ -12,6 +12,8 @@ import { launchWorkout } from '../lib/launch';
 import { back, go } from '../lib/router';
 import { DurationField, Sheet, Stepper, TopBar } from '../ui/kit';
 import { IconPlay } from '../ui/icons';
+import { EXERCISES, EXERCISE_BY_ID, isExerciseId } from '../anim/exercises';
+import { ExerciseFigure } from '../anim/Figure';
 
 const DRAFT_KEY = 'chrono.createur.brouillon';
 const DEFAULT_DUR = { effort: 30, rest: 15 };
@@ -451,12 +453,12 @@ export function Builder({ id }: { id?: string }) {
       data-press={b.id}
       data-open={b.id}
       data-pick={top ? b.id : undefined}
-      aria-label={`${LABEL[b.type]} ${fmtClock(b.duration)}${b.note ? `, ${b.note}` : ''}`}
+      aria-label={`${LABEL[b.type]} ${fmtClock(b.duration)}${b.note ? `, ${b.note}` : isExerciseId(b.exercise) ? `, ${EXERCISE_BY_ID[b.exercise].label}` : ''}`}
     >
       {selecting && top && <span className="bd-check" aria-hidden="true">{picked.includes(b.id) ? '✓' : ''}</span>}
       <span className="bd-main">
         <span className="bd-kind">{LABEL[b.type]}</span>
-        {b.note && <span className="bd-note">{b.note}</span>}
+        {(b.note || isExerciseId(b.exercise)) && <span className="bd-note">{b.note || (isExerciseId(b.exercise) ? EXERCISE_BY_ID[b.exercise].label : '')}</span>}
       </span>
       <span className="bd-end">
         <span className="bd-time">{fmtClock(b.duration)}</span>
@@ -600,6 +602,7 @@ function BuilderSheet({
   clearAll: () => void;
   open: (s: SheetState) => void;
 }) {
+  const settings = useSettings();
   if (sheet.kind === 'prep') {
     return (
       <Sheet title="Préparation" onClose={close}>
@@ -655,6 +658,25 @@ function BuilderSheet({
             <label htmlFor="bd-note">Commentaire</label>
             <textarea id="bd-note" value={it.note ?? ''} placeholder={it.type === 'effort' ? 'Ex. 15 burpees, allure 5:00/km…' : 'Ex. marcher, s’étirer…'} onChange={(e) => { const v = e.target.value; withItem(xid, (x) => { (x.item as TimelineStep).note = v; }); }} />
           </div>
+          {/* Animation des exercices (bêta) : seulement si elle est activée dans les réglages. */}
+          {it.type === 'effort' && settings.anim.enabled && (
+            <div className="field">
+              <label htmlFor="bd-ex">Exercice animé</label>
+              <select
+                id="bd-ex"
+                value={isExerciseId(it.exercise) ? it.exercise : ''}
+                onChange={(e) => { const v = e.target.value; withItem(xid, (x) => { const st = x.item as TimelineStep; if (v) st.exercise = v; else delete st.exercise; }); }}
+              >
+                <option value="">D’après le commentaire</option>
+                {EXERCISES.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+              </select>
+              {isExerciseId(it.exercise) ? (
+                <div className="bd-ex-preview"><ExerciseFigure exercise={it.exercise} avatar={settings.anim.avatar} /></div>
+              ) : (
+                <span className="hint">Sinon, l’exercice est reconnu d’après le commentaire (« Squats », « Burpees »…).</span>
+              )}
+            </div>
+          )}
         </div>
         <div className="btn-row">
           <button className="btn secondary" disabled={f.index === 0} onClick={() => move(xid, -1)}>Monter</button>

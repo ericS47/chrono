@@ -10,6 +10,8 @@ export interface TimelineFlatStep {
   /** Commentaire du bloc, sinon « Effort », « Repos » ou « Récupération ». */
   label: string;
   note?: string;
+  /** Exercice animé choisi dans le créateur. */
+  exercise?: string;
   /** Répétition de la série en cours. */
   set?: number;
   sets?: number;
@@ -20,9 +22,17 @@ export interface TimelineFlatStep {
   group?: string;
 }
 
+/** Libellés des exercices animés, pour nommer un bloc sans commentaire. */
+let exerciseLabel: (id: string) => string | undefined = () => undefined;
+export function setExerciseLabels(fn: (id: string) => string | undefined): void {
+  exerciseLabel = fn;
+}
+
 function step(s: TimelineStep): TimelineFlatStep {
   const note = s.note?.trim() || undefined;
-  return { kind: s.type === 'effort' ? 'work' : 'rest', duration: s.duration, label: note ?? (s.type === 'effort' ? 'Effort' : 'Repos'), note };
+  const exercise = s.type === 'effort' && s.exercise ? s.exercise : undefined;
+  const label = note ?? (exercise && exerciseLabel(exercise)) ?? (s.type === 'effort' ? 'Effort' : 'Repos');
+  return { kind: s.type === 'effort' ? 'work' : 'rest', duration: s.duration, label, note, ...(exercise ? { exercise } : {}) };
 }
 
 const isRest = (x: TimelineItem | undefined) => x?.type === 'rest';

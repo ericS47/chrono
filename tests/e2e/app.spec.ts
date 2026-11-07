@@ -328,3 +328,30 @@ test('animation des exercices : coupée par défaut, puis affichée pendant l’
   await page.getByRole('button', { name: /Reprendre l’effort/ }).click();
   await expect(page.getByTestId('anim-card')).toContainText('Pompes');
 });
+
+test('créateur : choisir l’exercice animé d’un effort dans la liste', async ({ page }) => {
+  // Coupée par défaut : pas de liste.
+  await page.goto('./#/creer');
+  await page.getByRole('button', { name: 'Effort', exact: true }).click();
+  await page.getByRole('button', { name: /^Effort 0:30/ }).click();
+  await expect(page.getByLabel('Commentaire')).toBeVisible();
+  await expect(page.getByLabel('Exercice animé')).toHaveCount(0);
+
+  await page.goto('./#/avatar');
+  await page.getByRole('switch', { name: /Afficher pendant la séance/ }).click();
+  await expect(page.getByRole('switch', { name: /Afficher pendant la séance/ })).toBeChecked();
+
+  // Le brouillon du créateur est gardé : on reprend le même bloc.
+  await page.goto('./#/creer');
+  await page.getByRole('button', { name: /^Effort 0:30/ }).click();
+  await page.getByLabel('Exercice animé').selectOption({ label: 'Fente' });
+  await expect(page.getByRole('img', { name: 'Animation : Fente' })).toBeVisible();
+  await page.getByRole('button', { name: 'Terminé' }).click();
+  await expect(page.getByRole('button', { name: /^Effort 0:30, Fente/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Lancer la séance' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(10_500);
+  await expect(page.locator('.ring-phase')).toHaveText('EFFORT');
+  await expect(page.getByTestId('anim-card')).toContainText('Fente');
+  await expect(page.getByRole('img', { name: 'Animation : Fente' })).toBeVisible();
+});

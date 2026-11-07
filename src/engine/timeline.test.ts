@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { TimelineItem } from '../data/types';
-import { expandTimeline, timelineDuration } from './timeline';
+import { expandTimeline, setExerciseLabels, timelineDuration } from './timeline';
 
 const e = (duration: number, note?: string): TimelineItem => ({ id: `e${duration}${note ?? ''}`, type: 'effort', duration, note });
 const r = (duration: number): TimelineItem => ({ id: `r${duration}`, type: 'rest', duration });
@@ -41,5 +41,19 @@ describe('créateur de séance : timeline', () => {
   it('ignore les durées nulles et une série d’une seule répétition n’a pas de numéro', () => {
     const flat = expandTimeline([e(0), { id: 's', type: 'series', reps: 1, between: 30, children: [e(20) as never] }]);
     expect(flat).toEqual([{ kind: 'work', duration: 20, label: 'Effort', note: undefined }]);
+  });
+});
+
+describe('créateur de séance : exercice animé choisi', () => {
+  it('garde l’exercice choisi, et le nomme quand il n’y a pas de commentaire', () => {
+    setExerciseLabels((id) => (id === 'squat' ? 'Squat' : undefined));
+    const items: TimelineItem[] = [
+      { id: 'a', type: 'effort', duration: 30, exercise: 'squat' },
+      { id: 'b', type: 'effort', duration: 30, note: '20 squats sautés', exercise: 'squat' },
+      { id: 'c', type: 'rest', duration: 15, exercise: 'squat' },
+    ];
+    const flat = expandTimeline(items);
+    expect(flat.map((x) => [x.label, x.exercise])).toEqual([['Squat', 'squat'], ['20 squats sautés', 'squat'], ['Repos', undefined]]);
+    setExerciseLabels(() => undefined);
   });
 });

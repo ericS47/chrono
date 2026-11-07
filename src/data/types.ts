@@ -33,6 +33,8 @@ export interface TimelineStep {
   type: 'effort' | 'rest';
   duration: number;
   note?: string;
+  /** Exercice animé choisi (sinon reconnu d'après le commentaire). */
+  exercise?: string;
 }
 
 /** Série : des blocs répétés. Son dernier repos sert de récupération entre deux répétitions. */

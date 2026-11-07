@@ -102,3 +102,14 @@ describe('exercices d’une phase', () => {
     expect(phaseAnims(ph({ kind: 'prep', label: 'Préparation' }), block)).toEqual([]);
   });
 });
+
+describe('exercice choisi dans le créateur', () => {
+  const base: Phase = { kind: 'work', label: 'Jambes', duration: 30, countUp: false, blockIndex: 0, mode: 'custom' };
+  it('passe avant la reconnaissance par le nom', () => {
+    expect(phaseAnims({ ...base, label: 'Pompes', exercise: 'squat' }, undefined)).toEqual([{ id: 'squat', name: 'Pompes' }]);
+    expect(phaseAnims({ ...base, exercise: 'lunge' }, undefined)).toEqual([{ id: 'lunge', name: 'Jambes' }]);
+  });
+  it('ignore un exercice inconnu', () => {
+    expect(phaseAnims({ ...base, exercise: 'nimporte' }, undefined)).toEqual([]);
+  });
+});

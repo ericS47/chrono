@@ -323,6 +323,8 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
   display: flex; flex-direction: column; gap: 16px;
 }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; }
+/* Fiche plus haute que l’écran : elle défile, sans écraser ses encadrés. */
+.sheet > * { flex-shrink: 0; }
 .sheet-head h2 { font-size: 20px; font-weight: 800; }
 
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--nav-h) + 30px); z-index: 60; background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 14px; font-weight: 700; font-size: 14px; max-width: calc(100% - 32px); }
@@ -498,6 +500,9 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .swatch { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); box-shadow: inset 0 0 0 3px var(--card); }
 .swatch[aria-checked='true'] { outline: 3px solid var(--accent); outline-offset: 2px; }
 button.row-link { width: 100%; background: none; border: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+
+.bd-ex-preview { background: var(--effort); border-radius: var(--radius); display: flex; justify-content: center; padding: 6px; }
+.bd-ex-preview .figure { height: 140px; width: auto; max-width: 100%; display: block; }
 
 /* ---------- Créateur de séance ---------- */
 

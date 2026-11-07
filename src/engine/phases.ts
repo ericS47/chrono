@@ -29,6 +29,8 @@ export interface Phase {
   roundCounter?: boolean;
   /** Tours intermédiaires (chrono simple). */
   laps?: boolean;
+  /** Exercice animé choisi dans le créateur (sinon reconnu d'après le nom). */
+  exercise?: string;
 }
 
 const DEFAULTS = {
@@ -176,6 +178,7 @@ export function buildBlockPhases(block: Block, blockIndex: number): Phase[] {
           out.push({
             ...base, kind: st.kind, label: st.label, duration: st.duration, countUp: false,
             set: st.set, sets: st.sets, round: st.round, rounds: st.rounds, detail: st.group,
+            ...(st.exercise ? { exercise: st.exercise } : {}),
           });
         }
         break;

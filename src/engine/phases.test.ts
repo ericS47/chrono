@@ -95,3 +95,18 @@ describe('buildPhases', () => {
     expect(phases[3]).toMatchObject({ set: 2, sets: 2 });
   });
 });
+
+describe('exercice animé choisi dans le créateur', () => {
+  it('passe de la timeline aux phases', () => {
+    const w = {
+      id: 'w', name: 'T', tags: [], favorite: false, createdAt: 0, updatedAt: 0,
+      blocks: [{ id: 'b', mode: 'custom' as const, exercises: [], restAfter: 0, params: { timeline: [
+        { id: 'a', type: 'effort' as const, duration: 30, note: 'Jambes', exercise: 'lunge' },
+        { id: 'r', type: 'rest' as const, duration: 10 },
+      ] } }],
+    };
+    const ph = buildPhases(w, 0).filter((p) => p.kind === 'work');
+    expect(ph[0].label).toBe('Jambes');
+    expect(ph[0].exercise).toBe('lunge');
+  });
+});

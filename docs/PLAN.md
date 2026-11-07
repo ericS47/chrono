@@ -79,7 +79,9 @@ Pendant l'effort, un avatar animé montre l'exercice à côté du chrono ; il di
 
 - L'avatar est **dessiné par l'app** (SVG, `src/anim/`), pas un GIF : il se règle (sexe, carnation, morphologie, âge, taille, cheveux, tenue) et reste 100 % local.
 - Exercices animés : squat, pompe, gainage, jumping jack, fente, burpee, mountain climber, abdos, montées de genoux. Reconnus d'après le nom de l'exercice ou de l'étape ; un AMRAP / For Time montre ses exercices à tour de rôle (8 s chacun). Exercice inconnu : pas d'animation.
-- Suite prévue : choisir l'animation à la main dans l'éditeur et le créateur ; plus d'exercices (mobilité, assis, élastique, kettlebell…) ; animation dans l'affichage agrandi ; joindre sa propre photo / GIF à un exercice.
+- Créateur de séance : dans la fiche d'un effort, sous le commentaire, une liste « Exercice animé » (visible seulement si l'animation est activée) choisit l'exercice à la main, avec un aperçu ; il passe avant la reconnaissance par le nom, et nomme le bloc s'il n'a pas de commentaire.
+- L'avatar : style « flat design » sans contour (ombres ton sur ton, cheveux fixés à la tête, chaussettes, visage simple).
+- Suite prévue : choisir le matériel (haltères, kettlebell, élastique, chaise…) avec une animation adaptée ; exercices de renforcement ; exercices sur chaise pour les seniors ; variantes (fente grand pas / petit pas, mains sur les hanches) ; liste aussi dans l'éditeur par blocs ; plus d'exercices (mobilité, assis, élastique, kettlebell…) ; animation dans l'affichage agrandi ; joindre sa propre photo / GIF à un exercice.
 - Piste à plus long terme : offres payantes par mode et deux profils (coach qui programme, pratiquant qui réalise). Un vrai partage coach → pratiquant demanderait un serveur et des comptes, contraire au « 100 % local » actuel : à décider le moment venu.
 
 ## Reste à faire / idées
