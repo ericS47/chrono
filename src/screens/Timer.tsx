@@ -177,6 +177,13 @@ export function TimerScreen() {
     setZoom(true);
   };
 
+  const block = workout.blocks[ph.blockIndex];
+  const showExercises = ph.roundCounter && block && block.exercises.some((e) => e.name.trim());
+  // Animation de l'exercice (réglage activé par défaut) : seulement pendant l'effort.
+  const anims = settings.anim.enabled && !idle && !ph.laps ? phaseAnims(ph, block) : [];
+  // Plusieurs exercices (AMRAP…) : on les montre à tour de rôle, 8 s chacun.
+  const anim = anims.length ? anims[Math.floor(el / 8000) % anims.length] : null;
+
   if (zoomed) {
     const reps = [sub, sub2].filter(Boolean).join(' · ');
     // Reste de la séance : une ligne discrète en haut, avec une fine barre de progression.
@@ -186,7 +193,7 @@ export function TimerScreen() {
       ? `Ensuite : ${nextPh.kind === 'rest' ? 'Repos' : nextPh.label}${nextPh.duration ? ` ${fmtShort(nextPh.duration)}` : ''}`
       : 'Dernière phase';
     return (
-      <div className={`timer zoom ${cls}`} role="button" tabIndex={0} aria-label="Quitter l’affichage agrandi" onClick={() => setZoom(false)}>
+      <div className={`timer zoom ${cls}${anim ? ' has-anim' : ''}`} role="button" tabIndex={0} aria-label="Quitter l’affichage agrandi" onClick={() => setZoom(false)}>
         <div className="zoom-rest" data-testid="zoom-rest">
           <div className="zoom-rest-row">
             <span className="num">{totalLeft > 0 ? `Reste ${fmtClock(totalLeft)}` : `Écoulé ${fmtClock(el / 1000)}`}</span>
@@ -204,6 +211,11 @@ export function TimerScreen() {
           {reps && <span>{reps}</span>}
         </div>
         {/* Raccourcis : sans quitter l'affichage agrandi. */}
+        {anim && (
+          <div className="zoom-anim" data-testid="zoom-anim">
+            <ExerciseFigure exercise={anim.id} avatar={settings.anim.avatar} playing={running} />
+          </div>
+        )}
         <div className="zoom-ctl" onClick={(e) => e.stopPropagation()}>
           <button aria-label="Revenir en arrière" onClick={() => S.back()}><IconPrev size={26} /></button>
           <button className="main" aria-label={running ? 'Pause' : 'Reprendre'} onClick={() => S.toggle()}>
@@ -223,12 +235,6 @@ export function TimerScreen() {
   }
 
   const upcoming = phases.slice(run.index, run.index + 3);
-  const block = workout.blocks[ph.blockIndex];
-  const showExercises = ph.roundCounter && block && block.exercises.some((e) => e.name.trim());
-  // Animation de l'exercice (réglage, coupé par défaut) : seulement pendant l'effort.
-  const anims = settings.anim.enabled && !idle && !ph.laps ? phaseAnims(ph, block) : [];
-  // Plusieurs exercices (AMRAP…) : on les montre à tour de rôle, 8 s chacun.
-  const anim = anims.length ? anims[Math.floor(el / 8000) % anims.length] : null;
 
   return (
     <div className={`timer ${cls}${anim ? ' has-anim' : ''}`}>

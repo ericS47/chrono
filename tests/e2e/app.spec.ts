@@ -307,6 +307,10 @@ test('animation des exercices : active par défaut, affichée pendant l’effort
   await page.getByRole('button', { name: 'Go' }).click();
   await expect(page.getByTestId('anim-card')).toContainText('Squats');
   await expect(page.getByRole('img', { name: 'Animation : Squat' })).toBeVisible();
+  // Aussi en plein écran (affichage agrandi).
+  await page.getByRole('button', { name: 'Agrandir le chrono' }).click();
+  await expect(page.getByTestId('zoom-anim').getByRole('img', { name: 'Animation : Squat' })).toBeVisible();
+  await page.getByTestId('zoom-value').click();
   await page.getByRole('button', { name: /Passer au repos/ }).click();
   await expect(page.getByTestId('anim-card')).toHaveCount(0);
   await page.getByRole('button', { name: /Reprendre l’effort/ }).click();

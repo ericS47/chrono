@@ -418,6 +418,11 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .zoom-phase { font-weight: 800; font-size: clamp(24px, 7vmin, 56px); letter-spacing: 0.08em; }
 .zoom-time { font-weight: 800; line-height: 0.9; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; font-size: min(46vw, 52vh); }
 .zoom-time.long { font-size: min(27vw, 40vh); }
+/* Animation de l'exercice en plein écran : sous le temps (portrait), à droite (paysage). */
+.zoom-anim { display: flex; justify-content: center; pointer-events: none; }
+.zoom-anim .figure { height: min(24vh, 62vw); width: auto; max-width: 86vw; display: block; }
+.timer.zoom.has-anim .zoom-time { font-size: min(38vw, 34vh); }
+.timer.zoom.has-anim .zoom-time.long { font-size: min(24vw, 28vh); }
 .zoom-info { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: 100%; }
 .zoom-info b { font-weight: 800; font-size: clamp(28px, 9vmin, 72px); line-height: 1.05; }
 .zoom-info span { font-weight: 700; font-size: clamp(18px, 5.5vmin, 44px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
@@ -454,6 +459,11 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
   .zoom-info b { font-size: clamp(22px, 7vmin, 48px); }
   .zoom-info span { font-size: clamp(16px, 4.5vmin, 30px); }
   .zoom-hint { display: none; }
+  .zoom-anim { position: absolute; right: var(--side-r); width: 46vw; top: 50%; transform: translateY(-55%); }
+  .zoom-anim .figure { height: min(58vh, 40vw); max-width: 44vw; }
+  .timer.zoom.has-anim { padding-right: calc(var(--side-r) + 46vw); }
+  .timer.zoom.has-anim .zoom-time { font-size: min(22vw, 36vh); }
+  .timer.zoom.has-anim .zoom-time.long { font-size: min(15vw, 28vh); }
 }
 
 .confirm { position: absolute; inset: 0; background: rgba(20, 24, 58, 0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 5; }
