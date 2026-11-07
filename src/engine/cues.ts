@@ -14,6 +14,9 @@ export interface Cue {
 
 const NUM_FR = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq'];
 
+/** Durée minimale (s) d'une étape pour avoir un bip de mi-temps. */
+export const HALFWAY_MIN = 20;
+
 /** Son joué à l'entrée dans la phase i. */
 export function entryEvent(phases: Phase[], i: number): SoundEvent | null {
   const ph = phases[i];
@@ -70,7 +73,8 @@ export function computeCues(
     const d = ph.duration;
     const end = t0 + d;
 
-    if (ph.kind === 'work' && d >= 60 && s.events.halfway.enabled && !s.silent) {
+    // Mi-temps : au milieu de chaque effort et de chaque repos d'au moins 20 s.
+    if (ph.kind !== 'prep' && d >= HALFWAY_MIN && ev('halfway')) {
       cues.push({ at: t0 + d / 2, event: 'halfway', say: s.voice ? 'Mi-temps' : undefined });
     }
     if (s.voice && s.announceRemaining && !s.silent) {

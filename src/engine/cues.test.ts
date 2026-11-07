@@ -54,4 +54,15 @@ describe('signaux programmés', () => {
     const cues = computeCues(ph, 0, 0, quiet);
     expect(Math.max(...cues.map((c) => c.at))).toBe(300);
   });
+
+  it('mi-temps au milieu des efforts et des repos d’au moins 20 s, jamais en préparation', () => {
+    const ph = buildPhases({ blocks: [{ ...defaultBlock('interval'), params: { work: 40, rest: 20, rounds: 2 } }] }, 10);
+    // prép 10 | effort 40 | repos 20 | effort 40
+    const half = computeCues(ph, 0, 0, quiet).filter((c) => c.event === 'halfway').map((c) => c.at);
+    expect(half).toEqual([30, 60, 90]);
+    const short = buildPhases({ blocks: [{ ...defaultBlock('tabata'), params: { work: 15, rest: 10, rounds: 2 } }] }, 0);
+    expect(computeCues(short, 0, 0, quiet).some((c) => c.event === 'halfway')).toBe(false);
+    const off = { ...quiet, events: { ...quiet.events, halfway: { enabled: false, sound: 'cloche' as const } } };
+    expect(computeCues(ph, 0, 0, off).some((c) => c.event === 'halfway')).toBe(false);
+  });
 });
