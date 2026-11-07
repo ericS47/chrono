@@ -299,3 +299,32 @@ test('PWA : manifeste et service worker', async ({ page, request }) => {
   expect(m.icons.length).toBeGreaterThanOrEqual(3);
   expect((await request.get('./sw.js')).ok()).toBe(true);
 });
+
+test('animation des exercices : coupée par défaut, puis affichée pendant l’effort seulement', async ({ page }) => {
+  await page.goto('./#/rapide/custom');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Go' }).click();
+  await expect(page.getByTestId('timer-value')).toBeVisible();
+  await expect(page.getByTestId('anim-card')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Arrêter' }).click();
+  await page.getByRole('button', { name: 'Abandonner sans enregistrer' }).click();
+
+  await page.goto('./#/reglages');
+  await page.getByText('Avatar et animation').click();
+  await page.getByRole('switch', { name: /Afficher pendant la séance/ }).click();
+  await expect(page.getByRole('switch', { name: /Afficher pendant la séance/ })).toBeChecked();
+  await page.getByRole('tab', { name: 'Homme' }).click();
+  await expect(page.getByRole('tab', { name: 'Homme' })).toHaveAttribute('aria-selected', 'true');
+
+  await page.goto('./#/rapide/custom');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Go' }).click();
+  await expect(page.getByTestId('anim-card')).toContainText('Squats');
+  await expect(page.getByRole('img', { name: 'Animation : Squat' })).toBeVisible();
+  await page.getByRole('button', { name: /Passer au repos/ }).click();
+  await expect(page.getByTestId('anim-card')).toHaveCount(0);
+  await page.getByRole('button', { name: /Reprendre l’effort/ }).click();
+  await expect(page.getByTestId('anim-card')).toContainText('Pompes');
+});

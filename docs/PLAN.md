@@ -73,6 +73,15 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 4. ✅ Planification (calendrier, récurrence, Aujourd'hui, rappels app ouverte)
 5. ✅ Finitions (export/import, thèmes, réglages audio fins)
 
+## Animation des exercices (branche `mode-photo`, en cours)
+
+Pendant l'effort, un avatar animé montre l'exercice à côté du chrono ; il disparaît au repos et revient à l'effort suivant, et se fige en pause. Réglage **coupé par défaut** (Réglages › Animation des exercices) : rien ne change pour qui ne l'active pas.
+
+- L'avatar est **dessiné par l'app** (SVG, `src/anim/`), pas un GIF : il se règle (sexe, carnation, morphologie, âge, taille, cheveux, tenue) et reste 100 % local.
+- Exercices animés : squat, pompe, gainage, jumping jack, fente, burpee, mountain climber, abdos, montées de genoux. Reconnus d'après le nom de l'exercice ou de l'étape ; un AMRAP / For Time montre ses exercices à tour de rôle (8 s chacun). Exercice inconnu : pas d'animation.
+- Suite prévue : choisir l'animation à la main dans l'éditeur et le créateur ; plus d'exercices (mobilité, assis, élastique, kettlebell…) ; animation dans l'affichage agrandi ; joindre sa propre photo / GIF à un exercice.
+- Piste à plus long terme : offres payantes par mode et deux profils (coach qui programme, pratiquant qui réalise). Un vrai partage coach → pratiquant demanderait un serveur et des comptes, contraire au « 100 % local » actuel : à décider le moment venu.
+
 ## Reste à faire / idées
 
 - Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.

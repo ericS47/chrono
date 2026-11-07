@@ -9,6 +9,8 @@ import { useSettings } from '../data/hooks';
 import { launchWorkout } from '../lib/launch';
 import { enterFullscreen, exitFullscreen } from '../lib/platform';
 import { Sheet } from '../ui/kit';
+import { ExerciseFigure } from '../anim/Figure';
+import { phaseAnims } from '../anim/phase';
 import {
   IconArrowRight, IconClose, IconExpand, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
@@ -223,9 +225,13 @@ export function TimerScreen() {
   const upcoming = phases.slice(run.index, run.index + 3);
   const block = workout.blocks[ph.blockIndex];
   const showExercises = ph.roundCounter && block && block.exercises.some((e) => e.name.trim());
+  // Animation de l'exercice (réglage, coupé par défaut) : seulement pendant l'effort.
+  const anims = settings.anim.enabled && !idle && !ph.laps ? phaseAnims(ph, block) : [];
+  // Plusieurs exercices (AMRAP…) : on les montre à tour de rôle, 8 s chacun.
+  const anim = anims.length ? anims[Math.floor(el / 8000) % anims.length] : null;
 
   return (
-    <div className={`timer ${cls}`}>
+    <div className={`timer ${cls}${anim ? ' has-anim' : ''}`}>
       <div className="timer-top">
         <button className="icon-btn" aria-label="Arrêter" onClick={() => (idle ? (S.discard(), go('/', true)) : setConfirm(true))}>
           <IconClose size={18} />
@@ -316,6 +322,21 @@ export function TimerScreen() {
                   <span>Tour {i + 1}</span><span className="num">{fmtClock((l - (laps[i - 1] ?? 0)) / 1000)} · {fmtClock(l / 1000)}</span>
                 </div>
               )).reverse() : <span>Touchez « Tour » pour marquer un temps intermédiaire.</span>}
+            </div>
+          ) : anim ? (
+            <div className="glass anim-card" data-testid="anim-card">
+              <ExerciseFigure exercise={anim.id} avatar={settings.anim.avatar} playing={running} />
+              <div className="anim-text">
+                {showExercises ? block.exercises.filter((e) => e.name.trim()).map((e, i) => {
+                  const name = [e.reps, e.name].filter(Boolean).join(' ');
+                  return <span key={i} className={name === anim.name ? 'on' : ''}>{name}{e.load ? ` · ${e.load}` : ''}</span>;
+                }) : (
+                  <>
+                    <b>{anim.name}</b>
+                    {nextPh && <span className="anim-next">Ensuite : {nextPh.kind === 'rest' ? 'Repos' : nextPh.label}{nextPh.duration ? ` ${fmtShort(nextPh.duration)}` : ''}</span>}
+                  </>
+                )}
+              </div>
             </div>
           ) : showExercises ? (
             <div className="glass ex-list">

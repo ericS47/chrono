@@ -5,6 +5,7 @@ import type { Settings, SoundEvent, SoundName, SoundSettings } from '../data/typ
 import { audio, SOUND_LABELS } from '../audio/audio';
 import { notificationPermission, platformInfo, requestNotifications, requestPersistentStorage, storageInfo } from '../lib/platform';
 import { Segmented, Stepper, Toggle } from '../ui/kit';
+import { go } from '../lib/router';
 
 const EVENT_LABELS: Record<SoundEvent, string> = {
   start: 'Départ',
@@ -136,6 +137,19 @@ export function SettingsScreen() {
               <option value="never">Ne jamais enregistrer</option>
             </select>
           </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2 className="section-title">Animation des exercices</h2>
+        <div className="form">
+          <button className="row row-link" onClick={() => go('/avatar')}>
+            <span className="row-text">
+              <span>Avatar et animation</span>
+              <span className="hint">{s.anim.enabled ? 'Affichée pendant l’effort' : 'Bêta · non affichée pendant les séances'}</span>
+            </span>
+            <span aria-hidden="true">›</span>
+          </button>
         </div>
       </section>
 

@@ -1,6 +1,8 @@
 // Modèle de données de Chrono (voir le plan, section « Modèle de données »).
 // Toutes les durées sont en secondes.
 
+import type { AnimSettings } from '../anim/avatar';
+
 export type Mode =
   | 'fortime'
   | 'amrap'
@@ -193,6 +195,8 @@ export interface Settings {
   saveMode: 'ask' | 'always' | 'never';
   /** Suppression auto de l'historique plus vieux que X mois (0 = jamais). */
   historyMonths: number;
+  /** Animation de l'exercice pendant l'effort et avatar (bêta). */
+  anim: AnimSettings;
 }
 
 export const MODE_LABELS: Record<Mode, string> = {

@@ -1,5 +1,6 @@
 import type { Block, Mode, Settings, SoundSettings, Workout } from './types';
 import { uid } from '../lib/format';
+import { DEFAULT_ANIM, normalizeAnim } from '../anim/avatar';
 
 export const DEFAULT_SOUND: SoundSettings = {
   master: 0.9,
@@ -31,6 +32,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'light',
   saveMode: 'ask',
   historyMonths: 0,
+  anim: DEFAULT_ANIM,
 };
 
 /** Fusionne des réglages partiels (anciens ou surchargés) avec les valeurs par défaut. */
@@ -45,6 +47,7 @@ export function normalizeSettings(s: Partial<Settings> | undefined): Settings {
     ...(s ?? {}),
     id: 'settings',
     sound: mergeSound(DEFAULT_SOUND, s?.sound),
+    anim: normalizeAnim(s?.anim),
   };
 }
 
