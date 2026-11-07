@@ -31,6 +31,8 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Relevés de jambes')).toBe('legraise');
     expect(matchExercise('Mollets')).toBe('calfraise');
     expect(matchExercise('Bird dog')).toBe('birddog');
+    expect(matchExercise('Tapping')).toBe('tapping');
+    expect(matchExercise('Tipping rapide')).toBe('tapping');
   });
   it('ne devine pas un exercice inconnu', () => {
     expect(matchExercise('Effort')).toBeNull();

@@ -7,7 +7,7 @@ import { setExerciseLabels } from '../engine/timeline';
 
 export type ExerciseId =
   | 'squat' | 'pushup' | 'plank' | 'jumpingjack' | 'lunge' | 'burpee' | 'climber' | 'situp' | 'highknees'
-  | 'kneepushup' | 'bridge' | 'superman' | 'sideplank' | 'legraise' | 'calfraise' | 'jumpsquat' | 'birddog';
+  | 'kneepushup' | 'bridge' | 'superman' | 'sideplank' | 'legraise' | 'calfraise' | 'jumpsquat' | 'birddog' | 'tapping';
 
 type Anchor = 'feet' | 'hands' | 'hip';
 
@@ -19,9 +19,9 @@ interface Frame {
   w?: number;
 }
 
-/** Catégories : membres inférieurs, membres supérieurs, tronc, abdominaux. */
-export type ExerciseGroup = 'mi' | 'ms' | 'tronc' | 'abdo';
-export const GROUP_LABELS: Record<ExerciseGroup, string> = { mi: 'MI · membres inférieurs', ms: 'MS · membres supérieurs', tronc: 'Tronc', abdo: 'Abdo' };
+/** Catégories : membres inférieurs, membres supérieurs, tronc, abdominaux, cardio. */
+export type ExerciseGroup = 'mi' | 'ms' | 'tronc' | 'abdo' | 'cardio';
+export const GROUP_LABELS: Record<ExerciseGroup, string> = { mi: 'MI · membres inférieurs', ms: 'MS · membres supérieurs', tronc: 'Tronc', abdo: 'Abdo', cardio: 'Cardio' };
 
 export interface ExerciseAnim {
   id: ExerciseId;
@@ -63,7 +63,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'jumpingjack', label: 'Jumping jack', group: 'mi', view: 'front', period: 1.3, anchor: 'hip', words: ['jumping jack', 'jumpingjack'],
+    id: 'jumpingjack', label: 'Jumping jack', group: 'cardio', view: 'front', period: 1.3, anchor: 'hip', words: ['jumping jack', 'jumpingjack'],
     frames: [
       { pose: { torso: 0, thighN: 3, shinN: 2, thighF: 3, shinF: 2, armN: 8, foreN: 10, armF: 8, foreF: 10 } },
       { pose: { torso: 0, thighN: 11, shinN: 10, thighF: 11, shinF: 10, armN: 90, foreN: 100, armF: 90, foreF: 100, lift: 7 } },
@@ -89,7 +89,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'climber', label: 'Mountain climber', group: 'abdo', view: 'side', period: 0.9, anchor: 'hands', words: ['mountain climber', 'climber', 'grimpeur'],
+    id: 'climber', label: 'Mountain climber', group: 'cardio', view: 'side', period: 0.9, anchor: 'hands', words: ['mountain climber', 'climber', 'grimpeur'],
     frames: [
       { pose: { ...HIGH_PLANK, thighN: 55, shinN: -95 } },
       { pose: { ...HIGH_PLANK, thighF: 55, shinF: -95 } },
@@ -175,6 +175,14 @@ export const EXERCISES: ExerciseAnim[] = [
       { pose: { torso: 72, head: -14, thighN: 0, shinN: -90, thighF: -72, shinF: -72, armN: 108, foreN: 108, armF: 2, foreF: 2 }, w: 0.8 },
       { pose: { torso: 72, head: -10, thighN: 0, shinN: -90, thighF: 0, shinF: -90, armN: 0, foreN: 0, armF: 2, foreF: 2 } },
       { pose: { torso: 72, head: -14, thighN: -72, shinN: -72, thighF: 0, shinF: -90, armN: 0, foreN: 0, armF: 108, foreF: 108 }, w: 0.8 },
+    ],
+  },
+  {
+    id: 'tapping', label: 'Tapping', group: 'cardio', view: 'side', period: 0.4, anchor: 'hip',
+    words: ['tapping', 'tipping', 'pietinement', 'fast feet', 'appuis rapides', 'pas rapides'],
+    frames: [
+      { pose: { torso: 16, head: -12, thighN: 42, shinN: -22, thighF: 26, shinF: -18, armN: 25, foreN: 105, armF: -15, foreF: 75, lift: 1 } },
+      { pose: { torso: 16, head: -12, thighN: 26, shinN: -18, thighF: 42, shinF: -22, armN: -15, foreN: 75, armF: 25, foreF: 105, lift: 1 } },
     ],
   },
 ];
