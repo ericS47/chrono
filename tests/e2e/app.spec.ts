@@ -336,6 +336,8 @@ test('créateur : choisir l’exercice animé d’un effort dans la liste', asyn
   await page.getByRole('button', { name: /^Effort 0:30/ }).click();
   await expect(page.getByLabel('Commentaire')).toBeVisible();
   await expect(page.getByLabel('Exercice animé')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Terminé' }).click();
+  await expect(page.locator('.bd-thumb')).toHaveCount(0);
 
   await page.goto('./#/avatar');
   await page.getByRole('switch', { name: /Afficher pendant la séance/ }).click();
@@ -348,6 +350,8 @@ test('créateur : choisir l’exercice animé d’un effort dans la liste', asyn
   await expect(page.getByRole('img', { name: 'Animation : Fente' })).toBeVisible();
   await page.getByRole('button', { name: 'Terminé' }).click();
   await expect(page.getByRole('button', { name: /^Effort 0:30, Fente/ })).toBeVisible();
+  // Miniature de l'exercice sur le bloc.
+  await expect(page.locator('.bd-blk .bd-thumb svg')).toHaveCount(1);
   await page.getByRole('button', { name: 'Lancer la séance' }).click();
   await page.getByRole('button', { name: 'Démarrer' }).click();
   await page.clock.runFor(10_500);

@@ -13,7 +13,7 @@ import { back, go } from '../lib/router';
 import { DurationField, Sheet, Stepper, TopBar } from '../ui/kit';
 import { IconPlay } from '../ui/icons';
 import { EXERCISES, EXERCISE_BY_ID, isExerciseId } from '../anim/exercises';
-import { ExerciseFigure } from '../anim/Figure';
+import { ExerciseFigure, FigureFrame } from '../anim/Figure';
 
 const DRAFT_KEY = 'chrono.createur.brouillon';
 const DEFAULT_DUR = { effort: 30, rest: 15 };
@@ -456,6 +456,12 @@ export function Builder({ id }: { id?: string }) {
       aria-label={`${LABEL[b.type]} ${fmtClock(b.duration)}${b.note ? `, ${b.note}` : isExerciseId(b.exercise) ? `, ${EXERCISE_BY_ID[b.exercise].label}` : ''}`}
     >
       {selecting && top && <span className="bd-check" aria-hidden="true">{picked.includes(b.id) ? '✓' : ''}</span>}
+      {/* Miniature de l'exercice animé choisi : image fixe à mi-mouvement (position clé). */}
+      {settings.anim.enabled && b.type === 'effort' && isExerciseId(b.exercise) && (
+        <span className="bd-thumb" aria-hidden="true">
+          <FigureFrame exercise={b.exercise} avatar={settings.anim.avatar} sec={EXERCISE_BY_ID[b.exercise].period / 2} />
+        </span>
+      )}
       <span className="bd-main">
         <span className="bd-kind">{LABEL[b.type]}</span>
         {(b.note || isExerciseId(b.exercise)) && <span className="bd-note">{b.note || (isExerciseId(b.exercise) ? EXERCISE_BY_ID[b.exercise].label : '')}</span>}
