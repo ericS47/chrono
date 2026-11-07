@@ -33,6 +33,10 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Bird dog')).toBe('birddog');
     expect(matchExercise('Tapping')).toBe('tapping');
     expect(matchExercise('Talons-fesses')).toBe('buttkicks');
+    expect(matchExercise('Kettlebell swing')).toBe('kbswing');
+    expect(matchExercise('Goblet squat')).toBe('kbgoblet');
+    expect(matchExercise('Curl biceps')).toBe('bandcurl');
+    expect(matchExercise('Élévations latérales')).toBe('bandraise');
     expect(matchExercise('Pas chassé D')).toBe('shuffleright');
     expect(matchExercise('Pas chassés droite')).toBe('shuffleright');
     expect(matchExercise('Pas chassé G')).toBe('shuffleleft');

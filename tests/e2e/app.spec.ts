@@ -340,6 +340,12 @@ test('créateur : choisir l’exercice animé d’un effort dans la liste', asyn
   await page.getByRole('button', { name: 'Effort', exact: true }).click();
   await page.getByRole('button', { name: /^Effort 0:30/ }).click();
   await page.getByRole('button', { name: 'Exercice animé' }).click();
+  // Sans matériel par défaut ; le filtre kettlebell montre les exercices avec kettlebell.
+  await expect(page.getByRole('radio', { name: 'Sans matériel' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radio', { name: 'Kettlebell' }).click();
+  await expect(page.getByRole('option', { name: 'Goblet squat' })).toBeVisible();
+  await expect(page.getByRole('option', { name: 'Fente' })).toHaveCount(0);
+  await page.getByRole('radio', { name: 'Sans matériel' }).click();
   await page.getByRole('option', { name: 'Fente' }).click();
   await expect(page.getByRole('img', { name: 'Animation : Fente' })).toBeVisible();
   await page.getByRole('button', { name: 'Terminé' }).click();

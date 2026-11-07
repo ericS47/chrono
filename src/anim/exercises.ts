@@ -8,7 +8,8 @@ import { setExerciseLabels } from '../engine/timeline';
 export type ExerciseId =
   | 'squat' | 'pushup' | 'plank' | 'jumpingjack' | 'lunge' | 'burpee' | 'climber' | 'situp' | 'highknees'
   | 'kneepushup' | 'bridge' | 'superman' | 'sideplank' | 'legraise' | 'calfraise' | 'jumpsquat' | 'birddog' | 'tapping'
-  | 'buttkicks' | 'shuffleright' | 'shuffleleft' | 'shufflealt';
+  | 'buttkicks' | 'shuffleright' | 'shuffleleft' | 'shufflealt'
+  | 'kbswing' | 'kbgoblet' | 'bandcurl' | 'bandraise';
 
 type Anchor = 'feet' | 'hands' | 'hip';
 
@@ -37,7 +38,14 @@ export interface ExerciseAnim {
   frames: Frame[];
   /** Mots reconnus dans le nom de l'exercice (sans accents, en minuscules). */
   words: string[];
+  /** Matériel (sans matériel par défaut), dessiné avec l'avatar. */
+  equipment?: Equipment;
 }
+
+/** Matériel : sans matériel, kettlebell, élastique. */
+export type Equipment = 'none' | 'kettlebell' | 'band';
+export const EQUIPMENT_LABELS: Record<Equipment, string> = { none: 'Sans matériel', kettlebell: 'Kettlebell', band: 'Élastique' };
+export const equipmentOf = (e: ExerciseAnim): Equipment => e.equipment ?? 'none';
 
 const STAND: Pose = { torso: 0, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 8, foreN: 14, armF: -5, foreF: 3 };
 const HIGH_PLANK: Pose = { torso: 68, head: -6, thighN: -68, shinN: -68, thighF: -68, shinF: -68, armN: 0, foreN: 0, armF: 3, foreF: 3 };
@@ -244,6 +252,38 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'shufflealt', label: 'Pas chassé alterné', group: 'cardio', view: 'front', period: 4.2, anchor: 'hip',
     words: ['pas chasse alterne', 'pas chasse', 'chasse alterne', 'pas chasses', 'shuffle'],
     frames: shuffleAlt(),
+  },
+  {
+    id: 'kbswing', label: 'Kettlebell swing', group: 'mi', view: 'side', period: 1.7, anchor: 'feet', equipment: 'kettlebell',
+    words: ['kettlebell swing', 'swing kettlebell', 'swing', 'kb swing'],
+    frames: [
+      { pose: { torso: 68, head: -30, thighN: 28, shinN: -12, thighF: 26, shinF: -12, armN: -18, foreN: -22, armF: -16, foreF: -20 }, w: 0.8 },
+      { pose: { torso: -2, head: 0, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 92, foreN: 92, armF: 90, foreF: 90 } },
+    ],
+  },
+  {
+    id: 'kbgoblet', label: 'Goblet squat', group: 'mi', view: 'side', period: 2.6, anchor: 'feet', equipment: 'kettlebell',
+    words: ['goblet squat', 'squat goblet', 'goblet', 'squat kettlebell', 'squat avec kettlebell'],
+    frames: [
+      { pose: { torso: 2, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 22, foreN: 160, armF: 20, foreF: 158 } },
+      { pose: { torso: 28, head: -14, thighN: 98, shinN: -30, thighF: 95, shinF: -32, armN: 40, foreN: 172, armF: 38, foreF: 170 } },
+    ],
+  },
+  {
+    id: 'bandcurl', label: 'Curl biceps (élastique)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet', equipment: 'band',
+    words: ['curl biceps', 'curl', 'flexion du coude', 'biceps'],
+    frames: [
+      { pose: { ...STAND, armN: 4, foreN: 12, armF: 2, foreF: 10 } },
+      { pose: { ...STAND, armN: 8, foreN: 150, armF: 6, foreF: 148 } },
+    ],
+  },
+  {
+    id: 'bandraise', label: 'Élévations latérales (élastique)', group: 'ms', view: 'front', period: 2.4, anchor: 'hip', equipment: 'band',
+    words: ['elevation laterale', 'elevations laterale', 'lateral raise', 'abduction d epaule', 'abduction epaule'],
+    frames: [
+      { pose: { torso: 0, thighN: 7, shinN: 6, thighF: 7, shinF: 6, armN: 10, foreN: 12, armF: 10, foreF: 12 } },
+      { pose: { torso: 0, thighN: 7, shinN: 6, thighF: 7, shinF: 6, armN: 86, foreN: 90, armF: 86, foreF: 90 } },
+    ],
   },
 ];
 
