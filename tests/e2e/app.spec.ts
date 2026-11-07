@@ -388,3 +388,19 @@ test('chrono : mini-fenêtre préparée dès le départ, pour s’ouvrir seule e
   await page.getByRole('button', { name: 'Abandonner sans enregistrer' }).click();
   await expect(page.locator('video[data-pip]')).toHaveCount(0);
 });
+
+test('chrono : un échec d’ouverture de la mini-fenêtre est expliqué', async ({ page }) => {
+  // Le téléphone refuse l'image dans l'image.
+  await page.addInitScript(() => {
+    HTMLVideoElement.prototype.requestPictureInPicture = function () {
+      return Promise.reject(new DOMException('refus', 'NotAllowedError'));
+    };
+  });
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(10_500);
+  await page.getByRole('button', { name: 'Mini-fenêtre' }).click();
+  await expect(page.getByRole('status')).toContainText('Mini-fenêtre impossible');
+  await expect(page.getByRole('status')).toContainText('image dans l’image');
+});

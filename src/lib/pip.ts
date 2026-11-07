@@ -90,7 +90,7 @@ async function ensureVideo(): Promise<HTMLVideoElement> {
     v.playsInline = true;
     v.setAttribute('aria-hidden', 'true');
     v.dataset.pip = 'chrono';
-    Object.assign(v.style, { position: 'fixed', width: '1px', height: '1px', opacity: '0', pointerEvents: 'none', left: '0', top: '0' });
+    Object.assign(v.style, { position: 'fixed', width: '160px', height: '100px', opacity: '0.01', pointerEvents: 'none', right: '0', bottom: '0', zIndex: '-1' });
     v.srcObject = canvas.captureStream(10);
     v.addEventListener('leavepictureinpicture', onLeave);
     document.body.appendChild(v);
@@ -108,27 +108,44 @@ export function armPip(): void {
   void ensureVideo().catch(() => undefined);
 }
 
-/** Ouvre la mini-fenêtre. */
-export async function openPip(): Promise<boolean> {
-  if (!pipSupported()) return false;
-  if (pipOpen()) return true;
+/** Raison d'un échec, en clair (affichée à l'utilisateur). */
+function reason(e: unknown): string {
+  const name = (e as { name?: string })?.name ?? '';
+  const msg = (e as { message?: string })?.message ?? String(e);
+  if (name === 'NotAllowedError') return 'refusée par le téléphone : autorisez l’image dans l’image pour Chrome (Paramètres › Applications › Chrome).';
+  if (name === 'NotSupportedError') return 'non prise en charge par ce navigateur.';
+  if (name === 'InvalidStateError') return 'la vidéo du chrono n’était pas prête, réessayez dans une seconde.';
+  return `${name ? `${name} : ` : ''}${msg}`;
+}
+
+/**
+ * Ouvre la mini-fenêtre. Renvoie null si c'est bon, sinon la raison de l'échec.
+ * La demande part tout de suite (pendant l'appui) : le téléphone refuse une
+ * demande faite après une attente, qu'il ne relie plus au geste de l'utilisateur.
+ */
+export async function openPip(): Promise<string | null> {
+  if (!pipSupported()) return 'non prise en charge par ce navigateur.';
+  if (pipOpen()) return null;
   try {
-    const v = await ensureVideo();
-    await v.requestPictureInPicture();
+    let v = video;
+    if (!v || v.readyState === 0) v = await ensureVideo();
+    const req = v.requestPictureInPicture();
+    if (v.paused) void v.play().catch(() => undefined);
+    await req;
     setPip(true);
     // Boutons pause / suivant de la mini-fenêtre.
     S.refreshMedia();
-    return true;
-  } catch {
-    return false;
+    return null;
+  } catch (e) {
+    return reason(e);
   }
 }
 
-/** Bouton du chrono : ouvre la mini-fenêtre, ou la ferme si elle est ouverte. */
-export async function togglePip(): Promise<boolean> {
+/** Bouton du chrono : ouvre la mini-fenêtre, ou la ferme si elle est ouverte. Renvoie la raison d'un échec. */
+export async function togglePip(): Promise<string | null> {
   if (pipOpen()) {
     await document.exitPictureInPicture().catch(() => undefined);
-    return false;
+    return null;
   }
   return openPip();
 }
