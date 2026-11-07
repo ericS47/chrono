@@ -73,11 +73,9 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 4. ✅ Planification (calendrier, récurrence, Aujourd'hui, rappels app ouverte)
 5. ✅ Finitions (export/import, thèmes, réglages audio fins)
 
-## Mini-fenêtre (branche `mini-fenetre`, en cours)
-
-Bouton « Mini-fenêtre » en haut du chrono (pendant la séance) : le chrono reste affiché en petit par-dessus les autres apps, comme une vidéo YouTube, et la séance continue (temps et sons). La mini-fenêtre montre la phase, le temps, l'étape suivante, le tour et une barre d'avancement ; ses boutons pause / suivant / précédent pilotent la séance. Le navigateur ne met en mini-fenêtre qu'une vidéo : le chrono est dessiné dans un canevas filmé en direct (`src/lib/pip.ts`, contenu calculé et testé dans `src/lib/pipView.ts`). Ouverture automatique en quittant l'app : la vidéo du chrono est préparée dès le départ de la séance et l'action « enterpictureinpicture » des contrôles média est déclarée ; Chrome l'utilise quand il le permet (ordinateur depuis Chrome 134 ; Android non garanti), de préférence avec « Son en arrière-plan » activé (une piste audio joue). Sinon, bouton « Mini-fenêtre ».
-
 ## Reste à faire / idées
+
+- Mini-fenêtre (image dans l'image, comme YouTube) : essayée puis retirée (nov. 2026). Safari sur iPhone refuse de mettre en mini-fenêtre une vidéo générée en direct (« non pris en charge ») ; seule une app native le permettrait. Alternative possible sur iPhone : la séance sur l'écran verrouillé / la Dynamic Island (avec « Son en arrière-plan »), avec barre de temps de la phase.
 
 - Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.
 

@@ -9,9 +9,8 @@ import { useSettings } from '../data/hooks';
 import { launchWorkout } from '../lib/launch';
 import { enterFullscreen, exitFullscreen } from '../lib/platform';
 import { Sheet } from '../ui/kit';
-import { armPip, closePip, openPip, pipSupported, togglePip } from '../lib/pip';
 import {
-  IconArrowRight, IconClose, IconExpand, IconDoor, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
+  IconArrowRight, IconClose, IconExpand, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
 
 const R = 138;
@@ -109,39 +108,7 @@ export function TimerScreen() {
   const [confirm, setConfirm] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [adding, setAdding] = useState(false);
-  /** Raison d'un échec d'ouverture de la mini-fenêtre (message temporaire). */
-  const [pipError, setPipError] = useState<string | null>(null);
-  useEffect(() => {
-    if (!pipError) return;
-    const t = setTimeout(() => setPipError(null), 6000);
-    return () => clearTimeout(t);
-  }, [pipError]);
   const zoomed = zoom && !!session && session.run.status !== 'idle' && session.run.status !== 'finished';
-
-  // Mini-fenêtre : fermée en quittant l'écran du chrono (fin, abandon).
-  useEffect(() => () => closePip(), []);
-
-  // Mini-fenêtre automatique : préparée dès le départ de la séance, Chrome peut l'ouvrir
-  // tout seul quand on quitte l'app (si le navigateur et le téléphone le permettent).
-  const live = !!session && (session.run.status === 'running' || session.run.status === 'paused');
-  useEffect(() => {
-    if (!live || !pipSupported()) return;
-    armPip();
-    if (!('mediaSession' in navigator)) return;
-    const ms = navigator.mediaSession as MediaSession & { setActionHandler(a: string, h: (() => void) | null): void };
-    try {
-      ms.setActionHandler('enterpictureinpicture', () => void openPip());
-    } catch {
-      return;
-    }
-    return () => {
-      try {
-        ms.setActionHandler('enterpictureinpicture', null);
-      } catch {
-        /* non supporté */
-      }
-    };
-  }, [live]);
 
   // On quitte le plein écran du téléphone en quittant le chrono ou l'affichage agrandi.
   useEffect(() => {
@@ -218,13 +185,7 @@ export function TimerScreen() {
       : 'Dernière phase';
     return (
       <div className={`timer zoom ${cls}`} role="button" tabIndex={0} aria-label="Quitter l’affichage agrandi" onClick={() => setZoom(false)}>
-        {/* Sortir : retour à l'écran d'accueil du téléphone, le chrono reste en mini-fenêtre. */}
-        {pipSupported() && (
-          <button className="zoom-door" aria-label="Mini-fenêtre" title="Sortir : le chrono reste en mini-fenêtre" onClick={(e) => { e.stopPropagation(); void togglePip().then(setPipError); }}>
-            <IconDoor size={20} />
-          </button>
-        )}
-        <div className={`zoom-rest${pipSupported() ? ' with-door' : ''}`} data-testid="zoom-rest">
+        <div className="zoom-rest" data-testid="zoom-rest">
           <div className="zoom-rest-row">
             <span className="num">{totalLeft > 0 ? `Reste ${fmtClock(totalLeft)}` : `Écoulé ${fmtClock(el / 1000)}`}</span>
             <span className="zoom-next">{nextText}</span>
@@ -255,7 +216,6 @@ export function TimerScreen() {
           </div>
         )}
         <span className="zoom-hint">Touchez l’écran pour revenir</span>
-        {pipError && <div className="toast" role="status" onClick={(e) => e.stopPropagation()}>Mini-fenêtre impossible : {pipError}</div>}
       </div>
     );
   }
@@ -283,12 +243,6 @@ export function TimerScreen() {
           <button className="icon-btn" aria-label={session.muted ? 'Réactiver le son' : 'Couper le son'} onClick={() => S.setMuted(!session.muted)}>
             {session.muted ? <IconMute size={18} /> : <IconSound size={18} />}
           </button>
-          {/* Sortir : le chrono reste en mini-fenêtre par-dessus les autres apps, la séance continue. */}
-          {!idle && pipSupported() && (
-            <button className="icon-btn quiet" aria-label="Mini-fenêtre" title="Sortir : le chrono reste en mini-fenêtre" onClick={() => void togglePip().then(setPipError)}>
-              <IconDoor size={18} />
-            </button>
-          )}
         </div>
       </div>
 
@@ -411,7 +365,6 @@ export function TimerScreen() {
         <span style={{ position: 'absolute', top: 'calc(74px + env(safe-area-inset-top))', left: 0, right: 0, textAlign: 'center', fontWeight: 800 }}>EN PAUSE</span>
       )}
 
-      {pipError && <div className="toast" role="status" onClick={(e) => e.stopPropagation()}>Mini-fenêtre impossible : {pipError}</div>}
       {confirm && (
         <div className="confirm" onClick={() => setConfirm(false)}>
           <div className="card" role="dialog" aria-label="Arrêter la séance" onClick={(e) => e.stopPropagation()}>
