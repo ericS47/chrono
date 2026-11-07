@@ -371,10 +371,22 @@ export function Builder({ id }: { id?: string }) {
         f.list.splice(j, 0, moved);
       });
     };
+    // iPhone (Safari) : sans cela, le premier mouvement du doigt fait défiler la page et
+    // interrompt le glisser. On bloque le défilement dès qu'on touche la poignée.
+    const onTouchStart = (e: TouchEvent) => {
+      if ((e.target as HTMLElement | null)?.closest?.('.bd-grip')) e.preventDefault();
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (drag.current) e.preventDefault();
+    };
+    document.addEventListener('touchstart', onTouchStart, { passive: false });
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
     document.addEventListener('pointermove', onMove, { passive: false });
     document.addEventListener('pointerup', onUp);
     document.addEventListener('pointercancel', onUp);
     return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchmove', onTouchMove);
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
       document.removeEventListener('pointercancel', onUp);
@@ -652,6 +664,10 @@ function BuilderSheet({
       <Sheet title={title} onClose={close}>
         <button className="btn block" onClick={() => { copy(xid); close(); }}>Copier</button>
         <button className="btn secondary block" onClick={() => open({ kind: it.type === 'series' ? 'series' : it.type === 'group' ? 'group' : 'step', id: xid })}>Régler</button>
+        <div className="btn-row">
+          <button className="btn secondary" disabled={f.index === 0} onClick={() => move(xid, -1)}>Monter</button>
+          <button className="btn secondary" disabled={f.index === f.list.length - 1} onClick={() => move(xid, 1)}>Descendre</button>
+        </div>
         <button className="btn danger block" onClick={() => { remove(xid); close(); }}>Supprimer</button>
       </Sheet>
     );

@@ -401,3 +401,32 @@ test('créateur : copier un effort l’ajoute à la fin de la séance', async ({
   const labels = await page.locator('.bd-blk[data-node]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
   expect(labels).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30, Squats']);
 });
+
+test('créateur : déplacer un bloc avec la poignée, ou avec Monter / Descendre', async ({ page }) => {
+  await page.goto('./#/creer');
+  await page.getByRole('button', { name: 'Effort', exact: true }).click();
+  await page.getByRole('button', { name: 'Repos', exact: true }).click();
+  await page.getByRole('button', { name: 'Effort', exact: true }).click();
+  await page.getByRole('button', { name: /^Effort 0:30/ }).first().click();
+  await page.getByLabel('Commentaire').fill('Squats');
+  await page.getByRole('button', { name: 'Terminé' }).click();
+  const labels = () => page.locator('.bd-blk[data-node]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+  expect(await labels()).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30']);
+  // Poignée : le repos glissé tout en bas.
+  const grip = await page.locator('.bd-blk.rest .bd-grip').boundingBox();
+  const last = await page.locator('.bd-blk[data-node]').last().boundingBox();
+  await page.mouse.move(grip!.x + grip!.width / 2, grip!.y + grip!.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(grip!.x + grip!.width / 2, grip!.y + (last!.y + last!.height * 0.8 - grip!.y) * (i / 8));
+  await page.mouse.up();
+  await expect.poll(labels).toEqual(['Effort 0:30, Squats', 'Effort 0:30', 'Repos 0:15']);
+  // Appui long : Monter.
+  const rest = page.getByRole('button', { name: /^Repos 0:15/ });
+  const r = await rest.boundingBox();
+  await page.mouse.move(r!.x + 30, r!.y + r!.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(700);
+  await page.mouse.up();
+  await page.getByRole('dialog').getByRole('button', { name: 'Monter' }).click();
+  await expect.poll(labels).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30']);
+});
