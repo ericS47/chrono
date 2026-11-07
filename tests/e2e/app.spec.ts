@@ -380,3 +380,14 @@ test('créateur : copier un bloc de travail l’ajoute à la fin de la séance',
     els.filter((e) => !e.parentElement?.closest('[data-node]')).map((e) => (e.classList.contains('bd-group') ? 'bloc' : e.textContent?.includes('Repos') ? 'repos' : 'autre')));
   expect(order.slice(-3)).toEqual(['bloc', 'repos', 'bloc']);
 });
+
+test('créateur : copier un effort l’ajoute à la fin de la séance', async ({ page }) => {
+  await page.goto('./#/creer');
+  await page.getByRole('button', { name: 'Effort', exact: true }).click();
+  await page.getByRole('button', { name: 'Repos', exact: true }).click();
+  await page.getByRole('button', { name: /^Effort 0:30/ }).click();
+  await page.getByLabel('Commentaire').fill('Squats');
+  await page.getByRole('button', { name: 'Copier à la fin' }).click();
+  const labels = await page.locator('.bd-blk[data-node]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+  expect(labels).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30, Squats']);
+});

@@ -8,7 +8,11 @@ import pkg from './package.json';
 
 export default defineConfig({
   base: './',
-  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    // Date de la version, affichée dans les réglages pour vérifier qu'une mise à jour est arrivée.
+    __APP_BUILD__: JSON.stringify(new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })),
+  },
   plugins: [
     react(),
     VitePWA({

@@ -213,7 +213,7 @@ export function SettingsScreen() {
         <p className="hint" style={{ margin: 0 }}>Tout reste sur ce téléphone. Exporte une sauvegarde de temps en temps, et avant de changer de téléphone.</p>
       </section>
 
-      <p className="hint" style={{ margin: 0, textAlign: 'center' }}>Chrono {__APP_VERSION__} · 100 % local, sans compte</p>
+      <p className="hint" style={{ margin: 0, textAlign: 'center' }}>Chrono {__APP_VERSION__} du {__APP_BUILD__} · 100 % local, sans compte</p>
       <p className="hint" style={{ margin: 0, textAlign: 'center' }} data-testid="platform-info">{platformInfo()}</p>
       {msg && <div className="toast" role="status">{msg}</div>}
     </main>
