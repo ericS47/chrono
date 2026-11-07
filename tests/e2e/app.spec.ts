@@ -314,7 +314,7 @@ test('créateur : copier un bloc de travail l’ajoute à la fin de la séance',
   await expect(page.locator('.bd-group')).toHaveCount(1);
   // Copier le bloc de travail : la copie va tout en bas, après le repos.
   await page.locator('.bd-group-head').first().click();
-  await page.getByRole('button', { name: 'Copier à la fin' }).click();
+  await page.getByRole('button', { name: 'Copier', exact: true }).click();
   await expect(page.locator('.bd-group')).toHaveCount(2);
   const order = await page.locator('[data-node]').evaluateAll((els) =>
     els.filter((e) => !e.parentElement?.closest('[data-node]')).map((e) => (e.classList.contains('bd-group') ? 'bloc' : e.textContent?.includes('Repos') ? 'repos' : 'autre')));
@@ -327,7 +327,7 @@ test('créateur : copier un effort l’ajoute à la fin de la séance', async ({
   await page.getByRole('button', { name: 'Repos', exact: true }).click();
   await page.getByRole('button', { name: /^Effort 0:30/ }).click();
   await page.getByLabel('Commentaire').fill('Squats');
-  await page.getByRole('button', { name: 'Copier à la fin' }).click();
+  await page.getByRole('button', { name: 'Copier', exact: true }).click();
   const labels = await page.locator('.bd-blk[data-node]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
   expect(labels).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30, Squats']);
 });

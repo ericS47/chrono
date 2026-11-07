@@ -667,7 +667,7 @@ function BuilderSheet({
           <button className="btn secondary" disabled={f.index === f.list.length - 1} onClick={() => move(xid, 1)}>Descendre</button>
         </div>
         <div className="btn-row">
-          <button className="btn secondary" onClick={() => { copy(xid); close(); }}>{f.parent ? `Copier à la fin ${f.parent.type === 'series' ? 'de la série' : 'du bloc'}` : 'Copier à la fin'}</button>
+          <button className="btn secondary" onClick={() => { copy(xid); close(); }}>Copier</button>
           <button className="btn danger" onClick={() => { remove(xid); close(); }}>Supprimer</button>
         </div>
         <button className="btn block" onClick={close}>Terminé</button>
@@ -715,7 +715,7 @@ function BuilderSheet({
       </div>
       <p className="hint">Durée : <b>{fmtClock(timelineDuration([c]))}</b>.</p>
       <div className="btn-row">
-        <button className="btn secondary" onClick={() => { copy(xid); close(); }}>{f.parent ? 'Copier à la fin du bloc' : 'Copier à la fin'}</button>
+        <button className="btn secondary" onClick={() => { copy(xid); close(); }}>Copier</button>
         <button className="btn secondary" onClick={() => { unwrap(xid); close(); }}>{isSeries ? 'Défaire la série' : 'Défaire le bloc'}</button>
       </div>
       <button className="btn danger block" onClick={() => { remove(xid); close(); }}>Supprimer</button>
