@@ -648,7 +648,7 @@ function BuilderSheet({
     const title = it.type === 'series' ? `Série × ${it.reps}` : it.type === 'group' ? it.name || 'Bloc de travail' : `${LABEL[it.type]} ${fmtClock(it.duration)}`;
     return (
       <Sheet title={title} onClose={close}>
-        <button className="btn block" onClick={() => { copy(xid); close(); }}>{f.parent ? `Copier (ajouté à la fin ${f.parent.type === 'series' ? 'de la série' : 'du bloc'})` : 'Copier (ajouté à la fin)'}</button>
+        <button className="btn block" onClick={() => { copy(xid); close(); }}>Copier</button>
         <button className="btn secondary block" onClick={() => open({ kind: it.type === 'series' ? 'series' : it.type === 'group' ? 'group' : 'step', id: xid })}>Régler</button>
         <button className="btn danger block" onClick={() => { remove(xid); close(); }}>Supprimer</button>
       </Sheet>
