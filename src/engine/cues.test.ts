@@ -65,4 +65,13 @@ describe('signaux programmés', () => {
     const off = { ...quiet, events: { ...quiet.events, halfway: { enabled: false, sound: 'cloche' as const } } };
     expect(computeCues(ph, 0, 0, off).some((c) => c.event === 'halfway')).toBe(false);
   });
+
+  it('créateur : « On change » quand un effort suit directement un autre effort', () => {
+    const ph = buildPhases({ blocks: [{ ...defaultBlock('custom'), params: { timeline: [
+      { id: 'a', type: 'effort', duration: 30 }, { id: 'b', type: 'effort', duration: 30, note: 'Squats' },
+      { id: 'c', type: 'rest', duration: 15 }, { id: 'd', type: 'effort', duration: 30 },
+    ] } }] }, 10);
+    const says = computeCues(ph, 0, 0, DEFAULT_SOUND, true).filter((c) => c.say && !/^\d|secondes|un$|deux$|trois$/.test(c.say)).map((c) => c.say);
+    expect(says).toEqual(['Préparation', 'Go', 'Mi-temps', 'On change. Squats', 'Mi-temps', 'Repos', 'Go', 'Mi-temps', 'Séance terminée']);
+  });
 });

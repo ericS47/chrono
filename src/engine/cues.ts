@@ -35,8 +35,13 @@ export function entrySpeech(phases: Phase[], i: number, s: SoundSettings): strin
   if (s.announcePhase) {
     if (ph.kind === 'prep') parts.push('Préparation');
     else if (ph.kind === 'rest') parts.push(ph.label === 'Transition' ? 'Repos' : ph.label);
-    else if (ph.label === 'Effort' || ph.label === ph.mode?.toUpperCase()) parts.push('Go');
-    else parts.push(ph.label);
+    else {
+      // Créateur de séance : un effort qui suit directement un autre effort → « On change ».
+      const chained = ph.mode === 'custom' && phases[i - 1]?.kind === 'work';
+      if (chained) parts.push('On change');
+      if (ph.label !== 'Effort' && ph.label !== ph.mode?.toUpperCase()) parts.push(ph.label);
+      else if (!chained) parts.push('Go');
+    }
   }
   if (s.announceRound && ph.kind === 'work') {
     if (ph.rounds && ph.rounds > 1 && ph.round) parts.push(`Tour ${ph.round} sur ${ph.rounds}`);
