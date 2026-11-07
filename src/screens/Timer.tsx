@@ -9,7 +9,7 @@ import { useSettings } from '../data/hooks';
 import { launchWorkout } from '../lib/launch';
 import { enterFullscreen, exitFullscreen } from '../lib/platform';
 import { Sheet } from '../ui/kit';
-import { closePip, pipSupported, togglePip } from '../lib/pip';
+import { armPip, closePip, openPip, pipSupported, togglePip } from '../lib/pip';
 import {
   IconArrowRight, IconClose, IconExpand, IconPip, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
@@ -114,13 +114,16 @@ export function TimerScreen() {
   // Mini-fenêtre : fermée en quittant l'écran du chrono (fin, abandon).
   useEffect(() => () => closePip(), []);
 
-  // Chrome peut ouvrir la mini-fenêtre tout seul quand on quitte l'app (si le téléphone le permet).
+  // Mini-fenêtre automatique : préparée dès le départ de la séance, Chrome peut l'ouvrir
+  // tout seul quand on quitte l'app (si le navigateur et le téléphone le permettent).
   const live = !!session && (session.run.status === 'running' || session.run.status === 'paused');
   useEffect(() => {
-    if (!live || !pipSupported() || !('mediaSession' in navigator)) return;
+    if (!live || !pipSupported()) return;
+    armPip();
+    if (!('mediaSession' in navigator)) return;
     const ms = navigator.mediaSession as MediaSession & { setActionHandler(a: string, h: (() => void) | null): void };
     try {
-      ms.setActionHandler('enterpictureinpicture', () => void togglePip());
+      ms.setActionHandler('enterpictureinpicture', () => void openPip());
     } catch {
       return;
     }

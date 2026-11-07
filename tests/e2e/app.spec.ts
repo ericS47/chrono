@@ -347,3 +347,35 @@ test('créateur : copier un effort l’ajoute à la fin de la séance', async ({
   const labels = await page.locator('.bd-blk[data-node]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
   expect(labels).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30, Squats']);
 });
+
+test('chrono : mini-fenêtre préparée dès le départ, pour s’ouvrir seule en quittant l’app', async ({ page }) => {
+  // On note les actions déclarées aux contrôles média.
+  await page.addInitScript(() => {
+    const w = window as unknown as { __pip: (() => void) | null };
+    w.__pip = null;
+    const ms = navigator.mediaSession as unknown as { setActionHandler: (a: string, h: (() => void) | null) => void };
+    const orig = ms.setActionHandler.bind(ms);
+    ms.setActionHandler = (a, h) => {
+      if (a === 'enterpictureinpicture') w.__pip = h;
+      try {
+        orig(a, h);
+      } catch {
+        /* action inconnue de ce navigateur */
+      }
+    };
+  });
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await expect.poll(() => page.evaluate(() => !!(window as unknown as { __pip: unknown }).__pip)).toBe(false);
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  // Séance lancée : la vidéo du chrono tourne déjà, et l'ouverture automatique est déclarée.
+  await expect.poll(() => page.evaluate(() => {
+    const v = document.querySelector<HTMLVideoElement>('video[data-pip]');
+    return !!v && !v.paused;
+  })).toBe(true);
+  await expect.poll(() => page.evaluate(() => !!(window as unknown as { __pip: unknown }).__pip)).toBe(true);
+  // Abandon : tout est démonté.
+  await page.getByRole('button', { name: 'Arrêter' }).click();
+  await page.getByRole('button', { name: 'Abandonner sans enregistrer' }).click();
+  await expect(page.locator('video[data-pip]')).toHaveCount(0);
+});

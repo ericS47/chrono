@@ -75,7 +75,7 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 
 ## Mini-fenêtre (branche `mini-fenetre`, en cours)
 
-Bouton « Mini-fenêtre » en haut du chrono (pendant la séance) : le chrono reste affiché en petit par-dessus les autres apps, comme une vidéo YouTube, et la séance continue (temps et sons). La mini-fenêtre montre la phase, le temps, l'étape suivante, le tour et une barre d'avancement ; ses boutons pause / suivant / précédent pilotent la séance. Le navigateur ne met en mini-fenêtre qu'une vidéo : le chrono est dessiné dans un canevas filmé en direct (`src/lib/pip.ts`, contenu calculé et testé dans `src/lib/pipView.ts`). Ouverture automatique en quittant l'app quand Chrome le permet, sinon par le bouton.
+Bouton « Mini-fenêtre » en haut du chrono (pendant la séance) : le chrono reste affiché en petit par-dessus les autres apps, comme une vidéo YouTube, et la séance continue (temps et sons). La mini-fenêtre montre la phase, le temps, l'étape suivante, le tour et une barre d'avancement ; ses boutons pause / suivant / précédent pilotent la séance. Le navigateur ne met en mini-fenêtre qu'une vidéo : le chrono est dessiné dans un canevas filmé en direct (`src/lib/pip.ts`, contenu calculé et testé dans `src/lib/pipView.ts`). Ouverture automatique en quittant l'app : la vidéo du chrono est préparée dès le départ de la séance et l'action « enterpictureinpicture » des contrôles média est déclarée ; Chrome l'utilise quand il le permet (ordinateur depuis Chrome 134 ; Android non garanti), de préférence avec « Son en arrière-plan » activé (une piste audio joue). Sinon, bouton « Mini-fenêtre ».
 
 ## Reste à faire / idées
 

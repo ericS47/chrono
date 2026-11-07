@@ -57,7 +57,8 @@ function draw(): void {
   }
 }
 
-function cleanup(): void {
+/** Démonte la vidéo du chrono (fin ou abandon de la séance). */
+function teardown(): void {
   if (timer !== null) clearInterval(timer);
   timer = null;
   (video?.srcObject as MediaStream | null)?.getTracks().forEach((t) => t.stop());
@@ -68,42 +69,72 @@ function cleanup(): void {
   S.refreshMedia();
 }
 
-/** Ouvre la mini-fenêtre (ou la ferme si elle est ouverte). À appeler sur un appui. */
-export async function togglePip(): Promise<boolean> {
-  if (!pipSupported()) return false;
-  if (pipOpen()) {
-    await document.exitPictureInPicture().catch(() => undefined);
-    return false;
-  }
-  try {
+/** Mini-fenêtre refermée : la vidéo reste prête pour la prochaine sortie de l'app. */
+function onLeave(): void {
+  setPip(false);
+  S.refreshMedia();
+}
+
+/**
+ * Prépare la vidéo du chrono (invisible, sans son) et la lance. Une vidéo déjà en lecture
+ * peut passer en mini-fenêtre sans attendre, y compris quand Chrome l'ouvre seul en quittant l'app.
+ */
+async function ensureVideo(): Promise<HTMLVideoElement> {
+  if (!video) {
     canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     draw();
-    video = document.createElement('video');
-    video.muted = true;
-    video.playsInline = true;
-    video.setAttribute('aria-hidden', 'true');
-    Object.assign(video.style, { position: 'fixed', width: '1px', height: '1px', opacity: '0', pointerEvents: 'none', left: '0', top: '0' });
-    video.srcObject = canvas.captureStream(10);
-    document.body.appendChild(video);
+    const v = document.createElement('video');
+    v.muted = true;
+    v.playsInline = true;
+    v.setAttribute('aria-hidden', 'true');
+    v.dataset.pip = 'chrono';
+    Object.assign(v.style, { position: 'fixed', width: '1px', height: '1px', opacity: '0', pointerEvents: 'none', left: '0', top: '0' });
+    v.srcObject = canvas.captureStream(10);
+    v.addEventListener('leavepictureinpicture', onLeave);
+    document.body.appendChild(v);
+    video = v;
     // Le temps est redessiné 4 fois par seconde, même app en arrière-plan.
     timer = window.setInterval(draw, 250);
-    await video.play();
-    video.addEventListener('leavepictureinpicture', cleanup, { once: true });
-    await video.requestPictureInPicture();
+  }
+  if (video.paused) await video.play();
+  return video;
+}
+
+/** Séance lancée : la mini-fenêtre est préparée, prête à s'ouvrir en quittant l'app. */
+export function armPip(): void {
+  if (!pipSupported()) return;
+  void ensureVideo().catch(() => undefined);
+}
+
+/** Ouvre la mini-fenêtre. */
+export async function openPip(): Promise<boolean> {
+  if (!pipSupported()) return false;
+  if (pipOpen()) return true;
+  try {
+    const v = await ensureVideo();
+    await v.requestPictureInPicture();
     setPip(true);
     // Boutons pause / suivant de la mini-fenêtre.
     S.refreshMedia();
     return true;
   } catch {
-    cleanup();
     return false;
   }
 }
 
-/** Ferme la mini-fenêtre (fin ou abandon de la séance). */
+/** Bouton du chrono : ouvre la mini-fenêtre, ou la ferme si elle est ouverte. */
+export async function togglePip(): Promise<boolean> {
+  if (pipOpen()) {
+    await document.exitPictureInPicture().catch(() => undefined);
+    return false;
+  }
+  return openPip();
+}
+
+/** Ferme la mini-fenêtre et démonte la vidéo (fin ou abandon de la séance). */
 export function closePip(): void {
   if (pipOpen()) void document.exitPictureInPicture().catch(() => undefined);
-  else if (video) cleanup();
+  if (video) teardown();
 }
