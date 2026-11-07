@@ -400,7 +400,8 @@ export function Builder({ id }: { id?: string }) {
     if (!el) return;
     const xid = el.dataset.open!;
     const f = find(items, xid);
-    if (f) setSheet({ kind: f.item.type === 'series' ? 'series' : f.item.type === 'group' ? 'group' : 'step', id: xid });
+    // Bloc de travail : un toucher ouvre le même menu que l'appui long (Copier, Régler, Supprimer).
+    if (f) setSheet({ kind: f.item.type === 'series' ? 'series' : f.item.type === 'group' ? 'long' : 'step', id: xid });
   };
 
   // ---------- Enregistrer, lancer ----------

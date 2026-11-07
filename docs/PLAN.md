@@ -84,6 +84,10 @@ Pendant l'effort, un avatar animé montre l'exercice à côté du chrono ; il di
 - Suite prévue : choisir le matériel (haltères, kettlebell, élastique, chaise…) avec une animation adaptée ; exercices de renforcement ; exercices sur chaise pour les seniors ; variantes (fente grand pas / petit pas, mains sur les hanches) ; liste aussi dans l'éditeur par blocs ; plus d'exercices (mobilité, assis, élastique, kettlebell…) ; animation dans l'affichage agrandi ; joindre sa propre photo / GIF à un exercice.
 - Piste à plus long terme : offres payantes par mode et deux profils (coach qui programme, pratiquant qui réalise). Un vrai partage coach → pratiquant demanderait un serveur et des comptes, contraire au « 100 % local » actuel : à décider le moment venu.
 
+## Mini-fenêtre (dans l'app)
+
+Raccourci « porte » en haut à droite du chrono et du plein écran (pendant la séance) : le chrono reste affiché en petit par-dessus les autres apps, comme une vidéo YouTube, et la séance continue (temps et sons). La mini-fenêtre montre la phase, le temps, l'étape suivante, le tour et une barre d'avancement ; ses boutons pause / suivant / précédent pilotent la séance. Le navigateur ne met en mini-fenêtre qu'une vidéo : le chrono est dessiné dans un canevas filmé en direct (`src/lib/pip.ts`, contenu calculé et testé dans `src/lib/pipView.ts`). Ouverture automatique en quittant l'app : la vidéo du chrono est préparée dès le départ de la séance et l'action « enterpictureinpicture » des contrôles média est déclarée ; Chrome l'utilise quand il le permet (ordinateur depuis Chrome 134 ; Android non garanti), de préférence avec « Son en arrière-plan » activé (une piste audio joue). Sinon, bouton « Mini-fenêtre ».
+
 ## Reste à faire / idées
 
 - Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.

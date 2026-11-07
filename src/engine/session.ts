@@ -7,7 +7,7 @@ import { audio } from '../audio/audio';
 import { computeCues } from './cues';
 import { buildPhases, type Phase } from './phases';
 import * as T from './timer';
-import { setMediaSession, vibrate } from '../lib/platform';
+import { isPip, setMediaSession, vibrate } from '../lib/platform';
 
 export interface Session {
   workout: Workout;
@@ -117,8 +117,9 @@ function buzz(s: Session, ph: Phase | undefined): void {
 function media(s: Session): void {
   const ph = s.phases[s.run.index];
   // Contrôles de l'écran verrouillé : sur iPhone, ils font passer Chrono pour le lecteur
-  // de musique et mettent Spotify en pause. Seulement avec le son en arrière-plan.
-  if (s.run.status === 'finished' || !ph || !s.sound.background) {
+  // de musique et mettent Spotify en pause. Seulement avec le son en arrière-plan,
+  // ou quand la mini-fenêtre est ouverte (ses boutons pause / suivant).
+  if (s.run.status === 'finished' || !ph || !(s.sound.background || isPip())) {
     setMediaSession('', '', null);
     return;
   }
@@ -127,7 +128,13 @@ function media(s: Session): void {
     play: () => toggle(),
     pause: () => toggle(),
     next: () => skip(),
-  });
+    prev: () => back(),
+  }, s.run.status === 'running');
+}
+
+/** Met à jour les contrôles média (ouverture / fermeture de la mini-fenêtre). */
+export function refreshMedia(): void {
+  if (current) media(current);
 }
 
 let lastResync = 0;
