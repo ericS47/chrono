@@ -91,8 +91,9 @@ describe('animation', () => {
 });
 
 describe('réglages', () => {
-  it('coupé par défaut, et complète un avatar partiel', () => {
-    expect(normalizeAnim(undefined).enabled).toBe(false);
+  it('activé par défaut, et complète un avatar partiel', () => {
+    expect(normalizeAnim(undefined).enabled).toBe(true);
+    expect(normalizeAnim({ enabled: false }).enabled).toBe(false);
     const a = normalizeAnim({ enabled: true, avatar: { sex: 'm' } as Avatar });
     expect(a.enabled).toBe(true);
     expect(a.avatar.sex).toBe('m');

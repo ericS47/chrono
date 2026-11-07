@@ -58,7 +58,7 @@ export function AvatarScreen() {
       <div className="form">
         <Toggle
           label="Afficher pendant la séance"
-          hint="Bêta · pendant l’effort, l’avatar montre l’exercice à côté du chrono ; il disparaît au repos. L’exercice est reconnu d’après son nom."
+          hint="Pendant l’effort, l’avatar montre l’exercice à côté du chrono ; il disparaît au repos. L’exercice est reconnu d’après son nom, ou choisi dans le créateur."
           checked={s.anim.enabled}
           onChange={(v) => void saveSettings({ ...s, anim: { ...s.anim, enabled: v } })}
         />

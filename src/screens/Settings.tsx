@@ -146,7 +146,7 @@ export function SettingsScreen() {
           <button className="row row-link" onClick={() => go('/avatar')}>
             <span className="row-text">
               <span>Avatar et animation</span>
-              <span className="hint">{s.anim.enabled ? 'Affichée pendant l’effort' : 'Bêta · non affichée pendant les séances'}</span>
+              <span className="hint">{s.anim.enabled ? 'Affichée pendant l’effort' : 'Coupée : non affichée pendant les séances'}</span>
             </span>
             <span aria-hidden="true">›</span>
           </button>

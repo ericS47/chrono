@@ -21,7 +21,7 @@ export interface Avatar {
 }
 
 export interface AnimSettings {
-  /** Afficher l'animation de l'exercice pendant l'effort (bêta, coupé par défaut). */
+  /** Afficher l'animation de l'exercice pendant l'effort (activé par défaut). */
   enabled: boolean;
   avatar: Avatar;
 }
@@ -80,12 +80,12 @@ export const DEFAULT_AVATAR: Avatar = {
   bottomType: 'legging',
 };
 
-export const DEFAULT_ANIM: AnimSettings = { enabled: false, avatar: DEFAULT_AVATAR };
+export const DEFAULT_ANIM: AnimSettings = { enabled: true, avatar: DEFAULT_AVATAR };
 
 export function normalizeAnim(a: Partial<AnimSettings> | undefined): AnimSettings {
   const avatar = { ...DEFAULT_AVATAR, ...(a?.avatar ?? {}) };
   if (!(avatar.skin >= 0 && avatar.skin < SKIN_TONES.length)) avatar.skin = DEFAULT_AVATAR.skin;
-  return { enabled: a?.enabled ?? false, avatar };
+  return { enabled: a?.enabled ?? true, avatar };
 }
 
 /** Mélange deux couleurs #RRGGBB (t = 0 : a, t = 1 : b). */
