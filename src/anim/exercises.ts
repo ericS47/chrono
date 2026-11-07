@@ -7,7 +7,8 @@ import { setExerciseLabels } from '../engine/timeline';
 
 export type ExerciseId =
   | 'squat' | 'pushup' | 'plank' | 'jumpingjack' | 'lunge' | 'burpee' | 'climber' | 'situp' | 'highknees'
-  | 'kneepushup' | 'bridge' | 'superman' | 'sideplank' | 'legraise' | 'calfraise' | 'jumpsquat' | 'birddog' | 'tapping';
+  | 'kneepushup' | 'bridge' | 'superman' | 'sideplank' | 'legraise' | 'calfraise' | 'jumpsquat' | 'birddog' | 'tapping'
+  | 'buttkicks' | 'shuffleright' | 'shuffleleft' | 'shufflealt';
 
 type Anchor = 'feet' | 'hands' | 'hip';
 
@@ -17,6 +18,8 @@ interface Frame {
   anchor?: Anchor;
   /** Durée relative du passage vers la posture suivante (1 par défaut). */
   w?: number;
+  /** Déplacement latéral imposé (position de la hanche), pour les pas chassés. */
+  x?: number;
 }
 
 /** Catégories : membres inférieurs, membres supérieurs, tronc, abdominaux, cardio. */
@@ -39,6 +42,40 @@ export interface ExerciseAnim {
 const STAND: Pose = { torso: 0, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 8, foreN: 14, armF: -5, foreF: 3 };
 const HIGH_PLANK: Pose = { torso: 68, head: -6, thighN: -68, shinN: -68, thighF: -68, shinF: -68, armN: 0, foreN: 0, armF: 3, foreF: 3 };
 const BURPEE_LOW: Pose = { torso: 60, head: -30, thighN: 100, shinN: -35, thighF: 98, shinF: -35, armN: 35, foreN: 35, armF: 33, foreF: 33 };
+
+// ---------- Pas chassés (vue de face, comme dans un miroir) ----------
+
+const SH_ARMS = { armN: 28, foreN: 70, armF: 28, foreF: 70 };
+const SH_JOINED: Pose = { torso: 0, thighN: 3, shinN: 2, thighF: 3, shinF: 2, ...SH_ARMS, lift: 3 };
+/** Jambe écartée du côté du déplacement (n : droite de l'écran, f : gauche). */
+const shApart = (side: 'n' | 'f'): Pose => side === 'n'
+  ? { torso: 0, thighN: 22, shinN: 19, thighF: 6, shinF: 4, ...SH_ARMS, armN: 36, armF: 22 }
+  : { torso: 0, thighN: 6, shinN: 4, thighF: 22, shinF: 19, ...SH_ARMS, armN: 22, armF: 36 };
+/** Pas chassés dans un sens : de x0 à x0 + 3 pas (pas de ±8), puis retour éclair au départ. */
+function shuffleOneWay(dir: 1 | -1): Frame[] {
+  const side = dir === 1 ? 'n' : 'f';
+  const out: Frame[] = [];
+  for (let k = 0; k < 3; k++) {
+    const x = dir * (-12 + k * 8);
+    out.push({ pose: SH_JOINED, x });
+    out.push({ pose: shApart(side), x: x + dir * 5 });
+  }
+  out.push({ pose: SH_JOINED, x: dir * 12, w: 0.25 });
+  return out;
+}
+/** Pas chassé alterné : trois pas à droite, trois pas à gauche. */
+function shuffleAlt(): Frame[] {
+  const out: Frame[] = [];
+  for (let k = 0; k < 3; k++) {
+    out.push({ pose: SH_JOINED, x: -12 + k * 8 });
+    out.push({ pose: shApart('n'), x: -12 + k * 8 + 5 });
+  }
+  for (let k = 0; k < 3; k++) {
+    out.push({ pose: SH_JOINED, x: 12 - k * 8 });
+    out.push({ pose: shApart('f'), x: 12 - k * 8 - 5 });
+  }
+  return out;
+}
 
 export const EXERCISES: ExerciseAnim[] = [
   {
@@ -185,6 +222,29 @@ export const EXERCISES: ExerciseAnim[] = [
       { pose: { torso: 16, head: -12, thighN: 26, shinN: -18, thighF: 42, shinF: -22, armN: -15, foreN: 75, armF: 25, foreF: 105, lift: 1 } },
     ],
   },
+  {
+    id: 'buttkicks', label: 'Talons-fesses', group: 'cardio', view: 'side', period: 0.62, anchor: 'hip',
+    words: ['talon fesse', 'talons fesses', 'talon aux fesse', 'butt kick', 'heel kick'],
+    frames: [
+      { pose: { torso: 6, head: -4, thighN: 8, shinN: -150, thighF: -2, shinF: 2, armN: -30, foreN: 50, armF: 35, foreF: 115, lift: 3 } },
+      { pose: { torso: 6, head: -4, thighN: -2, shinN: 2, thighF: 8, shinF: -150, armN: 35, foreN: 115, armF: -30, foreF: 50, lift: 3 } },
+    ],
+  },
+  {
+    id: 'shuffleright', label: 'Pas chassé droite', group: 'cardio', view: 'front', period: 2.4, anchor: 'hip',
+    words: ['pas chasse d', 'pas chasse droite', 'pas chasse a droite', 'pas chasse vers la droite', 'chasse droite', 'chasse d'],
+    frames: shuffleOneWay(1),
+  },
+  {
+    id: 'shuffleleft', label: 'Pas chassé gauche', group: 'cardio', view: 'front', period: 2.4, anchor: 'hip',
+    words: ['pas chasse g', 'pas chasse gauche', 'pas chasse a gauche', 'pas chasse vers la gauche', 'chasse gauche', 'chasse g'],
+    frames: shuffleOneWay(-1),
+  },
+  {
+    id: 'shufflealt', label: 'Pas chassé alterné', group: 'cardio', view: 'front', period: 4.2, anchor: 'hip',
+    words: ['pas chasse alterne', 'pas chasse', 'chasse alterne', 'pas chasses', 'shuffle'],
+    frames: shuffleAlt(),
+  },
 ];
 
 export const EXERCISE_BY_ID: Record<ExerciseId, ExerciseAnim> = Object.fromEntries(EXERCISES.map((e) => [e.id, e])) as Record<ExerciseId, ExerciseAnim>;
@@ -245,7 +305,9 @@ export function place(ex: ExerciseAnim, d: Dims): Placed {
   const tx: number[] = [];
   js.forEach((j, i) => {
     const a = ex.frames[i].anchor ?? ex.anchor;
-    if (i === 0) tx.push(-anchorX(j, a));
+    const x = ex.frames[i].x;
+    if (x !== undefined) tx.push(x - j.hip[0]);
+    else if (i === 0) tx.push(-anchorX(j, a));
     else tx.push(anchorX(js[i - 1], a) + tx[i - 1] - anchorX(j, a));
   });
   // Centrage horizontal sur l'ensemble du mouvement.

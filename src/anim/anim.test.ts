@@ -32,6 +32,13 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Mollets')).toBe('calfraise');
     expect(matchExercise('Bird dog')).toBe('birddog');
     expect(matchExercise('Tapping')).toBe('tapping');
+    expect(matchExercise('Talons-fesses')).toBe('buttkicks');
+    expect(matchExercise('Pas chassé D')).toBe('shuffleright');
+    expect(matchExercise('Pas chassés droite')).toBe('shuffleright');
+    expect(matchExercise('Pas chassé G')).toBe('shuffleleft');
+    expect(matchExercise('Pas chassé à gauche')).toBe('shuffleleft');
+    expect(matchExercise('Pas chassé alterné')).toBe('shufflealt');
+    expect(matchExercise('Pas chassés')).toBe('shufflealt');
     expect(matchExercise('Tipping rapide')).toBe('tapping');
   });
   it('ne devine pas un exercice inconnu', () => {
