@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Avatar } from './avatar';
+import { DEFAULT_AVATAR } from './avatar';
 import { mix, SKIN_TONES } from './avatar';
 import type { ExerciseId } from './exercises';
-import { EXERCISE_BY_ID, frameAt, GROUND, place, VIEW_H, VIEW_W } from './exercises';
+import { EXERCISE_BY_ID, frameAt, frameBox, GROUND, place, VIEW_W } from './exercises';
 import type { Dims, Joints, Pt } from './pose';
 import { dims } from './pose';
 
@@ -129,15 +130,19 @@ function FrontFigure({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Color
   );
 }
 
+/** Gabarit le plus encombrant : sert à cadrer chaque exercice. */
+const REF = dims({ ...DEFAULT_AVATAR, sex: 'm', build: 'forte', height: 'grande' });
+
 /** Image fixe de l'avatar à l'instant `sec` du mouvement. */
 export function FigureFrame({ exercise, avatar, sec, title }: { exercise: ExerciseId; avatar: Avatar; sec: number; title?: string }) {
   const placed = useMemo(() => place(EXERCISE_BY_ID[exercise], dims(avatar)), [exercise, avatar]);
   const c = useMemo(() => colors(avatar), [avatar]);
   const { j } = frameAt(placed, sec);
+  const b = frameBox(placed.ex, REF);
   const ex = placed.ex;
   return (
-    <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} className="figure" role="img" aria-label={title ?? `Animation : ${ex.label}`}>
-      <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={ex.view === 'front' ? 26 : 48} ry={3.2} fill="rgba(20,24,58,0.12)" />
+    <svg viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`} className={`figure ${b.w > b.h * 1.25 ? 'wide' : ''}`} role="img" aria-label={title ?? `Animation : ${ex.label}`}>
+      <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={Math.min(ex.view === 'front' ? 26 : 48, b.w / 2 - 3)} ry={3.2} fill="rgba(20,24,58,0.12)" />
       {ex.view === 'front' ? <FrontFigure j={j} d={placed.d} av={avatar} c={c} /> : <SideFigure j={j} d={placed.d} av={avatar} c={c} />}
     </svg>
   );

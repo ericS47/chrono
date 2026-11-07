@@ -187,4 +187,32 @@ export function frameAt(p: Placed, sec: number): { j: Joints; pose: Pose } {
   return { j: translate(j0, dx, dy), pose };
 }
 
+/**
+ * Cadre serré d'un exercice : le mouvement complet du plus grand avatar possible,
+ * pour qu'une pompe (allongée) remplisse le dessin autant qu'un squat.
+ * Un avatar plus petit reste plus petit dans le même cadre.
+ */
+export interface Box { x: number; y: number; w: number; h: number }
+const boxes = new Map<ExerciseId, Box>();
+export function frameBox(ex: ExerciseAnim, ref: Dims): Box {
+  const hit = boxes.get(ex.id);
+  if (hit) return hit;
+  const p = place(ex, ref);
+  let half = 0;
+  let top = GROUND;
+  for (let i = 0; i < 48; i++) {
+    const { j } = frameAt(p, (ex.period * i) / 48);
+    for (const k of Object.keys(j) as (keyof Joints)[]) {
+      if (k === 'up' || k === 'front') continue;
+      half = Math.max(half, Math.abs(j[k][0] - VIEW_W / 2));
+      top = Math.min(top, j[k][1]);
+    }
+  }
+  const pad = 9;
+  const y = Math.max(0, top - ref.head - pad);
+  const box = { x: VIEW_W / 2 - half - pad, y, w: 2 * (half + pad), h: GROUND + 6 - y };
+  boxes.set(ex.id, box);
+  return box;
+}
+
 export type { Pt };
