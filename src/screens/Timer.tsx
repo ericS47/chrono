@@ -9,8 +9,9 @@ import { useSettings } from '../data/hooks';
 import { launchWorkout } from '../lib/launch';
 import { enterFullscreen, exitFullscreen } from '../lib/platform';
 import { Sheet } from '../ui/kit';
+import { closePip, pipSupported, togglePip } from '../lib/pip';
 import {
-  IconArrowRight, IconClose, IconExpand, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
+  IconArrowRight, IconClose, IconExpand, IconPip, IconFlag, IconSkip, IconMinus, IconMute, IconPause, IconPlay, IconPlus, IconPrev, IconSound,
 } from '../ui/icons';
 
 const R = 138;
@@ -109,6 +110,28 @@ export function TimerScreen() {
   const [zoom, setZoom] = useState(false);
   const [adding, setAdding] = useState(false);
   const zoomed = zoom && !!session && session.run.status !== 'idle' && session.run.status !== 'finished';
+
+  // Mini-fenêtre : fermée en quittant l'écran du chrono (fin, abandon).
+  useEffect(() => () => closePip(), []);
+
+  // Chrome peut ouvrir la mini-fenêtre tout seul quand on quitte l'app (si le téléphone le permet).
+  const live = !!session && (session.run.status === 'running' || session.run.status === 'paused');
+  useEffect(() => {
+    if (!live || !pipSupported() || !('mediaSession' in navigator)) return;
+    const ms = navigator.mediaSession as MediaSession & { setActionHandler(a: string, h: (() => void) | null): void };
+    try {
+      ms.setActionHandler('enterpictureinpicture', () => void togglePip());
+    } catch {
+      return;
+    }
+    return () => {
+      try {
+        ms.setActionHandler('enterpictureinpicture', null);
+      } catch {
+        /* non supporté */
+      }
+    };
+  }, [live]);
 
   // On quitte le plein écran du téléphone en quittant le chrono ou l'affichage agrandi.
   useEffect(() => {
@@ -235,6 +258,11 @@ export function TimerScreen() {
           <b>{workout.name}</b>
         </div>
         <div className="timer-top-right">
+          {!idle && pipSupported() && (
+            <button className="icon-btn" aria-label="Mini-fenêtre" title="Mini-fenêtre : le chrono reste affiché quand vous quittez l’app" onClick={() => void togglePip()}>
+              <IconPip size={18} />
+            </button>
+          )}
           {!idle && (
             <button className="icon-btn" aria-label="Agrandir le chrono" onClick={openZoom}>
               <IconExpand size={18} />

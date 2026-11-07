@@ -128,21 +128,31 @@ export function vibrate(pattern: number | number[]): void {
   }
 }
 
-// ---------- Contrôles média (notification / écran verrouillé) ----------
+// ---------- Contrôles média (notification / écran verrouillé / mini-fenêtre) ----------
 
-export function setMediaSession(title: string, artist: string, handlers: { play?: () => void; pause?: () => void; next?: () => void } | null): void {
+let pip = false;
+/** Mini-fenêtre ouverte : ses boutons pause / suivant passent par les contrôles média. */
+export const isPip = () => pip;
+export function setPip(on: boolean): void {
+  pip = on;
+}
+
+export function setMediaSession(title: string, artist: string, handlers: { play?: () => void; pause?: () => void; next?: () => void; prev?: () => void } | null, playing = true): void {
   if (!('mediaSession' in navigator)) return;
   const ms = navigator.mediaSession;
   try {
     if (!handlers) {
       ms.metadata = null;
-      (['play', 'pause', 'nexttrack'] as MediaSessionAction[]).forEach((a) => ms.setActionHandler(a, null));
+      (['play', 'pause', 'nexttrack', 'previoustrack'] as MediaSessionAction[]).forEach((a) => ms.setActionHandler(a, null));
+      ms.playbackState = 'none';
       return;
     }
     ms.metadata = new MediaMetadata({ title, artist, album: 'Chrono' });
     ms.setActionHandler('play', handlers.play ?? null);
     ms.setActionHandler('pause', handlers.pause ?? null);
     ms.setActionHandler('nexttrack', handlers.next ?? null);
+    ms.setActionHandler('previoustrack', handlers.prev ?? null);
+    ms.playbackState = playing ? 'playing' : 'paused';
   } catch {
     /* non supporté */
   }

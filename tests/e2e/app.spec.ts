@@ -320,3 +320,19 @@ test('créateur : copier un bloc de travail l’ajoute à la fin de la séance',
     els.filter((e) => !e.parentElement?.closest('[data-node]')).map((e) => (e.classList.contains('bd-group') ? 'bloc' : e.textContent?.includes('Repos') ? 'repos' : 'autre')));
   expect(order.slice(-3)).toEqual(['bloc', 'repos', 'bloc']);
 });
+
+test('chrono : mini-fenêtre (image dans l’image) qui suit la séance', async ({ page }) => {
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  // Pas de mini-fenêtre avant le départ.
+  await expect(page.getByRole('button', { name: 'Mini-fenêtre' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(10_500);
+  await page.getByRole('button', { name: 'Mini-fenêtre' }).click();
+  await expect.poll(() => page.evaluate(() => !!document.pictureInPictureElement)).toBe(true);
+  // La séance continue pendant ce temps.
+  await expect(page.locator('.ring-phase')).toHaveText('EFFORT');
+  // Un second appui la referme.
+  await page.getByRole('button', { name: 'Mini-fenêtre' }).click();
+  await expect.poll(() => page.evaluate(() => !!document.pictureInPictureElement)).toBe(false);
+});

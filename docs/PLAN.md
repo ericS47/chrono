@@ -73,6 +73,10 @@ Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), 
 4. ✅ Planification (calendrier, récurrence, Aujourd'hui, rappels app ouverte)
 5. ✅ Finitions (export/import, thèmes, réglages audio fins)
 
+## Mini-fenêtre (branche `mini-fenetre`, en cours)
+
+Bouton « Mini-fenêtre » en haut du chrono (pendant la séance) : le chrono reste affiché en petit par-dessus les autres apps, comme une vidéo YouTube, et la séance continue (temps et sons). La mini-fenêtre montre la phase, le temps, l'étape suivante, le tour et une barre d'avancement ; ses boutons pause / suivant / précédent pilotent la séance. Le navigateur ne met en mini-fenêtre qu'une vidéo : le chrono est dessiné dans un canevas filmé en direct (`src/lib/pip.ts`, contenu calculé et testé dans `src/lib/pipView.ts`). Ouverture automatique en quittant l'app quand Chrome le permet, sinon par le bouton.
+
 ## Reste à faire / idées
 
 - Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.
