@@ -1,11 +1,9 @@
 // Corps de l'avatar, style dessin animé : formes anatomiques (cuisses, mollets, biceps, buste, fessiers),
-// contour continu autour de chaque partie du corps et ombre douce sur l'arrière des membres.
+// style à plat sans trait noir, ombre dans un ton plus foncé de la même couleur sur l'arrière des membres.
 //
-// Chaque groupe (bras, jambe, buste + tête) est dessiné deux fois : d'abord son contour (formes
-// épaissies), puis ses couleurs par-dessus. Les membres d'un même groupe se fondent ainsi sans
-// trait au coude ou au genou, comme un dessin à la main.
+// Inspiration : illustrations de fitness « flat design » (aplats, ombres ton sur ton, visage simple).
 
-import { createContext, useContext, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { Avatar } from './avatar';
 import { mix } from './avatar';
 import type { Dims, Joints, Pt } from './pose';
@@ -14,35 +12,21 @@ export interface Colors { skin: string; skinFar: string; hair: string; top: stri
 
 const INK = '#14183A';
 const SW = 0.8;
-const line = (c: string) => mix(c, INK, 0.72);
+const line = (c: string) => mix(c, INK, 0.55);
 
-const Pass = createContext<'outline' | 'fill'>('fill');
-
-/** Dessine son contenu en deux passes : contour, puis couleurs. */
+/** Groupe de formes (bras, jambe, buste + tête), dessiné dans l'ordre. */
 function Layer({ children }: { children: ReactNode }) {
-  return (
-    <g>
-      <Pass.Provider value="outline">{children}</Pass.Provider>
-      <Pass.Provider value="fill">{children}</Pass.Provider>
-    </g>
-  );
+  return <g>{children}</g>;
 }
 
-/** Une forme : contour (1re passe), couleur + ombre (2e passe). `edge` : liseré visible (vêtements). */
+/** Une forme à plat, avec son ombre dans un ton plus foncé. `edge` : liseré discret (bord d'un vêtement). */
 function Shape({ d, fill, shadow, edge }: { d: string; fill: string; shadow?: string; edge?: boolean }) {
-  const pass = useContext(Pass);
-  if (pass === 'outline') return <path d={d} fill={line(fill)} stroke={line(fill)} strokeWidth={SW * 2} strokeLinejoin="round" />;
   return (
     <>
-      <path d={d} fill={fill} stroke={edge ? line(fill) : 'none'} strokeWidth={SW * 0.7} strokeLinejoin="round" />
-      {shadow && <path d={shadow} fill={INK} opacity={0.15} />}
+      <path d={d} fill={fill} stroke={edge ? mix(fill, INK, 0.12) : 'none'} strokeWidth={SW * 0.6} strokeLinejoin="round" />
+      {shadow && <path d={shadow} fill={mix(fill, INK, 0.16)} />}
     </>
   );
-}
-
-/** Détail sans contour (yeux, sourcils, bouche), dessiné seulement avec les couleurs. */
-function Detail({ children }: { children: ReactNode }) {
-  return useContext(Pass) === 'fill' ? <>{children}</> : null;
 }
 
 // ---------- Géométrie ----------
@@ -144,12 +128,13 @@ function Leg({ hip, knee, ankle, toe, d, av, skin, bottom, shoe }: {
     <Layer>
       <Shape d={limb(hip, knee, THIGH, d.wThigh, { cap0: 0.15 })} fill={skin} shadow={limb(hip, knee, THIGH, d.wThigh, { band: 0.35 })} />
       <Shape d={limb(knee, ankle, SHIN, d.wShin)} fill={skin} shadow={limb(knee, ankle, SHIN, d.wShin, { band: 0.35 })} />
+      <Shape d={limb(knee, ankle, SHIN, d.wShin, { t0: 0.84, grow: 0.25, cap0: 0.2, cap1: 0.5 })} fill="#F4F3EF" shadow={limb(knee, ankle, SHIN, d.wShin, { band: 0.35, t0: 0.84 })} />
       <Shape d={limb(heel, tip, SHOE, sw)} fill={shoe} />
       <Shape d={limb(heel, tip, SHOE, sw, { band: 0.3 })} fill="#ECEAE4" />
       {legging ? (
         <>
           <Shape d={limb(hip, knee, THIGH, d.wThigh, { grow: 0.35, cap0: 0.15 })} fill={bottom} shadow={limb(hip, knee, THIGH, d.wThigh, { band: 0.35, grow: 0.35 })} />
-          <Shape d={limb(knee, ankle, SHIN, d.wShin, { grow: 0.3, t1: 0.9, cap1: 0.3 })} fill={bottom} shadow={limb(knee, ankle, SHIN, d.wShin, { band: 0.35, t1: 0.9 })} />
+          <Shape d={limb(knee, ankle, SHIN, d.wShin, { grow: 0.3, t1: 0.84, cap1: 0.3 })} fill={bottom} shadow={limb(knee, ankle, SHIN, d.wShin, { band: 0.35, t1: 0.84 })} />
         </>
       ) : (
         <Shape d={limb(hip, knee, THIGH, d.wThigh, { grow: 0.6, t1: 0.58, cap0: 0.15, cap1: 0.25 })} fill={bottom} edge shadow={limb(hip, knee, THIGH, d.wThigh, { band: 0.35, grow: 0.6, t1: 0.58 })} />
@@ -180,10 +165,29 @@ function Arm({ shoulder, elbow, hand, d, skin, top }: { shoulder: Pt; elbow: Pt;
 // ---------- Tête ----------
 
 // Tête de profil, en unités du rayon : (avant, haut) depuis le centre du crâne.
-const FACE: [number, number][] = [[0, 1], [0.58, 0.86], [0.88, 0.5], [0.92, 0.28], [1.1, 0.05], [0.92, -0.06], [0.93, -0.3], [0.8, -0.6], [0.5, -0.8], [0.08, -0.66], [-0.32, -0.55], [-0.78, -0.22], [-0.96, 0.22], [-0.7, 0.76]];
-const HAIR_F: [number, number][] = [[-0.1, 1.12], [0.55, 1.02], [0.95, 0.62], [0.72, 0.6], [0.4, 0.68], [0.1, 0.5], [-0.3, 0.18], [-0.55, -0.05], [-0.95, 0.05], [-1.06, 0.5], [-0.75, 0.98]];
-const HAIR_M: [number, number][] = [[-0.1, 1.1], [0.5, 1.02], [0.9, 0.66], [0.62, 0.66], [0.2, 0.58], [-0.25, 0.34], [-0.62, 0.2], [-0.98, 0.25], [-1.0, 0.6], [-0.7, 0.98]];
-const TAIL: [number, number][] = [[-0.8, 0.62], [-1.25, 0.6], [-1.55, 0.25], [-1.6, -0.3], [-1.38, -0.75], [-1.3, -0.3], [-1.22, 0.1], [-0.92, 0.3]];
+const FACE: [number, number][] = [[0, 1], [0.58, 0.86], [0.86, 0.5], [0.9, 0.28], [1.05, 0.04], [0.9, -0.06], [0.9, -0.3], [0.78, -0.6], [0.5, -0.8], [0.1, -0.68], [-0.3, -0.56], [-0.76, -0.22], [-0.95, 0.22], [-0.7, 0.76]];
+// Calotte : homme (mèches courtes), femme (raie, mèche sur le front).
+const CAP_M: [number, number][] = [[-0.05, 1.14], [0.3, 1.16], [0.62, 1.04], [0.92, 0.7], [0.66, 0.68], [0.35, 0.74], [0.05, 0.6], [-0.3, 0.36], [-0.62, 0.22], [-0.98, 0.25], [-1.04, 0.62], [-0.72, 1.0]];
+const CAP_F: [number, number][] = [[-0.1, 1.14], [0.5, 1.06], [0.9, 0.66], [0.98, 0.32], [0.72, 0.56], [0.36, 0.72], [0.0, 0.56], [-0.32, 0.26], [-0.6, -0.2], [-1.0, -0.1], [-1.08, 0.5], [-0.78, 0.98]];
+
+type HairKind = 'short' | 'long' | 'bob';
+const hairKind = (av: Avatar): HairKind => (av.sex === 'm' ? 'short' : av.age === 'senior' ? 'bob' : 'long');
+
+/** Cheveux qui tombent : partent de l'arrière du crâne et pendent vers le sol, quelle que soit la posture. */
+function fallingHair(o: Pt, fwd: Pt, up: Pt, r: number, len: number): string {
+  const L = (f: number, u: number): Pt => [o[0] + (fwd[0] * f + up[0] * u) * r, o[1] + (fwd[1] * f + up[1] * u) * r];
+  const top = L(-0.55, 0.9);
+  const back = L(-1.08, 0.3);
+  const ear = L(-0.42, -0.25);
+  // Tête penchée (pompe, gainage) : les cheveux pendent moins loin.
+  const k = len * (0.4 + 0.6 * Math.max(0, -up[1]));
+  // Largeur de la mèche à l'horizontale, au moins 0,9 rayon.
+  const dir = back[0] <= ear[0] ? -1 : 1;
+  const xb = back[0];
+  const xe = Math.abs(ear[0] - xb) < 0.9 * r ? xb - dir * 0.9 * r : ear[0];
+  const y0 = Math.max(back[1], ear[1]);
+  return smooth([top, back, [xb + dir * 0.12 * r, y0 + k * 0.55 * r], [xb, y0 + k * r], [xe, y0 + k * 0.92 * r], [xe + dir * 0.08 * r, y0 + k * 0.4 * r], ear]);
+}
 
 function SideHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }) {
   const ux = j.headC[0] - j.neck[0];
@@ -193,24 +197,25 @@ function SideHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }
   const fwd: Pt = [-up[1], up[0]];
   const r = d.head;
   const P = (pts: [number, number][]) => local(j.headC, fwd, up, r, pts);
-  const [eye] = P([[0.56, 0.2]]);
-  const brow = P([[0.42, 0.42], [0.58, 0.47], [0.74, 0.43]]);
+  const [eye] = P([[0.55, 0.18]]);
+  const brow = P([[0.4, 0.42], [0.56, 0.48], [0.72, 0.44]]);
+  const [cheek] = P([[0.5, -0.22]]);
   const ear = P([[-0.12, 0.02]])[0];
+  const kind = hairKind(av);
   const bald = av.age === 'senior' && av.sex === 'm';
-  const hair = av.sex === 'f' ? HAIR_F : bald ? HAIR_M.map(([f, u]) => [f, u > 0.6 ? u - 0.08 : u] as [number, number]) : HAIR_M;
+  const cap = kind === 'short' ? (bald ? CAP_M.map(([f, u]) => [f, u > 0.6 ? u - 0.1 : u] as [number, number]) : CAP_M) : CAP_F;
   const neckTop = P([[-0.1, -0.5]])[0];
   const deg = (Math.atan2(up[1], up[0]) * 180) / Math.PI;
   return (
     <>
-      <Shape d={limb(j.neck, neckTop, NECK, d.wArm * 1.25)} fill={c.skin} />
-      {av.sex === 'f' && <Shape d={smooth(P(TAIL))} fill={c.hair} />}
+      <Shape d={limb(j.neck, neckTop, NECK, d.wArm * 1.2)} fill={c.skin} shadow={limb(j.neck, neckTop, NECK, d.wArm * 1.2, { band: 0.4 })} />
       <Shape d={smooth(P(FACE))} fill={c.skin} />
-      <Shape d={smooth(P(hair))} fill={c.hair} />
-      <Shape d={ellipse(ear, r * 0.2, r * 0.27, deg + 90)} fill={c.skin} />
-      <Detail>
-        <ellipse cx={eye[0]} cy={eye[1]} rx={r * 0.1} ry={r * 0.15} transform={`rotate(${deg + 90} ${eye[0]} ${eye[1]})`} fill={INK} />
-        <path d={`M${brow[0][0]},${brow[0][1]} Q${brow[1][0]},${brow[1][1]} ${brow[2][0]},${brow[2][1]}`} stroke={line(c.hair)} strokeWidth={0.7} fill="none" strokeLinecap="round" />
-      </Detail>
+      <ellipse cx={cheek[0]} cy={cheek[1]} rx={r * 0.2} ry={r * 0.13} fill={mix(c.skin, '#E8737A', 0.32)} />
+      {kind !== 'short' && <Shape d={fallingHair(j.headC, fwd, up, r, kind === 'long' ? 3.1 : 1.15)} fill={c.hair} shadow={fallingHair(j.headC, fwd, up, r * 0.82, kind === 'long' ? 3 : 1.05)} />}
+      <Shape d={smooth(P(cap))} fill={c.hair} />
+      {kind === 'short' && <Shape d={ellipse(ear, r * 0.19, r * 0.26, deg + 90)} fill={mix(c.skin, INK, 0.06)} />}
+      <ellipse cx={eye[0]} cy={eye[1]} rx={r * 0.09} ry={r * 0.14} transform={`rotate(${deg + 90} ${eye[0]} ${eye[1]})`} fill={INK} />
+      <path d={`M${brow[0][0]},${brow[0][1]} Q${brow[1][0]},${brow[1][1]} ${brow[2][0]},${brow[2][1]}`} stroke={line(c.hair)} strokeWidth={0.75} fill="none" strokeLinecap="round" />
     </>
   );
 }
@@ -219,25 +224,30 @@ function FrontHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors 
   const r = d.head;
   const o = j.headC;
   const P = (pts: [number, number][]) => local(o, [1, 0], [0, -1], r, pts);
-  const face = P([[0, 1], [0.72, 0.82], [0.92, 0.25], [0.82, -0.35], [0.45, -0.82], [0, -0.92], [-0.45, -0.82], [-0.82, -0.35], [-0.92, 0.25], [-0.72, 0.82]]);
-  const f = av.sex === 'f';
-  const hairPts: [number, number][] = f
-    ? [[0, 1.12], [0.82, 0.95], [1.08, 0.3], [1.1, -0.55], [0.86, -0.75], [0.84, 0.1], [0.6, 0.58], [0, 0.66], [-0.6, 0.58], [-0.84, 0.1], [-0.86, -0.75], [-1.1, -0.55], [-1.08, 0.3], [-0.82, 0.95]]
-    : [[0, 1.1], [0.8, 0.92], [1.0, 0.4], [0.86, 0.36], [0.55, 0.6], [0, 0.66], [-0.55, 0.6], [-0.86, 0.36], [-1.0, 0.4], [-0.8, 0.92]];
-  const [eL, eR] = P([[-0.34, 0.14], [0.34, 0.14]]);
-  const mouth = P([[-0.2, -0.45], [0, -0.55], [0.2, -0.45]]);
+  const face = P([[0, 1], [0.72, 0.82], [0.9, 0.25], [0.8, -0.35], [0.45, -0.8], [0, -0.9], [-0.45, -0.8], [-0.8, -0.35], [-0.9, 0.25], [-0.72, 0.82]]);
+  const kind = hairKind(av);
+  const back: [number, number][] = kind === 'long'
+    ? [[0, 1.12], [0.9, 0.9], [1.12, 0.1], [1.15, -1.2], [1.25, -2.2], [0.75, -2.0], [-0.75, -2.0], [-1.25, -2.2], [-1.15, -1.2], [-1.12, 0.1], [-0.9, 0.9]]
+    : [[0, 1.12], [0.92, 0.9], [1.1, 0.1], [1.08, -0.62], [0.8, -0.75], [-0.8, -0.75], [-1.08, -0.62], [-1.1, 0.1], [-0.92, 0.9]];
+  const cap: [number, number][] = kind === 'short'
+    ? [[0, 1.14], [0.5, 1.1], [0.88, 0.85], [1.0, 0.4], [0.86, 0.4], [0.7, 0.62], [0.3, 0.64], [-0.05, 0.56], [-0.4, 0.66], [-0.86, 0.42], [-1.0, 0.42], [-0.9, 0.86], [-0.5, 1.1]]
+    : [[0, 1.12], [0.82, 0.92], [1.02, 0.3], [0.86, -0.1], [0.8, 0.42], [0.5, 0.66], [0.08, 0.72], [-0.2, 0.5], [-0.62, 0.62], [-0.82, 0.42], [-0.86, -0.1], [-1.02, 0.3], [-0.82, 0.92]];
+  const [eL, eR] = P([[-0.33, 0.12], [0.33, 0.12]]);
+  const [bL, bR] = P([[-0.5, -0.2], [0.5, -0.2]]);
+  const mouth = P([[-0.18, -0.46], [0, -0.55], [0.18, -0.46]]);
   return (
     <>
-      <Shape d={limb(j.neck, [o[0], o[1] + r * 0.5], NECK, d.wArm * 1.3)} fill={c.skin} />
-      <Shape d={ellipse(P([[0.93, 0.05]])[0], r * 0.18, r * 0.26)} fill={c.skin} />
-      <Shape d={ellipse(P([[-0.93, 0.05]])[0], r * 0.18, r * 0.26)} fill={c.skin} />
+      {kind !== 'short' && <Shape d={smooth(P(back))} fill={mix(c.hair, INK, 0.12)} />}
+      <Shape d={limb(j.neck, [o[0], o[1] + r * 0.5], NECK, d.wArm * 1.25)} fill={c.skin} />
+      {kind === 'short' && <Shape d={ellipse(P([[0.92, 0.05]])[0], r * 0.17, r * 0.25)} fill={c.skin} />}
+      {kind === 'short' && <Shape d={ellipse(P([[-0.92, 0.05]])[0], r * 0.17, r * 0.25)} fill={c.skin} />}
       <Shape d={smooth(face)} fill={c.skin} />
-      <Shape d={smooth(P(hairPts))} fill={c.hair} />
-      <Detail>
-        <ellipse cx={eL[0]} cy={eL[1]} rx={r * 0.09} ry={r * 0.14} fill={INK} />
-        <ellipse cx={eR[0]} cy={eR[1]} rx={r * 0.09} ry={r * 0.14} fill={INK} />
-        <path d={`M${mouth[0][0]},${mouth[0][1]} Q${mouth[1][0]},${mouth[1][1]} ${mouth[2][0]},${mouth[2][1]}`} stroke={line(c.skin)} strokeWidth={0.7} fill="none" strokeLinecap="round" />
-      </Detail>
+      <ellipse cx={bL[0]} cy={bL[1]} rx={r * 0.17} ry={r * 0.11} fill={mix(c.skin, '#E8737A', 0.32)} />
+      <ellipse cx={bR[0]} cy={bR[1]} rx={r * 0.17} ry={r * 0.11} fill={mix(c.skin, '#E8737A', 0.32)} />
+      <Shape d={smooth(P(cap))} fill={c.hair} />
+      <ellipse cx={eL[0]} cy={eL[1]} rx={r * 0.08} ry={r * 0.13} fill={INK} />
+      <ellipse cx={eR[0]} cy={eR[1]} rx={r * 0.08} ry={r * 0.13} fill={INK} />
+      <path d={`M${mouth[0][0]},${mouth[0][1]} Q${mouth[1][0]},${mouth[1][1]} ${mouth[2][0]},${mouth[2][1]}`} stroke={line(c.skin)} strokeWidth={0.7} fill="none" strokeLinecap="round" />
     </>
   );
 }
@@ -269,9 +279,9 @@ export function SideBody({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: C
       <Arm shoulder={j.shoulderF} elbow={j.elbowF} hand={j.handF} d={d} skin={c.skinFar} top={c.topFar} />
       <Leg hip={j.hipF} knee={j.kneeF} ankle={j.ankleF} toe={j.toeF} d={d} av={av} skin={c.skinFar} bottom={c.bottomFar} shoe={mix(c.shoe, INK, 0.25)} />
       <Layer>
-        <SideHead j={j} d={d} av={av} c={c} />
         <Shape d={torsoPath(j, d, prof, -0.08, 1.05)} fill={c.top} shadow={torsoPath(j, d, prof, -0.08, 1.05, 0, 0.32)} />
         <Shape d={torsoPath(j, d, prof, -0.08, 0.22, 0.15)} fill={c.bottom} edge shadow={torsoPath(j, d, prof, -0.08, 0.22, 0.15, 0.32)} />
+        <SideHead j={j} d={d} av={av} c={c} />
       </Layer>
       <Leg hip={j.hipN} knee={j.kneeN} ankle={j.ankleN} toe={j.toeN} d={d} av={av} skin={c.skin} bottom={c.bottom} shoe={c.shoe} />
       <Arm shoulder={j.shoulderN} elbow={j.elbowN} hand={j.handN} d={d} skin={c.skin} top={c.top} />
@@ -284,8 +294,8 @@ export function FrontBody({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: 
   const sh = d.shoulderHalf;
   const hh = d.hipHalf;
   const prof: Prof = (f
-    ? [[-0.06, hh + 3.2], [0.1, hh + 4.4], [0.42, sh * 0.68 + d.belly * 0.8], [0.7, sh * 0.95], [0.9, sh + 1], [1, 3.6]]
-    : [[-0.06, hh + 2.8], [0.1, hh + 3.4], [0.42, sh * 0.76 + d.belly * 0.8], [0.7, sh * 0.98], [0.9, sh + 1.8], [1, 4]]
+    ? [[-0.06, hh + 2.2], [0.1, hh + 3.0], [0.42, sh * 0.68 + d.belly * 0.8], [0.7, sh * 0.95], [0.9, sh + 1], [1, 3.6]]
+    : [[-0.06, hh + 2.0], [0.1, hh + 2.6], [0.42, sh * 0.76 + d.belly * 0.8], [0.7, sh * 0.98], [0.9, sh + 1.8], [1, 4]]
   ).map(([k, w]) => [k, w, w] as [number, number, number]);
   const half = (k0: number, k1: number, grow = 0): string => {
     const ks = [k0, ...prof.map((p) => p[0]).filter((k) => k > k0 && k < k1), k1];

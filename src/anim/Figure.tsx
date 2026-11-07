@@ -10,7 +10,7 @@ import { dims } from './pose';
 import type { Colors } from './Body';
 import { FrontBody, SideBody } from './Body';
 
-const SHOE = '#2B2F3A';
+const SHOE = '#6E7891';
 
 function colors(av: Avatar): Colors {
   const skin = SKIN_TONES[av.skin]?.color ?? SKIN_TONES[2].color;

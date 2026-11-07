@@ -57,7 +57,7 @@ export function dims(av: Avatar): Dims {
   }[av.build];
   const arms = av.build === 'musclee' ? 1.1 : 1;
   return {
-    head: 7.3 * (av.age === 'jeune' ? 1.06 : 1) * s,
+    head: 6.5 * (av.age === 'jeune' ? 1.06 : 1) * s,
     neck: 2 * s,
     torso: 30 * s,
     thigh: 24 * s,
