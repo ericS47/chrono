@@ -130,10 +130,19 @@ function media(s: Session): void {
   });
 }
 
+let lastResync = 0;
+
 function loop(): void {
   if (timer !== null) return;
   timer = window.setInterval(() => {
     if (!current || current.run.status !== 'running') return;
+    // Bips en direct décalés ou perdus (audio interrompu par la voix de l'iPhone,
+    // un appel…) : on relance l'audio et on les reprogramme depuis le temps réel.
+    if (audio.needsResync() && now() - lastResync > 2000) {
+      lastResync = now();
+      audio.unlock();
+      reschedule(current, false);
+    }
     const { state, events } = T.tick(current.run, now());
     if (!events.length) return;
     const s = { ...current, run: state };

@@ -108,6 +108,28 @@ class AudioEngine {
     return changed;
   }
 
+  /** Repère pris à la programmation : horloge audio et horloge de la page au même instant. */
+  private anchor: { ctx: number; perf: number } | null = null;
+
+  /**
+   * Vrai si les bips programmés en direct ne tombent plus juste : contexte audio
+   * arrêté ou interrompu (voix de l'iPhone, appel, autre app), ou horloge audio
+   * qui a pris du retard sur le chrono. Il faut alors les reprogrammer.
+   */
+  needsResync(): boolean {
+    if (!this.anchor || !this.ctx || this.trackPlaying()) return false;
+    // Audio arrêté : on tente de le relancer ; on reprogrammera quand il tournera
+    // (son horloge aura pris du retard), sans couper la voix en boucle d'ici là.
+    if (this.ctx.state !== 'running') {
+      void this.ctx.resume().catch(() => undefined);
+      return false;
+    }
+    const audioElapsed = this.ctx.currentTime - this.anchor.ctx;
+    const realElapsed = (performance.now() - this.anchor.perf) / 1000;
+    // Au démarrage, l'horloge audio peut rester à l'arrêt un court instant.
+    return realElapsed > 1 && Math.abs(audioElapsed - realElapsed) > 0.3;
+  }
+
   /** Vrai si le son peut sortir maintenant (contexte audio actif). */
   isRunning(): boolean {
     return this.ctx?.state === 'running';
@@ -283,6 +305,7 @@ class AudioEngine {
     this.unlock();
     const ctx = this.ctx;
     const t0 = performance.now();
+    this.anchor = ctx ? { ctx: ctx.currentTime, perf: t0 } : null;
     const beeps: Beep[] = [];
     for (const c of cues) {
       if (c.event && !s.silent) {
@@ -359,6 +382,7 @@ class AudioEngine {
     }
     this.scheduled.timers.forEach((t) => clearTimeout(t));
     this.scheduled = { nodes: [], timers: [] };
+    this.anchor = null;
     this.trackGen++;
     if (this.trackUrl) {
       this.player?.pause();
