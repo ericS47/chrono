@@ -185,9 +185,17 @@ export function Builder({ id }: { id?: string }) {
     nodes[nodes.length - 1]?.scrollIntoView({ block: 'end', behavior: 'auto' });
   }, [ready]);
 
+  // Copier : un bloc de travail va à la fin de la séance (on enchaîne les blocs), le reste juste après.
   const copy = (xid: string) => {
-    withItem(xid, (f) => f.list.splice(f.index + 1, 0, cloneWithIds(f.item)));
-    setToast('Copié');
+    const group = find(items, xid)?.item.type === 'group';
+    const c = cloneWithIds(find(items, xid)!.item);
+    withItem(xid, (f) => {
+      const k = structuredClone(c);
+      if (f.item.type === 'group') f.list.push(k);
+      else f.list.splice(f.index + 1, 0, k);
+    });
+    if (group) setLastAdded(c.id);
+    setToast(group ? 'Copié à la fin' : 'Copié');
   };
   const remove = (xid: string) => {
     mutate((list) => {
@@ -642,7 +650,7 @@ function BuilderSheet({
     const title = it.type === 'series' ? `Série × ${it.reps}` : it.type === 'group' ? it.name || 'Bloc de travail' : `${LABEL[it.type]} ${fmtClock(it.duration)}`;
     return (
       <Sheet title={title} onClose={close}>
-        <button className="btn block" onClick={() => { copy(xid); close(); }}>Copier (ajouté juste après)</button>
+        <button className="btn block" onClick={() => { copy(xid); close(); }}>{it.type === 'group' ? 'Copier (ajouté à la fin)' : 'Copier (ajouté juste après)'}</button>
         <button className="btn secondary block" onClick={() => open({ kind: it.type === 'series' ? 'series' : it.type === 'group' ? 'group' : 'step', id: xid })}>Régler</button>
         <button className="btn danger block" onClick={() => { remove(xid); close(); }}>Supprimer</button>
       </Sheet>
@@ -737,7 +745,7 @@ function BuilderSheet({
       </div>
       <p className="hint">Durée : <b>{fmtClock(timelineDuration([c]))}</b>.</p>
       <div className="btn-row">
-        <button className="btn secondary" onClick={() => { copy(xid); close(); }}>Copier</button>
+        <button className="btn secondary" onClick={() => { copy(xid); close(); }}>{isSeries ? 'Copier' : 'Copier à la fin'}</button>
         <button className="btn secondary" onClick={() => { unwrap(xid); close(); }}>{isSeries ? 'Défaire la série' : 'Défaire le bloc'}</button>
       </div>
       <button className="btn danger block" onClick={() => { remove(xid); close(); }}>Supprimer</button>
