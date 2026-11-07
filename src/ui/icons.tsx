@@ -53,6 +53,4 @@ export const IconUser = make(<><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5
 export const IconClock = make(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>);
 export const IconGrid = make(<><rect x="4" y="4" width="7" height="7" rx="2" /><rect x="13" y="4" width="7" height="7" rx="2" /><rect x="4" y="13" width="7" height="7" rx="2" /><rect x="13" y="13" width="7" height="7" rx="2" /></>);
 export const IconExpand = make(<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />);
-/** Porte entrouverte : sortir de l’app en gardant le chrono en mini-fenêtre. */
-export const IconDoor = make(<><path d="M14 3.5h4a1.5 1.5 0 011.5 1.5v14a1.5 1.5 0 01-1.5 1.5h-4" /><path d="M4.5 4.6 12 3v18l-7.5-1.6z" /><circle cx="9.4" cy="12" r="0.9" fill="currentColor" stroke="none" /></>);
 export const IconHistory = make(<><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.4" /><path d="M3 4v4h4M12 7v5l3 2" /></>);
