@@ -173,20 +173,12 @@ const CAP_F: [number, number][] = [[-0.1, 1.14], [0.5, 1.06], [0.9, 0.66], [0.98
 type HairKind = 'short' | 'long' | 'bob';
 const hairKind = (av: Avatar): HairKind => (av.sex === 'm' ? 'short' : av.age === 'senior' ? 'bob' : 'long');
 
-/** Cheveux qui tombent : partent de l'arrière du crâne et pendent vers le sol, quelle que soit la posture. */
-function fallingHair(o: Pt, fwd: Pt, up: Pt, r: number, len: number): string {
-  const L = (f: number, u: number): Pt => [o[0] + (fwd[0] * f + up[0] * u) * r, o[1] + (fwd[1] * f + up[1] * u) * r];
-  const top = L(-0.55, 0.9);
-  const back = L(-1.08, 0.3);
-  const ear = L(-0.42, -0.25);
-  // Tête penchée (pompe, gainage) : les cheveux pendent moins loin.
-  const k = len * (0.4 + 0.6 * Math.max(0, -up[1]));
-  // Largeur de la mèche à l'horizontale, au moins 0,9 rayon.
-  const dir = back[0] <= ear[0] ? -1 : 1;
-  const xb = back[0];
-  const xe = Math.abs(ear[0] - xb) < 0.9 * r ? xb - dir * 0.9 * r : ear[0];
-  const y0 = Math.max(back[1], ear[1]);
-  return smooth([top, back, [xb + dir * 0.12 * r, y0 + k * 0.55 * r], [xb, y0 + k * r], [xe, y0 + k * 0.92 * r], [xe + dir * 0.08 * r, y0 + k * 0.4 * r], ear]);
+/** Cheveux longs ou carré : fixés à la tête, ils suivent ses mouvements sans flotter. */
+function backHair(o: Pt, fwd: Pt, up: Pt, r: number, len: number): string {
+  // len : longueur sous le centre du crâne, en rayons (carré ≈ 0,8 ; cheveux longs ≈ 2,3).
+  return smooth(local(o, fwd, up, r, [
+    [-0.55, 0.9], [-1.06, 0.35], [-1.14, -len * 0.45], [-1.08, -len], [-0.62, -len - 0.08], [-0.46, -len * 0.45], [-0.42, -0.25],
+  ]));
 }
 
 function SideHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }) {
@@ -211,7 +203,7 @@ function SideHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }
       <Shape d={limb(j.neck, neckTop, NECK, d.wArm * 1.2)} fill={c.skin} shadow={limb(j.neck, neckTop, NECK, d.wArm * 1.2, { band: 0.4 })} />
       <Shape d={smooth(P(FACE))} fill={c.skin} />
       <ellipse cx={cheek[0]} cy={cheek[1]} rx={r * 0.2} ry={r * 0.13} fill={mix(c.skin, '#E8737A', 0.32)} />
-      {kind !== 'short' && <Shape d={fallingHair(j.headC, fwd, up, r, kind === 'long' ? 3.1 : 1.15)} fill={c.hair} shadow={fallingHair(j.headC, fwd, up, r * 0.82, kind === 'long' ? 3 : 1.05)} />}
+      {kind !== 'short' && <Shape d={backHair(j.headC, fwd, up, r, kind === 'long' ? 2.3 : 0.8)} fill={c.hair} />}
       <Shape d={smooth(P(cap))} fill={c.hair} />
       {kind === 'short' && <Shape d={ellipse(ear, r * 0.19, r * 0.26, deg + 90)} fill={mix(c.skin, INK, 0.06)} />}
       <ellipse cx={eye[0]} cy={eye[1]} rx={r * 0.09} ry={r * 0.14} transform={`rotate(${deg + 90} ${eye[0]} ${eye[1]})`} fill={INK} />
