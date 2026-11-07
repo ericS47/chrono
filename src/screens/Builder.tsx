@@ -12,7 +12,7 @@ import { launchWorkout } from '../lib/launch';
 import { back, go } from '../lib/router';
 import { DurationField, Sheet, Stepper, TopBar } from '../ui/kit';
 import { IconPlay } from '../ui/icons';
-import { EXERCISES, EXERCISE_BY_ID, isExerciseId } from '../anim/exercises';
+import { EXERCISES, EXERCISE_BY_ID, GROUP_LABELS, isExerciseId, type ExerciseGroup } from '../anim/exercises';
 import { ExerciseFigure, FigureFrame } from '../anim/Figure';
 
 const DRAFT_KEY = 'chrono.createur.brouillon';
@@ -681,7 +681,11 @@ function BuilderSheet({
                 onChange={(e) => { const v = e.target.value; withItem(xid, (x) => { const st = x.item as TimelineStep; if (v) st.exercise = v; else delete st.exercise; }); }}
               >
                 <option value="">D’après le commentaire</option>
-                {EXERCISES.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+                {(Object.keys(GROUP_LABELS) as ExerciseGroup[]).map((g) => (
+                  <optgroup key={g} label={GROUP_LABELS[g]}>
+                    {EXERCISES.filter((x) => x.group === g).sort((a, b) => a.label.localeCompare(b.label, 'fr')).map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+                  </optgroup>
+                ))}
               </select>
               {isExerciseId(it.exercise) ? (
                 <div className="bd-ex-preview"><ExerciseFigure exercise={it.exercise} avatar={settings.anim.avatar} /></div>

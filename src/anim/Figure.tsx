@@ -26,13 +26,15 @@ const REF = dims({ ...DEFAULT_AVATAR, sex: 'm', build: 'forte', height: 'grande'
 export function FigureFrame({ exercise, avatar, sec, title }: { exercise: ExerciseId; avatar: Avatar; sec: number; title?: string }) {
   const placed = useMemo(() => place(EXERCISE_BY_ID[exercise], dims(avatar)), [exercise, avatar]);
   const c = useMemo(() => colors(avatar), [avatar]);
-  const { j } = frameAt(placed, sec);
+  const { j, flat, roll } = frameAt(placed, sec);
   const b = frameBox(placed.ex, REF);
   const ex = placed.ex;
   return (
     <svg viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`} className={`figure ${b.w > b.h * 1.25 ? 'wide' : ''}`} role="img" aria-label={title ?? `Animation : ${ex.label}`}>
       <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={Math.min(ex.view === 'front' ? 26 : 48, b.w / 2 - 3)} ry={3.2} fill="rgba(20,24,58,0.12)" />
-      {ex.view === 'front' ? <FrontBody j={j} d={placed.d} av={avatar} c={c} /> : <SideBody j={j} d={placed.d} av={avatar} c={c} />}
+      {ex.view === 'front'
+        ? <g transform={roll ? `rotate(${roll} ${flat.hip[0]} ${flat.hip[1]})` : undefined}><FrontBody j={flat} d={placed.d} av={avatar} c={c} /></g>
+        : <SideBody j={j} d={placed.d} av={avatar} c={c} />}
     </svg>
   );
 }

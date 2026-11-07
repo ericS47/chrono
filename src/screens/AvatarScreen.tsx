@@ -6,7 +6,7 @@ import {
   AGE_LABELS, BOTTOM_COLORS, BUILD_LABELS, HAIR_COLORS, HEIGHT_LABELS, SKIN_TONES, TOP_COLORS,
 } from '../anim/avatar';
 import type { ExerciseId } from '../anim/exercises';
-import { EXERCISES } from '../anim/exercises';
+import { EXERCISES, GROUP_LABELS, type ExerciseGroup } from '../anim/exercises';
 import { ExerciseFigure } from '../anim/Figure';
 import { Segmented, Toggle, TopBar } from '../ui/kit';
 
@@ -44,11 +44,16 @@ export function AvatarScreen() {
       <div className="avatar-preview">
         <ExerciseFigure exercise={ex} avatar={av} />
       </div>
-      <div className="chips" role="group" aria-label="Exercice de l’aperçu">
-        {EXERCISES.map((e) => (
-          <button key={e.id} className="chip" aria-pressed={e.id === ex} onClick={() => setEx(e.id)}>{e.label}</button>
-        ))}
-      </div>
+      {(Object.keys(GROUP_LABELS) as ExerciseGroup[]).map((g) => (
+        <div key={g} className="ex-group">
+          <span className="field-label">{GROUP_LABELS[g]}</span>
+          <div className="chips" role="group" aria-label={`Exercice de l’aperçu : ${GROUP_LABELS[g]}`}>
+            {EXERCISES.filter((e) => e.group === g).sort((a, b) => a.label.localeCompare(b.label, 'fr')).map((e) => (
+              <button key={e.id} className="chip" aria-pressed={e.id === ex} onClick={() => setEx(e.id)}>{e.label}</button>
+            ))}
+          </div>
+        </div>
+      ))}
 
       <div className="form">
         <Toggle

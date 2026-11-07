@@ -17,6 +17,10 @@ export interface Pose {
   armN: number; foreN: number; armF: number; foreF: number;
   /** Hauteur de saut au-dessus du sol. */
   lift?: number;
+  /** Talons levés (degrés) : le pied pivote, pointe au sol (mollets, saut). */
+  heel?: number;
+  /** Vue de face : tout le corps basculé (degrés, sens horaire), pour le gainage latéral. */
+  roll?: number;
 }
 
 export type Pt = [number, number];
@@ -111,11 +115,12 @@ export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
   const h = rad(t + (p.head ?? 0) + d.stoop);
   const headC = add(neck, [Math.sin(h), -Math.cos(h)], d.neck + d.head);
   const shoulder = add(neck, up, -2.5);
+  const heel = p.heel ?? 0;
   const leg = (thigh: number, shin: number) => {
     const knee = add(hip, dir(thigh), d.thigh);
     const ankle = add(knee, dir(shin), d.shin);
     // Le pied reste à peu près perpendiculaire au tibia, à plat quand on est debout.
-    const toe = add(ankle, dir(shin + 90 - Math.min(0, shin) * 0.15), d.foot);
+    const toe = add(ankle, dir(shin + 90 - Math.min(0, shin) * 0.15 - heel), d.foot);
     return { knee, ankle, toe };
   };
   const arm = (a: number, f: number) => {
@@ -150,6 +155,22 @@ export function lowest(j: Joints, d: Dims): number {
   return Math.max(...contacts(j, d).map(([p, r]) => p[1] + r));
 }
 
+/** Tourne toutes les articulations autour de la hanche (degrés, sens horaire à l'écran). */
+export function rotate(j: Joints, deg: number): Joints {
+  if (!deg) return j;
+  const r = rad(deg);
+  const c = Math.cos(r);
+  const s = Math.sin(r);
+  const [ox, oy] = j.hip;
+  const out = { ...j } as Record<keyof Joints, Pt>;
+  for (const k of Object.keys(j) as (keyof Joints)[]) {
+    const [x, y] = j[k];
+    if (k === 'up' || k === 'front') out[k] = [x * c - y * s, x * s + y * c];
+    else out[k] = [ox + (x - ox) * c - (y - oy) * s, oy + (x - ox) * s + (y - oy) * c];
+  }
+  return out as Joints;
+}
+
 export function translate(j: Joints, dx: number, dy: number): Joints {
   const out = { ...j } as Record<keyof Joints, Pt>;
   for (const k of Object.keys(j) as (keyof Joints)[]) {
@@ -165,6 +186,6 @@ export function lerpPose(a: Pose, b: Pose, t: number): Pose {
     torso: l(a.torso, b.torso), head: l(a.head, b.head),
     thighN: l(a.thighN, b.thighN), shinN: l(a.shinN, b.shinN), thighF: l(a.thighF, b.thighF), shinF: l(a.shinF, b.shinF),
     armN: l(a.armN, b.armN), foreN: l(a.foreN, b.foreN), armF: l(a.armF, b.armF), foreF: l(a.foreF, b.foreF),
-    lift: l(a.lift, b.lift),
+    lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll),
   };
 }

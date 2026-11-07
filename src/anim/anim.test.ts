@@ -20,6 +20,17 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Abdos')).toBe('situp');
     expect(matchExercise('Sit-ups')).toBe('situp');
     expect(matchExercise('Montées de genoux')).toBe('highknees');
+    // Renforcement : le nom le plus précis l'emporte.
+    expect(matchExercise('Pompes sur les genoux')).toBe('kneepushup');
+    expect(matchExercise('10 pompes')).toBe('pushup');
+    expect(matchExercise('Squats sautés')).toBe('jumpsquat');
+    expect(matchExercise('Gainage latéral')).toBe('sideplank');
+    expect(matchExercise('Gainage')).toBe('plank');
+    expect(matchExercise('Pont fessier')).toBe('bridge');
+    expect(matchExercise('Superman')).toBe('superman');
+    expect(matchExercise('Relevés de jambes')).toBe('legraise');
+    expect(matchExercise('Mollets')).toBe('calfraise');
+    expect(matchExercise('Bird dog')).toBe('birddog');
   });
   it('ne devine pas un exercice inconnu', () => {
     expect(matchExercise('Effort')).toBeNull();
