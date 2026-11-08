@@ -128,7 +128,7 @@ export function SettingsScreen() {
         <div className="form">
           <Stepper label="Préparation par défaut" hint="Modifiable pour chaque séance" value={s.prepSeconds} min={0} max={60} step={5} format={(v) => `${v} s`} onChange={(v) => up({ prepSeconds: v })} />
           <Toggle label="Vibration" hint="À chaque changement de phase" checked={s.vibration} onChange={(v) => up({ vibration: v })} />
-          <Toggle label="Écran toujours allumé" hint="Tant que Chrono est ouvert : le téléphone ne se met pas en veille" checked={s.keepAwake} onChange={(v) => up({ keepAwake: v })} />
+          <Toggle label="Écran toujours allumé" hint="Tant que Pulse est ouvert : le téléphone ne se met pas en veille" checked={s.keepAwake} onChange={(v) => up({ keepAwake: v })} />
           <div className="field">
             <label htmlFor="savemode">À la fin d’une séance</label>
             <select id="savemode" value={s.saveMode} onChange={(e) => up({ saveMode: e.target.value as Settings['saveMode'] })}>
@@ -213,7 +213,7 @@ export function SettingsScreen() {
         <p className="hint" style={{ margin: 0 }}>Tout reste sur ce téléphone. Exporte une sauvegarde de temps en temps, et avant de changer de téléphone.</p>
       </section>
 
-      <p className="hint" style={{ margin: 0, textAlign: 'center' }}>Chrono {__APP_VERSION__} du {__APP_BUILD__} · 100 % local, sans compte</p>
+      <p className="hint" style={{ margin: 0, textAlign: 'center' }}>Pulse {__APP_VERSION__} du {__APP_BUILD__} · 100 % local, sans compte</p>
       <p className="hint" style={{ margin: 0, textAlign: 'center' }} data-testid="platform-info">{platformInfo()}</p>
       {msg && <div className="toast" role="status">{msg}</div>}
     </main>

@@ -76,7 +76,7 @@ export async function exportBackup(d: ChronoDB = db): Promise<Backup> {
 /** Importe une sauvegarde. `replace` vide d'abord les données existantes, sinon fusionne. */
 export async function importBackup(data: unknown, replace: boolean, d: ChronoDB = db): Promise<{ workouts: number; logs: number }> {
   const b = data as Partial<Backup>;
-  if (!b || b.app !== 'chrono' || !Array.isArray(b.workouts)) throw new Error('Ce fichier n’est pas une sauvegarde Chrono.');
+  if (!b || b.app !== 'chrono' || !Array.isArray(b.workouts)) throw new Error('Ce fichier n’est pas une sauvegarde Pulse.');
   await d.transaction('rw', [d.workouts, d.schedules, d.logs, d.settings], async () => {
     if (replace) {
       await Promise.all([d.workouts.clear(), d.schedules.clear(), d.logs.clear()]);

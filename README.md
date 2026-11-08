@@ -1,4 +1,6 @@
-# Chrono
+# Pulse
+
+*Un peu Pulse chaque jour.* (Anciennement « Chrono » ; le dépôt garde son nom `chrono`.)
 
 Chrono de séance sportive (PWA, pensée pour un téléphone Android) : AMRAP, EMOM, For Time, Tabata, intervalles, chrono, compte à rebours, étapes personnalisées, musculation et course. On prépare ses séances, on les planifie, l'app guide au bip et à la voix, et on garde un historique. **100 % local** : pas de compte, pas de serveur, tout reste sur le téléphone.
 

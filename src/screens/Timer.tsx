@@ -243,7 +243,7 @@ export function TimerScreen() {
           <IconClose size={18} />
         </button>
         <div className="center">
-          <span>{blocks > 1 ? `Bloc ${ph.blockIndex + 1} / ${blocks}` : block && blockTitle(block) !== workout.name ? blockTitle(block) : 'Chrono'}</span>
+          <span>{blocks > 1 ? `Bloc ${ph.blockIndex + 1} / ${blocks}` : block && blockTitle(block) !== workout.name ? blockTitle(block) : 'Pulse'}</span>
           <b>{workout.name}</b>
         </div>
         <div className="timer-top-right">

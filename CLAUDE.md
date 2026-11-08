@@ -1,6 +1,6 @@
 # Chrono — consignes pour Claude
 
-App de chrono de séance sportive (PWA installable), 100 % locale, en français.
+App de chrono de séance sportive **Pulse** (anciennement Chrono ; slogan « Un peu Pulse chaque jour »), PWA installable, 100 % locale, en français. Logo : `scripts/logo-pulse.webp`, icônes générées par `scripts/icons.mjs`. « Chrono » reste le nom du mode chrono libre.
 Le propriétaire de l'app est Eric ; il écrit en français : réponds en français.
 
 - Plan validé : `docs/PLAN.md` (dont la liste « Reste à faire »). Design validé : `docs/DESIGN.md`. Les respecter.

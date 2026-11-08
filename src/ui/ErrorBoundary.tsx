@@ -18,7 +18,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
     return (
       <main className="screen no-nav">
         <h1 className="page-title">Oups</h1>
-        <p>Chrono a rencontré une erreur. Tes données sont intactes.</p>
+        <p>Pulse a rencontré une erreur. Tes données sont intactes.</p>
         <pre className="code-box" style={{ whiteSpace: 'pre-wrap' }}>{`${error.name}: ${error.message}\n${(error.stack ?? '').split('\n').slice(0, 6).join('\n')}\n${navigator.userAgent}`}</pre>
         <button className="btn" onClick={() => { window.location.hash = '#/'; this.setState({ error: null }); }}>Revenir à l’accueil</button>
       </main>

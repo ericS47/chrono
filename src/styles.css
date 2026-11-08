@@ -91,6 +91,7 @@ h1, h2, h3 { margin: 0; }
 
 .page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
 .page-head .eyebrow { font-size: 13px; font-weight: 600; color: var(--muted); }
+.slogan { margin: 4px 0 0; font-size: 15px; font-weight: 700; color: var(--accent); }
 .page-title { font-weight: 800; font-size: 32px; line-height: 1.05; letter-spacing: -0.03em; }
 
 .section { display: flex; flex-direction: column; gap: 12px; }
