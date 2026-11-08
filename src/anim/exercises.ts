@@ -11,7 +11,8 @@ export type ExerciseId =
   | 'buttkicks' | 'shuffleright' | 'shuffleleft' | 'shufflealt'
   | 'kbswing' | 'kbgoblet' | 'bandcurl' | 'bandraise'
   | 'dbcurl' | 'dbpress' | 'dbrow' | 'sittostand' | 'kneeext' | 'chairdips'
-  | 'seatedmarch' | 'seateddbcurl' | 'seateddbpress' | 'seatedbandrow' | 'seatedkbraise';
+  | 'seatedmarch' | 'seateddbcurl' | 'seateddbpress' | 'seatedbandrow' | 'seatedkbraise'
+  | 'ringpress' | 'ringbridge';
 
 type Anchor = 'feet' | 'hands' | 'hip';
 
@@ -25,14 +26,16 @@ interface Frame {
   x?: number;
 }
 
-/** Catégories : membres inférieurs, membres supérieurs, tronc, abdominaux, cardio. */
-export type ExerciseGroup = 'mi' | 'ms' | 'tronc' | 'abdo' | 'cardio';
-export const GROUP_LABELS: Record<ExerciseGroup, string> = { mi: 'MI · membres inférieurs', ms: 'MS · membres supérieurs', tronc: 'Tronc', abdo: 'Abdo', cardio: 'Cardio' };
+/** Catégories : membres inférieurs, membres supérieurs, tronc (abdos compris), cardio. */
+export type ExerciseGroup = 'mi' | 'ms' | 'tronc' | 'cardio';
+export const GROUP_LABELS: Record<ExerciseGroup, string> = { mi: 'MI · membres inférieurs', ms: 'MS · membres supérieurs', tronc: 'Tronc', cardio: 'Cardio' };
 
 export interface ExerciseAnim {
   id: ExerciseId;
   label: string;
   group: ExerciseGroup;
+  /** Catégories supplémentaires (l'exercice apparaît aussi dans ces bandeaux). */
+  also?: ExerciseGroup[];
   view: 'side' | 'front';
   /** Durée d'un cycle, en secondes. */
   period: number;
@@ -46,15 +49,17 @@ export interface ExerciseAnim {
   chairUnder?: 'hip' | 'hands';
 }
 
-/** Matériel : sans matériel, kettlebell, élastique, haltères. */
-export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell';
-export const EQUIPMENT_LABELS: Record<Equipment, string> = { none: 'Sans matériel', kettlebell: 'Kettlebell', band: 'Élastique', dumbbell: 'Haltères' };
+/** Matériel : sans matériel, kettlebell, élastique, haltères, anneau de Pilates. */
+export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell' | 'ring';
+export const EQUIPMENT_LABELS: Record<Equipment, string> = { none: 'Sans matériel', kettlebell: 'Kettlebell', band: 'Élastique', dumbbell: 'Haltères', ring: 'Anneau de Pilates' };
 
 /** Position : debout (ou au sol), ou sur une chaise (dessinée avec l'avatar). */
 export type Position = 'standing' | 'chair';
 export const POSITION_LABELS: Record<Position, string> = { standing: 'Debout', chair: 'Chaise' };
 export const positionOf = (e: ExerciseAnim): Position => (e.chairUnder ? 'chair' : 'standing');
 export const equipmentOf = (e: ExerciseAnim): Equipment => e.equipment ?? 'none';
+/** L'exercice appartient-il à cette catégorie (principale ou supplémentaire) ? */
+export const inGroup = (e: ExerciseAnim, g: ExerciseGroup): boolean => e.group === g || !!e.also?.includes(g);
 
 const STAND: Pose = { torso: 0, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 8, foreN: 14, armF: -5, foreF: 3 };
 const HIGH_PLANK: Pose = { torso: 68, head: -6, thighN: -68, shinN: -68, thighF: -68, shinF: -68, armN: 0, foreN: 0, armF: 3, foreF: 3 };
@@ -133,7 +138,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'burpee', label: 'Burpee', group: 'ms', view: 'side', period: 3.2, anchor: 'feet', words: ['burpee'],
+    id: 'burpee', label: 'Burpee', group: 'cardio', view: 'side', period: 3.2, anchor: 'feet', words: ['burpee'],
     frames: [
       { pose: STAND, anchor: 'feet' },
       { pose: BURPEE_LOW, anchor: 'feet', w: 0.7 },
@@ -143,21 +148,21 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'climber', label: 'Mountain climber', group: 'cardio', view: 'side', period: 0.9, anchor: 'hands', words: ['mountain climber', 'climber', 'grimpeur'],
+    id: 'climber', label: 'Mountain climber', group: 'tronc', view: 'side', period: 0.9, anchor: 'hands', words: ['mountain climber', 'climber', 'grimpeur'],
     frames: [
       { pose: { ...HIGH_PLANK, thighN: 55, shinN: -95 } },
       { pose: { ...HIGH_PLANK, thighF: 55, shinF: -95 } },
     ],
   },
   {
-    id: 'situp', label: 'Abdos', group: 'abdo', view: 'side', period: 2.4, anchor: 'hip', words: ['abdo', 'sit up', 'situp', 'crunch', 'relevé de buste', 'releve de buste'],
+    id: 'situp', label: 'Abdos', group: 'tronc', view: 'side', period: 2.4, anchor: 'hip', words: ['abdo', 'sit up', 'situp', 'crunch', 'relevé de buste', 'releve de buste'],
     frames: [
       { pose: { torso: -84, head: 8, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 150, foreN: 150, armF: 146, foreF: 146 } },
       { pose: { torso: -18, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 95, foreN: 98, armF: 92, foreF: 95 } },
     ],
   },
   {
-    id: 'highknees', label: 'Montées de genoux', group: 'mi', view: 'side', period: 0.75, anchor: 'hip', words: ['montee de genou', 'montees de genou', 'high knee', 'genoux haut', 'genoux poitrine'],
+    id: 'highknees', label: 'Montées de genoux', group: 'mi', also: ['cardio'], view: 'side', period: 0.75, anchor: 'hip', words: ['montee de genou', 'montees de genou', 'high knee', 'genoux haut', 'genoux poitrine'],
     frames: [
       { pose: { torso: -2, thighN: 95, shinN: 5, thighF: 2, shinF: 2, armN: -35, foreN: 30, armF: 45, foreF: 120, lift: 2 } },
       { pose: { torso: -2, thighN: 2, shinN: 2, thighF: 95, shinF: 5, armN: 45, foreN: 120, armF: -35, foreF: 30, lift: 2 } },
@@ -197,7 +202,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'legraise', label: 'Relevés de jambes', group: 'abdo', view: 'side', period: 2.6, anchor: 'hip',
+    id: 'legraise', label: 'Relevés de jambes', group: 'tronc', view: 'side', period: 2.6, anchor: 'hip',
     words: ['releve de jambe', 'releves de jambe', 'leg raise', 'levee de jambe'],
     frames: [
       { pose: { torso: -88, head: 6, thighN: 92, shinN: 92, thighF: 91, shinF: 91, armN: 70, foreN: 85, armF: 68, foreF: 85 } },
@@ -240,7 +245,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'buttkicks', label: 'Talons-fesses', group: 'cardio', view: 'side', period: 0.62, anchor: 'hip',
+    id: 'buttkicks', label: 'Talons-fesses', group: 'cardio', also: ['mi'], view: 'side', period: 0.62, anchor: 'hip',
     words: ['talon fesse', 'talons fesses', 'talon aux fesse', 'butt kick', 'heel kick'],
     frames: [
       { pose: { torso: 6, head: -4, thighN: 8, shinN: -150, thighF: -2, shinF: 2, armN: -30, foreN: 50, armF: 35, foreF: 115, lift: 3 } },
@@ -386,6 +391,24 @@ export const EXERCISES: ExerciseAnim[] = [
     frames: [
       { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 30, foreN: 32, armF: 28, foreF: 30 } },
       { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 95, foreN: 95, armF: 93, foreF: 93 } },
+    ],
+  },
+  {
+    id: 'ringpress', label: 'Compression anneau (bras)', group: 'ms', view: 'front', period: 2.2, anchor: 'hip', equipment: 'ring',
+    words: ['compression anneau', 'anneau pilates', 'anneau de pilates', 'cercle pilates', 'magic circle', 'presse anneau'],
+    frames: [
+      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 55, foreN: -95, armF: 55, foreF: -95 } },
+      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 45, foreN: -98, armF: 45, foreF: -98 }, w: 0.5 },
+      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 45, foreN: -98, armF: 45, foreF: -98 } },
+    ],
+  },
+  {
+    id: 'ringbridge', label: 'Pont fessier avec anneau', group: 'mi', view: 'side', period: 2.8, anchor: 'feet', equipment: 'ring',
+    words: ['pont fessier anneau', 'pont avec anneau', 'pont fessier avec anneau', 'adduction anneau'],
+    frames: [
+      { pose: { torso: -88, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 70, foreN: 85, armF: 68, foreF: 85 } },
+      { pose: { torso: -112, head: 14, thighN: 100, shinN: -5, thighF: 98, shinF: -5, armN: 60, foreN: 80, armF: 58, foreF: 80 }, w: 0.5 },
+      { pose: { torso: -112, head: 14, thighN: 100, shinN: -5, thighF: 98, shinF: -5, armN: 60, foreN: 80, armF: 58, foreF: 80 } },
     ],
   },
 ];

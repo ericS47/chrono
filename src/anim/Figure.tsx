@@ -81,10 +81,34 @@ function Chair({ seatY, front }: { seatY: number; front: number }) {
   );
 }
 
+const RING = '#3DB8AD';
+/** Anneau de Pilates : de face, tenu entre les mains ; de profil, serré entre les genoux. */
+function Ring({ j, view }: { j: Joints; view: 'side' | 'front' }) {
+  if (view === 'front') {
+    const [ax, ay] = j.handF;
+    const [bx, by] = j.handN;
+    const cx = (ax + bx) / 2;
+    const cy = (ay + by) / 2;
+    const rx = Math.max(3, Math.abs(bx - ax) / 2 + 1);
+    return (
+      <g>
+        <ellipse cx={cx} cy={cy} rx={rx} ry={8} fill="none" stroke={RING} strokeWidth={1.9} />
+        <rect x={ax - 2.2} y={ay - 2.8} width={4.4} height={5.6} rx={1.5} fill="#2B2F3A" opacity={0.85} />
+        <rect x={bx - 2.2} y={by - 2.8} width={4.4} height={5.6} rx={1.5} fill="#2B2F3A" opacity={0.85} />
+      </g>
+    );
+  }
+  // De profil, l'anneau est vu par la tranche, entre les genoux.
+  const [kx, ky] = j.kneeN;
+  const ang = (Math.atan2(j.kneeN[1] - j.hipN[1], j.kneeN[0] - j.hipN[0]) * 180) / Math.PI;
+  return <ellipse cx={kx} cy={ky} rx={2.4} ry={7} fill="none" stroke={RING} strokeWidth={1.9} transform={`rotate(${ang} ${kx} ${ky})`} />;
+}
+
 /** Matériel tenu ou utilisé (dessiné par-dessus le corps ; la chaise est dessinée derrière). */
-function Equipment({ kind, j, view }: { kind: 'kettlebell' | 'band' | 'dumbbell'; j: Joints; view: 'side' | 'front' }) {
+function Equipment({ kind, j, view }: { kind: 'kettlebell' | 'band' | 'dumbbell' | 'ring'; j: Joints; view: 'side' | 'front' }) {
   const mid = (a: Pt, b: Pt): Pt => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
   if (kind === 'kettlebell') return <Kettlebell hand={mid(j.handN, j.handF)} r={5} />;
+  if (kind === 'ring') return <Ring j={j} view={view} />;
   if (kind === 'dumbbell') {
     return (
       <g>

@@ -48,6 +48,9 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Rowing assis')).toBe('seatedbandrow');
     expect(matchExercise('Montée de genou assis')).toBe('seatedmarch');
     expect(matchExercise('Élévation frontale')).toBe('seatedkbraise');
+    expect(matchExercise('Anneau de Pilates')).toBe('ringpress');
+    expect(matchExercise('Pont fessier avec anneau')).toBe('ringbridge');
+    expect(matchExercise('Pont fessier')).toBe('bridge');
     expect(matchExercise('Pas chassé D')).toBe('shuffleright');
     expect(matchExercise('Pas chassés droite')).toBe('shuffleright');
     expect(matchExercise('Pas chassé G')).toBe('shuffleleft');
@@ -109,6 +112,19 @@ describe('animation', () => {
     };
     expect(h({ ...DEFAULT_AVATAR, height: 'grande' })).toBeGreaterThan(h(DEFAULT_AVATAR));
     expect(h({ ...DEFAULT_AVATAR, height: 'petite' })).toBeLessThan(h(DEFAULT_AVATAR));
+  });
+});
+
+describe('catégories', () => {
+  it('abdos dans le tronc ; montées de genoux et talons-fesses en MI et en cardio', async () => {
+    const { EXERCISE_BY_ID, inGroup } = await import('./exercises');
+    expect(EXERCISE_BY_ID.situp.group).toBe('tronc');
+    expect(EXERCISE_BY_ID.burpee.group).toBe('cardio');
+    expect(EXERCISE_BY_ID.climber.group).toBe('tronc');
+    for (const id of ['highknees', 'buttkicks'] as const) {
+      expect(inGroup(EXERCISE_BY_ID[id], 'mi')).toBe(true);
+      expect(inGroup(EXERCISE_BY_ID[id], 'cardio')).toBe(true);
+    }
   });
 });
 
