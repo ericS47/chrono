@@ -49,6 +49,8 @@ export interface ExerciseAnim {
   words: string[];
   /** Matériel (sans matériel par défaut), dessiné avec l'avatar. */
   equipment?: Equipment;
+  /** Branches où l'exercice apparaît (par défaut : chaise s'il y en a une, sinon debout). */
+  positions?: Position[];
   /** Exercice sur chaise : chaise posée sous la hanche (assis) ou sous les mains (dips), d'après la première posture. */
   chairUnder?: ChairUnder;
 }
@@ -63,6 +65,8 @@ export type Position = 'standing' | 'chair';
 export type ChairUnder = 'hip' | 'hands' | 'foot';
 export const POSITION_LABELS: Record<Position, string> = { standing: 'Debout', chair: 'Chaise' };
 export const positionOf = (e: ExerciseAnim): Position => (e.chairUnder ? 'chair' : 'standing');
+/** L'exercice apparaît-il dans cette branche (debout ou chaise) ? */
+export const inPosition = (e: ExerciseAnim, pos: Position): boolean => (e.positions ?? [positionOf(e)]).includes(pos);
 export const equipmentOf = (e: ExerciseAnim): Equipment => e.equipment ?? 'none';
 /** L'exercice appartient-il à cette catégorie (principale ou supplémentaire) ? */
 export const inGroup = (e: ExerciseAnim, g: ExerciseGroup): boolean => e.group === g || !!e.also?.includes(g);
@@ -420,7 +424,7 @@ export const EXERCISES: ExerciseAnim[] = [
 
   // ---------- Sans matériel : MI ----------
   {
-    id: 'bulgarian', label: 'Squat sur une jambe (pied sur la chaise)', group: 'mi', view: 'side', period: 2.8, anchor: 'feet', chairUnder: 'foot',
+    id: 'bulgarian', label: 'Squat bulgare', group: 'mi', view: 'side', period: 2.8, anchor: 'feet', chairUnder: 'foot', positions: ['standing', 'chair'],
     words: ['squat sur une jambe', 'squat bulgare', 'fente bulgare', 'split squat', 'squat une jambe'],
     frames: [
       { pose: { torso: 6, thighN: 10, shinN: 0, thighF: -40, shinF: -70, armN: 30, foreN: -20, armF: 28, foreF: -22 } },

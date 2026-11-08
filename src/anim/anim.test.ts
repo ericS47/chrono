@@ -29,6 +29,7 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Pont fessier')).toBe('bridge');
     // Sans matériel (MI, MS, tronc).
     expect(matchExercise('Squat sur une jambe')).toBe('bulgarian');
+    expect(matchExercise('Squat bulgare')).toBe('bulgarian');
     expect(matchExercise('Relevé de la pointe des pieds')).toBe('toeraise');
     expect(matchExercise('Abduction de la jambe')).toBe('legabduction');
     expect(matchExercise('Adduction de la jambe')).toBe('legadduction');
@@ -80,6 +81,7 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Pont fessier')).toBe('bridge');
     // Sans matériel (MI, MS, tronc).
     expect(matchExercise('Squat sur une jambe')).toBe('bulgarian');
+    expect(matchExercise('Squat bulgare')).toBe('bulgarian');
     expect(matchExercise('Relevé de la pointe des pieds')).toBe('toeraise');
     expect(matchExercise('Abduction de la jambe')).toBe('legabduction');
     expect(matchExercise('Adduction de la jambe')).toBe('legadduction');
@@ -170,6 +172,10 @@ describe('catégories', () => {
     expect(EXERCISE_BY_ID.situp.group).toBe('tronc');
     expect(EXERCISE_BY_ID.burpee.group).toBe('cardio');
     expect(EXERCISE_BY_ID.climber.group).toBe('tronc');
+    const { inPosition } = await import('./exercises');
+    expect(inPosition(EXERCISE_BY_ID.bulgarian, 'standing')).toBe(true);
+    expect(inPosition(EXERCISE_BY_ID.bulgarian, 'chair')).toBe(true);
+    expect(inPosition(EXERCISE_BY_ID.squat, 'chair')).toBe(false);
     for (const id of ['highknees', 'buttkicks'] as const) {
       expect(inGroup(EXERCISE_BY_ID[id], 'mi')).toBe(true);
       expect(inGroup(EXERCISE_BY_ID[id], 'cardio')).toBe(true);

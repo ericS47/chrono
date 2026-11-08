@@ -5,7 +5,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import type { Avatar } from './avatar';
 import type { Equipment, ExerciseGroup, ExerciseId, Position } from './exercises';
-import { EQUIPMENT_LABELS, EXERCISES, EXERCISE_BY_ID, GROUP_LABELS, POSITION_LABELS, equipmentOf, inGroup, positionOf } from './exercises';
+import { EQUIPMENT_LABELS, EXERCISES, EXERCISE_BY_ID, GROUP_LABELS, POSITION_LABELS, equipmentOf, inGroup, inPosition, positionOf } from './exercises';
 import { FigureFrame } from './Figure';
 
 /** Couleur du bandeau de chaque catégorie. */
@@ -50,7 +50,7 @@ export function ExercisePicker({ value, onChange, avatar, label = 'Exercice anim
     onChange(v);
     setOpen(false);
   };
-  const list = EXERCISES.filter((x) => positionOf(x) === pos && equipmentOf(x) === equip);
+  const list = EXERCISES.filter((x) => inPosition(x, pos) && equipmentOf(x) === equip);
   return (
     <div className="ex-picker">
       <button
