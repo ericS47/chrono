@@ -50,13 +50,13 @@ function ShareSheet({ w, onClose }: { w: Workout; onClose: () => void }) {
   };
   return (
     <Sheet title="Partager la séance" onClose={onClose}>
-      <p className="hint" style={{ margin: 0 }}>Scanne ce QR code ou envoie le lien : la séance s’ouvre dans Chrono sur l’autre téléphone, sans compte ni serveur.</p>
+      <p className="hint" style={{ margin: 0 }}>Scanne ce QR code ou envoie le lien : la séance s’ouvre dans Pulse sur l’autre téléphone, sans compte ni serveur.</p>
       {qr ? <div className="qr"><img src={qr} alt="QR code de la séance" /></div> : <p className="hint">Séance trop longue pour un QR code : utilise le lien.</p>}
       <div className="code-box">{url}</div>
       <div className="btn-row">
         <button className="btn" onClick={() => void copy()}>{copied ? 'Lien copié' : 'Copier le lien'}</button>
         {'share' in navigator && (
-          <button className="btn secondary" onClick={() => void navigator.share({ title: w.name, text: `Séance « ${w.name} » pour Chrono`, url }).catch(() => undefined)}>Envoyer…</button>
+          <button className="btn secondary" onClick={() => void navigator.share({ title: w.name, text: `Séance « ${w.name} » pour Pulse`, url }).catch(() => undefined)}>Envoyer…</button>
         )}
       </div>
     </Sheet>

@@ -139,7 +139,7 @@ export function setMediaSession(title: string, artist: string, handlers: { play?
       (['play', 'pause', 'nexttrack'] as MediaSessionAction[]).forEach((a) => ms.setActionHandler(a, null));
       return;
     }
-    ms.metadata = new MediaMetadata({ title, artist, album: 'Chrono' });
+    ms.metadata = new MediaMetadata({ title, artist, album: 'Pulse' });
     ms.setActionHandler('play', handlers.play ?? null);
     ms.setActionHandler('pause', handlers.pause ?? null);
     ms.setActionHandler('nexttrack', handlers.next ?? null);

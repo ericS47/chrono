@@ -18,11 +18,11 @@ export default defineConfig({
     VitePWA({
       // Mise à jour appliquée par main.tsx, jamais pendant une séance.
       registerType: 'prompt',
-      includeAssets: ['icon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Chrono',
-        short_name: 'Chrono',
-        description: 'Chrono de séance : AMRAP, EMOM, Tabata, intervalles, musculation, course.',
+        name: 'Pulse',
+        short_name: 'Pulse',
+        description: 'Un peu Pulse chaque jour. Chrono de séance : AMRAP, EMOM, Tabata, intervalles, musculation, course.',
         lang: 'fr',
         start_url: './',
         scope: './',

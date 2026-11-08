@@ -6,6 +6,8 @@ test.beforeEach(async ({ page }) => {
 
 test('accueil : chrono rapide et navigation', async ({ page }) => {
   await page.goto('./');
+  await expect(page).toHaveTitle('Pulse');
+  await expect(page.getByText('Un peu Pulse chaque jour')).toBeVisible();
   await expect(page.locator('.big-tile')).toHaveCount(2);
   await page.locator('.big-tile', { hasText: 'Types de séances' }).click();
   await expect(page.getByRole('heading', { name: 'Types de séances' })).toBeVisible();
@@ -294,7 +296,7 @@ test('PWA : manifeste et service worker', async ({ page, request }) => {
   const res = await request.get('./manifest.webmanifest');
   expect(res.ok()).toBe(true);
   const m = await res.json();
-  expect(m.name).toBe('Chrono');
+  expect(m.name).toBe('Pulse');
   expect(m.display).toBe('standalone');
   expect(m.icons.length).toBeGreaterThanOrEqual(3);
   expect((await request.get('./sw.js')).ok()).toBe(true);

@@ -100,7 +100,7 @@ export function ScheduleForm() {
             </button>
           )}
           {s.reminderMinutes !== null && (
-            <span className="hint">Le rappel ne s’affiche que si Chrono est ouvert (limite du navigateur).</span>
+            <span className="hint">Le rappel ne s’affiche que si Pulse est ouvert (limite du navigateur).</span>
           )}
         </div>
       </div>
