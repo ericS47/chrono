@@ -629,14 +629,12 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'arnold', label: 'Développé Arnold', group: 'ms', view: 'side', period: 3, anchor: 'feet',
     words: ['developpe arnold', 'arnold press', 'arnold'],
     frames: [
-      // Mains devant le visage, coudes devant.
-      { pose: { ...STAND, armN: 28, foreN: 168, armF: 26, foreF: 166 } },
-      // À 90°, les coudes s'écartent sur les côtés (de profil, le haut du bras pivote vers nous).
-      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.6 },
+      // Coudes à 90° écartés sur les côtés (de profil, le haut du bras pivote vers nous), avant-bras vers le haut.
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.9 },
+      // Poussée au-dessus de la tête, puis retour coudes écartés.
+      { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 }, w: 0.9 },
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.8 },
-      // Poussée au-dessus de la tête.
-      { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 } },
-      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.6 },
+      // Les coudes se rejoignent devant, bras toujours à 90°, puis se réécartent.
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.8 },
     ],
   },
@@ -644,14 +642,12 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'dbarnold', label: 'Développé Arnold (haltères)', group: 'ms', view: 'side', period: 3, anchor: 'feet', equipment: 'dumbbell',
     words: ['developpe arnold haltere', 'arnold press haltere', 'arnold haltere'],
     frames: [
-      // Mains devant le visage, coudes devant.
-      { pose: { ...STAND, armN: 28, foreN: 168, armF: 26, foreF: 166 } },
-      // À 90°, les coudes s'écartent sur les côtés (de profil, le haut du bras pivote vers nous).
-      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.6 },
+      // Coudes à 90° écartés sur les côtés (de profil, le haut du bras pivote vers nous), avant-bras vers le haut.
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.9 },
+      // Poussée au-dessus de la tête, puis retour coudes écartés.
+      { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 }, w: 0.9 },
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.8 },
-      // Poussée au-dessus de la tête.
-      { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 } },
-      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.6 },
+      // Les coudes se rejoignent devant, bras toujours à 90°, puis se réécartent.
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.8 },
     ],
   },
