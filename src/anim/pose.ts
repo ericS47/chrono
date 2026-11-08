@@ -23,6 +23,8 @@ export interface Pose {
   shrug?: number;
   /** De profil : longueur apparente des bras (1 = entière ; moins = bras tendus vers nous, ex. ouverture latérale). */
   reach?: number;
+  /** Longueur apparente du seul haut du bras (coudes qui s'écartent sur les côtés, avant-bras vertical). */
+  reachUpper?: number;
   /** Vue de face : tout le corps basculé (degrés, sens horaire), pour le gainage latéral. */
   roll?: number;
 }
@@ -130,7 +132,7 @@ export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
   };
   const reach = p.reach ?? 1;
   const arm = (a: number, f: number) => {
-    const elbow = add(shoulder, dir(a), d.arm * reach);
+    const elbow = add(shoulder, dir(a), d.arm * reach * (p.reachUpper ?? 1));
     return { elbow, hand: add(elbow, dir(f), d.fore * reach) };
   };
   const ln = leg(p.thighN, p.shinN);
@@ -193,5 +195,6 @@ export function lerpPose(a: Pose, b: Pose, t: number): Pose {
     thighN: l(a.thighN, b.thighN), shinN: l(a.shinN, b.shinN), thighF: l(a.thighF, b.thighF), shinF: l(a.shinF, b.shinF),
     armN: l(a.armN, b.armN), foreN: l(a.foreN, b.foreN), armF: l(a.armF, b.armF), foreF: l(a.foreF, b.foreF),
     lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll), shrug: l(a.shrug, b.shrug), reach: (a.reach ?? 1) + ((b.reach ?? 1) - (a.reach ?? 1)) * t,
+    reachUpper: (a.reachUpper ?? 1) + ((b.reachUpper ?? 1) - (a.reachUpper ?? 1)) * t,
   };
 }

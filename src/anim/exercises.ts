@@ -534,12 +534,15 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'pecfly', label: 'Pectoraux (coudes à 90°, se touchent devant)', group: 'ms', view: 'front', period: 2.2, anchor: 'hip',
+    id: 'pecfly', label: 'Pectoraux (coudes à 90°, se touchent devant)', group: 'ms', view: 'side', period: 2.4, anchor: 'feet',
     words: ['pectoraux', 'pectoral', 'butterfly', 'ecarte pectoraux', 'coude a 90', 'coudes qui se touchent'],
     frames: [
-      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: -30, foreN: 180, armF: -30, foreF: 180 }, w: 0.5 },
-      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: -30, foreN: 180, armF: -30, foreF: 180 } },
-      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 88, foreN: 178, armF: 88, foreF: 178 } },
+      // Coudes serrés devant, à hauteur d'épaules, avant-bras verticaux.
+      { pose: { ...STAND, armN: 90, foreN: 180, armF: 88, foreF: 178 }, w: 0.5 },
+      { pose: { ...STAND, armN: 90, foreN: 180, armF: 88, foreF: 178 } },
+      // Coudes écartés sur les côtés : de profil, le haut du bras pivote vers nous.
+      { pose: { ...STAND, armN: 90, foreN: 180, armF: 88, foreF: 178, reachUpper: 0.15 }, w: 0.5 },
+      { pose: { ...STAND, armN: 90, foreN: 180, armF: 88, foreF: 178, reachUpper: 0.15 } },
     ],
   },
   // ---------- Sans matériel : tronc ----------
@@ -557,10 +560,13 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'obliques', label: 'Obliques (toucher les chevilles)', group: 'tronc', view: 'side', period: 2, anchor: 'hip',
     words: ['oblique', 'toucher les cheville', 'touche cheville', 'touche talon', 'heel touch'],
     frames: [
-      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 74, foreN: 74, armF: 52, foreF: 120 } },
-      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 74, foreN: 74, armF: 52, foreF: 120 }, w: 0.3 },
-      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 52, foreN: 120, armF: 74, foreF: 74 } },
-      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 52, foreN: 120, armF: 74, foreF: 74 }, w: 0.3 },
+      // Bras tendus vers les chevilles : c'est le buste qui s'enroule et bascule d'un côté puis de l'autre.
+      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 78, foreN: 78, armF: 64, foreF: 64 } },
+      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 78, foreN: 78, armF: 64, foreF: 64 }, w: 0.3 },
+      { pose: { torso: -64, head: 8, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 70, foreN: 70, armF: 70, foreF: 70 }, w: 0.5 },
+      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 64, foreN: 64, armF: 78, foreF: 78 } },
+      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 64, foreN: 64, armF: 78, foreF: 78 }, w: 0.3 },
+      { pose: { torso: -64, head: 8, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 70, foreN: 70, armF: 70, foreF: 70 }, w: 0.5 },
     ],
   },
   {
@@ -623,20 +629,30 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'arnold', label: 'Développé Arnold', group: 'ms', view: 'side', period: 3, anchor: 'feet',
     words: ['developpe arnold', 'arnold press', 'arnold'],
     frames: [
+      // Mains devant le visage, coudes devant.
       { pose: { ...STAND, armN: 28, foreN: 168, armF: 26, foreF: 166 } },
-      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
+      // À 90°, les coudes s'écartent sur les côtés (de profil, le haut du bras pivote vers nous).
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.6 },
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.8 },
+      // Poussée au-dessus de la tête.
       { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 } },
-      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.6 },
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.8 },
     ],
   },
   {
     id: 'dbarnold', label: 'Développé Arnold (haltères)', group: 'ms', view: 'side', period: 3, anchor: 'feet', equipment: 'dumbbell',
     words: ['developpe arnold haltere', 'arnold press haltere', 'arnold haltere'],
     frames: [
+      // Mains devant le visage, coudes devant.
       { pose: { ...STAND, armN: 28, foreN: 168, armF: 26, foreF: 166 } },
-      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
+      // À 90°, les coudes s'écartent sur les côtés (de profil, le haut du bras pivote vers nous).
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.6 },
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.8 },
+      // Poussée au-dessus de la tête.
       { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 } },
-      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.6 },
+      { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.8 },
     ],
   },
 ];
