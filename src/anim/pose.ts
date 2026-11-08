@@ -25,6 +25,11 @@ export interface Pose {
   reach?: number;
   /** Longueur apparente du seul haut du bras (coudes qui s'écartent sur les côtés, avant-bras vertical). */
   reachUpper?: number;
+  /**
+   * De profil : rotation du buste (-1 à 1). Positif : l'épaule de devant descend vers le sol et
+   * vers les pieds, celle de derrière remonte (rotation vers le côté proche) ; négatif : l'inverse.
+   */
+  twist?: number;
   /** Vue de face : tout le corps basculé (degrés, sens horaire), pour le gainage latéral. */
   roll?: number;
 }
@@ -131,16 +136,20 @@ export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
     return { knee, ankle, toe };
   };
   const reach = p.reach ?? 1;
-  const arm = (a: number, f: number) => {
-    const elbow = add(shoulder, dir(a), d.arm * reach * (p.reachUpper ?? 1));
+  // Rotation du buste : les deux épaules s'écartent l'une de l'autre, perpendiculairement au buste.
+  const tw = (p.twist ?? 0) * 6;
+  const shN = add(add(shoulder, front, -0.8 * tw), up, -0.5 * tw);
+  const shF = add(add(shoulder, front, 0.8 * tw), up, 0.3 * tw);
+  const arm = (from: Pt, a: number, f: number) => {
+    const elbow = add(from, dir(a), d.arm * reach * (p.reachUpper ?? 1));
     return { elbow, hand: add(elbow, dir(f), d.fore * reach) };
   };
   const ln = leg(p.thighN, p.shinN);
   const lf = leg(p.thighF, p.shinF);
-  const an = arm(p.armN, p.foreN);
-  const af = arm(p.armF, p.foreF);
+  const an = arm(shN, p.armN, p.foreN);
+  const af = arm(shF, p.armF, p.foreF);
   return {
-    hip, neck, headC, up, front, shoulderN: shoulder, shoulderF: shoulder, hipN: hip, hipF: hip,
+    hip, neck, headC, up, front, shoulderN: shN, shoulderF: shF, hipN: hip, hipF: hip,
     kneeN: ln.knee, ankleN: ln.ankle, toeN: ln.toe, kneeF: lf.knee, ankleF: lf.ankle, toeF: lf.toe,
     elbowN: an.elbow, handN: an.hand, elbowF: af.elbow, handF: af.hand,
   };
@@ -196,5 +205,6 @@ export function lerpPose(a: Pose, b: Pose, t: number): Pose {
     armN: l(a.armN, b.armN), foreN: l(a.foreN, b.foreN), armF: l(a.armF, b.armF), foreF: l(a.foreF, b.foreF),
     lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll), shrug: l(a.shrug, b.shrug), reach: (a.reach ?? 1) + ((b.reach ?? 1) - (a.reach ?? 1)) * t,
     reachUpper: (a.reachUpper ?? 1) + ((b.reachUpper ?? 1) - (a.reachUpper ?? 1)) * t,
+    twist: l(a.twist, b.twist),
   };
 }

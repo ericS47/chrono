@@ -561,10 +561,10 @@ export const EXERCISES: ExerciseAnim[] = [
     words: ['oblique', 'toucher les cheville', 'touche cheville', 'touche talon', 'heel touch'],
     frames: [
       // Buste relevé et fixe ; rotation à droite (cheville de devant), puis à gauche (cheville de derrière), bras tendus.
-      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 14, armN: 62, foreN: 62, armF: 82, foreF: 82 }, w: 0.35 },
-      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 14, armN: 62, foreN: 62, armF: 82, foreF: 82 } },
-      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 4, armN: 82, foreN: 82, armF: 62, foreF: 62 }, w: 0.35 },
-      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 4, armN: 82, foreN: 82, armF: 62, foreF: 62 } },
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 18, twist: 1, armN: 66, foreN: 66, armF: 80, foreF: 80 }, w: 0.35 },
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 18, twist: 1, armN: 66, foreN: 66, armF: 80, foreF: 80 } },
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: -4, twist: -1, armN: 80, foreN: 80, armF: 66, foreF: 66 }, w: 0.35 },
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: -4, twist: -1, armN: 80, foreN: 80, armF: 66, foreF: 66 } },
     ],
   },
   {
