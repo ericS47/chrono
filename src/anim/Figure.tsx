@@ -120,7 +120,7 @@ export function FigureFrame({ exercise, avatar, sec, title }: { exercise: Exerci
       {ex.view === 'front'
         ? <g transform={roll ? `rotate(${roll} ${flat.hip[0]} ${flat.hip[1]})` : undefined}><FrontBody j={flat} d={placed.d} av={avatar} c={c} /></g>
         : <SideBody j={j} d={placed.d} av={avatar} c={c} />}
-      {ex.equipment && ex.equipment !== 'none' && ex.equipment !== 'chair' && <Equipment kind={ex.equipment} j={j} view={ex.view} />}
+      {ex.equipment && ex.equipment !== 'none' && <Equipment kind={ex.equipment} j={j} view={ex.view} />}
     </svg>
   );
 }

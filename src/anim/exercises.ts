@@ -10,7 +10,8 @@ export type ExerciseId =
   | 'kneepushup' | 'bridge' | 'superman' | 'sideplank' | 'legraise' | 'calfraise' | 'jumpsquat' | 'birddog' | 'tapping'
   | 'buttkicks' | 'shuffleright' | 'shuffleleft' | 'shufflealt'
   | 'kbswing' | 'kbgoblet' | 'bandcurl' | 'bandraise'
-  | 'dbcurl' | 'dbpress' | 'dbrow' | 'sittostand' | 'kneeext' | 'chairdips';
+  | 'dbcurl' | 'dbpress' | 'dbrow' | 'sittostand' | 'kneeext' | 'chairdips'
+  | 'seatedmarch' | 'seateddbcurl' | 'seateddbpress' | 'seatedbandrow' | 'seatedkbraise';
 
 type Anchor = 'feet' | 'hands' | 'hip';
 
@@ -41,13 +42,18 @@ export interface ExerciseAnim {
   words: string[];
   /** Matériel (sans matériel par défaut), dessiné avec l'avatar. */
   equipment?: Equipment;
-  /** Chaise : posée sous la hanche (assis) ou sous les mains (dips), d'après la première posture. */
+  /** Exercice sur chaise : chaise posée sous la hanche (assis) ou sous les mains (dips), d'après la première posture. */
   chairUnder?: 'hip' | 'hands';
 }
 
-/** Matériel : sans matériel, kettlebell, élastique, haltères, chaise. */
-export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell' | 'chair';
-export const EQUIPMENT_LABELS: Record<Equipment, string> = { none: 'Sans matériel', kettlebell: 'Kettlebell', band: 'Élastique', dumbbell: 'Haltères', chair: 'Chaise' };
+/** Matériel : sans matériel, kettlebell, élastique, haltères. */
+export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell';
+export const EQUIPMENT_LABELS: Record<Equipment, string> = { none: 'Sans matériel', kettlebell: 'Kettlebell', band: 'Élastique', dumbbell: 'Haltères' };
+
+/** Position : debout (ou au sol), ou sur une chaise (dessinée avec l'avatar). */
+export type Position = 'standing' | 'chair';
+export const POSITION_LABELS: Record<Position, string> = { standing: 'Debout', chair: 'Chaise' };
+export const positionOf = (e: ExerciseAnim): Position => (e.chairUnder ? 'chair' : 'standing');
 export const equipmentOf = (e: ExerciseAnim): Equipment => e.equipment ?? 'none';
 
 const STAND: Pose = { torso: 0, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 8, foreN: 14, armF: -5, foreF: 3 };
@@ -313,7 +319,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'sittostand', label: 'Assis-debout', group: 'mi', view: 'side', period: 3.4, anchor: 'feet', equipment: 'chair', chairUnder: 'hip',
+    id: 'sittostand', label: 'Assis-debout', group: 'mi', view: 'side', period: 3.4, anchor: 'feet', chairUnder: 'hip',
     words: ['assis debout', 'lever de chaise', 'se lever de la chaise', 'sit to stand', 'debout assis'],
     frames: [
       { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 80, foreN: 85, armF: 78, foreF: 83 }, w: 0.6 },
@@ -324,7 +330,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'kneeext', label: 'Extension de genou assis', group: 'mi', view: 'side', period: 2.6, anchor: 'hip', equipment: 'chair', chairUnder: 'hip',
+    id: 'kneeext', label: 'Extension de genou assis', group: 'mi', view: 'side', period: 2.6, anchor: 'hip', chairUnder: 'hip',
     words: ['extension de genou', 'extension genou', 'extension de jambe assis', 'levee de jambe assis', 'leve de jambe assis', 'quadriceps assis'],
     frames: [
       { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 20, foreN: 60, armF: 18, foreF: 58 } },
@@ -333,11 +339,53 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'chairdips', label: 'Dips sur chaise', group: 'ms', view: 'side', period: 2.4, anchor: 'hands', equipment: 'chair', chairUnder: 'hands',
+    id: 'chairdips', label: 'Dips sur chaise', group: 'ms', view: 'side', period: 2.4, anchor: 'hands', chairUnder: 'hands',
     words: ['dips', 'dip sur chaise', 'dips sur chaise', 'triceps chaise', 'extension triceps chaise'],
     frames: [
       { pose: { torso: 0, thighN: 70, shinN: 45, thighF: 68, shinF: 45, armN: -12, foreN: -12, armF: -10, foreF: -10 } },
       { pose: { torso: 6, thighN: 85, shinN: 75, thighF: 83, shinF: 75, armN: -80, foreN: 12, armF: -78, foreF: 14 } },
+    ],
+  },
+  {
+    id: 'seatedmarch', label: 'Montée de genou assis', group: 'mi', view: 'side', period: 1.8, anchor: 'hip', chairUnder: 'hip',
+    words: ['montee de genou assis', 'montees de genou assis', 'marche assis', 'genou assis'],
+    frames: [
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 20, foreN: 60, armF: 18, foreF: 58 } },
+      { pose: { torso: 0, thighN: 125, shinN: 20, thighF: 88, shinF: 0, armN: 20, foreN: 60, armF: 18, foreF: 58 } },
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 20, foreN: 60, armF: 18, foreF: 58 } },
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 123, shinF: 20, armN: 20, foreN: 60, armF: 18, foreF: 58 } },
+    ],
+  },
+  {
+    id: 'seateddbcurl', label: 'Curl biceps assis (haltères)', group: 'ms', view: 'side', period: 2.2, anchor: 'hip', equipment: 'dumbbell', chairUnder: 'hip',
+    words: ['curl assis', 'curl biceps assis', 'curl haltere assis'],
+    frames: [
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 4, foreN: 10, armF: 2, foreF: 8 } },
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 8, foreN: 150, armF: 6, foreF: 148 } },
+    ],
+  },
+  {
+    id: 'seateddbpress', label: 'Développé épaules assis', group: 'ms', view: 'side', period: 2.4, anchor: 'hip', equipment: 'dumbbell', chairUnder: 'hip',
+    words: ['developpe epaule assis', 'developpe assis', 'shoulder press assis'],
+    frames: [
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 20, foreN: 170, armF: 18, foreF: 168 } },
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 172, foreN: 176, armF: 170, foreF: 174 } },
+    ],
+  },
+  {
+    id: 'seatedbandrow', label: 'Rowing assis (élastique)', group: 'ms', view: 'side', period: 2.4, anchor: 'hip', equipment: 'band', chairUnder: 'hip',
+    words: ['rowing assis', 'rowing elastique', 'tirage assis', 'tirage elastique'],
+    frames: [
+      { pose: { torso: 10, thighN: 90, shinN: 30, thighF: 88, shinF: 30, armN: 58, foreN: 62, armF: 56, foreF: 60 } },
+      { pose: { torso: -4, thighN: 90, shinN: 30, thighF: 88, shinF: 30, armN: -35, foreN: 75, armF: -33, foreF: 73 } },
+    ],
+  },
+  {
+    id: 'seatedkbraise', label: 'Élévation frontale assis (kettlebell)', group: 'ms', view: 'side', period: 2.4, anchor: 'hip', equipment: 'kettlebell', chairUnder: 'hip',
+    words: ['elevation frontale assis', 'elevation frontale', 'front raise'],
+    frames: [
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 30, foreN: 32, armF: 28, foreF: 30 } },
+      { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 95, foreN: 95, armF: 93, foreF: 93 } },
     ],
   },
 ];
@@ -457,7 +505,7 @@ export function frameAt(p: Placed, sec: number): { j: Joints; flat: Joints; roll
  */
 /** Chaise : dessus de l'assise et bord avant, d'après la première posture (fixe pendant le mouvement). */
 export function chairPos(p: Placed): { seatY: number; front: number } | null {
-  if (p.ex.equipment !== 'chair') return null;
+  if (!p.ex.chairUnder) return null;
   const j0 = frameAt(p, 0).j;
   if (p.ex.chairUnder === 'hands') return { seatY: j0.handN[1] + p.d.wFore * 0.5, front: j0.handN[0] + 1.5 };
   return { seatY: j0.hip[1] + p.d.wTorso * 0.47, front: j0.hip[0] + 9 };

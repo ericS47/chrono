@@ -43,6 +43,11 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Assis-debout')).toBe('sittostand');
     expect(matchExercise('Extension de genou')).toBe('kneeext');
     expect(matchExercise('Dips sur chaise')).toBe('chairdips');
+    expect(matchExercise('Curl assis')).toBe('seateddbcurl');
+    expect(matchExercise('Développé épaules assis')).toBe('seateddbpress');
+    expect(matchExercise('Rowing assis')).toBe('seatedbandrow');
+    expect(matchExercise('Montée de genou assis')).toBe('seatedmarch');
+    expect(matchExercise('Élévation frontale')).toBe('seatedkbraise');
     expect(matchExercise('Pas chassé D')).toBe('shuffleright');
     expect(matchExercise('Pas chassés droite')).toBe('shuffleright');
     expect(matchExercise('Pas chassé G')).toBe('shuffleleft');

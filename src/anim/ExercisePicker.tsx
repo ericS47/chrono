@@ -1,11 +1,11 @@
-// Choix de l'exercice animé : une liste qui s'ouvre sous le champ, filtrée par matériel
-// (sans matériel par défaut, kettlebell, élastique), en deux colonnes, rangée par catégorie
+// Choix de l'exercice animé : une liste qui s'ouvre sous le champ, filtrée en deux temps
+// (position : debout ou chaise, puis matériel : sans matériel, kettlebell, élastique, haltères), en deux colonnes, rangée par catégorie
 // avec un bandeau de couleur, et une miniature de chaque exercice.
 
 import { useId, useState, type ReactNode } from 'react';
 import type { Avatar } from './avatar';
-import type { Equipment, ExerciseGroup, ExerciseId } from './exercises';
-import { EQUIPMENT_LABELS, EXERCISES, EXERCISE_BY_ID, GROUP_LABELS, equipmentOf } from './exercises';
+import type { Equipment, ExerciseGroup, ExerciseId, Position } from './exercises';
+import { EQUIPMENT_LABELS, EXERCISES, EXERCISE_BY_ID, GROUP_LABELS, POSITION_LABELS, equipmentOf, positionOf } from './exercises';
 import { FigureFrame } from './Figure';
 
 /** Couleur du bandeau de chaque catégorie. */
@@ -23,6 +23,11 @@ const EQUIPMENT_ICONS: Record<Equipment, ReactNode> = {
   band: <svg {...ICON}><rect x="1.8" y="7.5" width="4.4" height="7" rx="1.6" fill="currentColor" stroke="none" /><rect x="17.8" y="7.5" width="4.4" height="7" rx="1.6" fill="currentColor" stroke="none" /><path d="M6.2 11c3.2 6 8.4 6 11.6 0" strokeWidth={2.2} /></svg>,
   // Haltère : barre et deux disques.
   dumbbell: <svg {...ICON}><path d="M7 12h10" strokeWidth={2.4} /><rect x="3.2" y="7.5" width="3.8" height="9" rx="1.3" fill="currentColor" stroke="none" /><rect x="17" y="7.5" width="3.8" height="9" rx="1.3" fill="currentColor" stroke="none" /></svg>,
+};
+
+const POSITION_ICONS: Record<Position, ReactNode> = {
+  // Debout : silhouette.
+  standing: <svg {...ICON}><circle cx="12" cy="4.6" r="2.1" fill="currentColor" stroke="none" /><path d="M12 7.6v7.2M12 14.8l-3 6M12 14.8l3 6M7.5 10.6h9" strokeWidth={2.2} /></svg>,
   // Chaise de profil.
   chair: <svg {...ICON}><path d="M7 3.5v17M7 13h10.5M17.5 13v7.5M7 13" strokeWidth={2.2} /><path d="M6.2 12.8h12" strokeWidth={2.6} /></svg>,
 };
@@ -34,14 +39,16 @@ export function ExercisePicker({ value, onChange, avatar, label = 'Exercice anim
   label?: string;
 }) {
   const [open, setOpen] = useState(false);
-  // Sans matériel par défaut ; à l'ouverture, le matériel de l'exercice choisi.
+  // Embranchement : position (debout par défaut), puis matériel (sans matériel par défaut).
+  // À l'ouverture, ceux de l'exercice déjà choisi.
+  const [pos, setPos] = useState<Position>(value ? positionOf(EXERCISE_BY_ID[value]) : 'standing');
   const [equip, setEquip] = useState<Equipment>(value ? equipmentOf(EXERCISE_BY_ID[value]) : 'none');
   const id = useId();
   const pick = (v: ExerciseId | null) => {
     onChange(v);
     setOpen(false);
   };
-  const list = EXERCISES.filter((x) => equipmentOf(x) === equip);
+  const list = EXERCISES.filter((x) => positionOf(x) === pos && equipmentOf(x) === equip);
   return (
     <div className="ex-picker">
       <button
@@ -55,6 +62,17 @@ export function ExercisePicker({ value, onChange, avatar, label = 'Exercice anim
       </button>
       {open && (
         <div className="ex-picker-list" id={id}>
+          <div className="ex-pos" role="radiogroup" aria-label="Position">
+            {(Object.keys(POSITION_LABELS) as Position[]).map((k) => (
+              <button
+                key={k} type="button" role="radio" aria-checked={k === pos} aria-label={POSITION_LABELS[k]}
+                className="ex-pos-btn" onClick={() => setPos(k)}
+              >
+                {POSITION_ICONS[k]}
+                <span>{POSITION_LABELS[k]}</span>
+              </button>
+            ))}
+          </div>
           <div className="ex-equip" role="radiogroup" aria-label="Matériel">
             {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((k) => (
               <button
@@ -70,6 +88,7 @@ export function ExercisePicker({ value, onChange, avatar, label = 'Exercice anim
             <button type="button" role="option" aria-selected={!value} className="ex-opt wide" onClick={() => pick(null)}>
               Aucun exercice
             </button>
+            {!list.length && <p className="hint ex-empty">Pas encore d’exercice {pos === 'chair' ? 'sur chaise' : 'debout'} avec ce matériel.</p>}
             {(Object.keys(GROUP_LABELS) as ExerciseGroup[]).map((g) => {
               const items = list.filter((x) => x.group === g).sort((a, b) => a.label.localeCompare(b.label, 'fr'));
               if (!items.length) return null;

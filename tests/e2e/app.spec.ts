@@ -345,6 +345,13 @@ test('créateur : choisir l’exercice animé d’un effort dans la liste', asyn
   await page.getByRole('radio', { name: 'Kettlebell' }).click();
   await expect(page.getByRole('option', { name: 'Goblet squat' })).toBeVisible();
   await expect(page.getByRole('option', { name: 'Fente' })).toHaveCount(0);
+  // Position « Chaise », puis matériel « Haltères » : les exercices assis aux haltères.
+  await expect(page.getByRole('radio', { name: 'Debout' })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radio', { name: 'Chaise' }).click();
+  await page.getByRole('radio', { name: 'Haltères' }).click();
+  await expect(page.getByRole('option', { name: 'Curl biceps assis (haltères)' })).toBeVisible();
+  await expect(page.getByRole('option', { name: 'Goblet squat' })).toHaveCount(0);
+  await page.getByRole('radio', { name: 'Debout' }).click();
   await page.getByRole('radio', { name: 'Sans matériel' }).click();
   await page.getByRole('option', { name: 'Fente' }).click();
   await expect(page.getByRole('img', { name: 'Animation : Fente' })).toBeVisible();
