@@ -12,7 +12,10 @@ export type ExerciseId =
   | 'kbswing' | 'kbgoblet' | 'bandcurl' | 'bandraise'
   | 'dbcurl' | 'dbpress' | 'dbrow' | 'sittostand' | 'kneeext' | 'chairdips'
   | 'seatedmarch' | 'seateddbcurl' | 'seateddbpress' | 'seatedbandrow' | 'seatedkbraise'
-  | 'ringpress' | 'ringbridge';
+  | 'ringpress' | 'ringbridge'
+  | 'bulgarian' | 'toeraise' | 'legabduction' | 'legadduction' | 'kickback'
+  | 'pressup' | 'pressforward' | 'curlbw' | 'tricepsbw' | 'shrug' | 'uprightrow' | 'lateralbw' | 'frontbw' | 'pecfly'
+  | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside';
 
 type Anchor = 'feet' | 'hands' | 'hip';
 
@@ -46,7 +49,7 @@ export interface ExerciseAnim {
   /** Matériel (sans matériel par défaut), dessiné avec l'avatar. */
   equipment?: Equipment;
   /** Exercice sur chaise : chaise posée sous la hanche (assis) ou sous les mains (dips), d'après la première posture. */
-  chairUnder?: 'hip' | 'hands';
+  chairUnder?: ChairUnder;
 }
 
 /** Matériel : sans matériel, kettlebell, élastique, haltères, anneau de Pilates. */
@@ -55,6 +58,8 @@ export const EQUIPMENT_LABELS: Record<Equipment, string> = { none: 'Sans matéri
 
 /** Position : debout (ou au sol), ou sur une chaise (dessinée avec l'avatar). */
 export type Position = 'standing' | 'chair';
+/** Appui sur la chaise : hanche (assis), mains (dips) ou pied arrière (squat sur une jambe). */
+export type ChairUnder = 'hip' | 'hands' | 'foot';
 export const POSITION_LABELS: Record<Position, string> = { standing: 'Debout', chair: 'Chaise' };
 export const positionOf = (e: ExerciseAnim): Position => (e.chairUnder ? 'chair' : 'standing');
 export const equipmentOf = (e: ExerciseAnim): Equipment => e.equipment ?? 'none';
@@ -155,7 +160,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'situp', label: 'Abdos', group: 'tronc', view: 'side', period: 2.4, anchor: 'hip', words: ['abdo', 'sit up', 'situp', 'crunch', 'relevé de buste', 'releve de buste'],
+    id: 'situp', label: 'Abdos', group: 'tronc', view: 'side', period: 2.4, anchor: 'hip', words: ['abdo', 'crunch', 'relevé de buste', 'releve de buste'],
     frames: [
       { pose: { torso: -84, head: 8, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 150, foreN: 150, armF: 146, foreF: 146 } },
       { pose: { torso: -18, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 95, foreN: 98, armF: 92, foreF: 95 } },
@@ -285,7 +290,7 @@ export const EXERCISES: ExerciseAnim[] = [
   },
   {
     id: 'bandcurl', label: 'Curl biceps (élastique)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet', equipment: 'band',
-    words: ['curl biceps', 'curl', 'flexion du coude', 'biceps'],
+    words: ['curl elastique', 'curl biceps elastique', 'curl a l elastique'],
     frames: [
       { pose: { ...STAND, armN: 4, foreN: 12, armF: 2, foreF: 10 } },
       { pose: { ...STAND, armN: 8, foreN: 150, armF: 6, foreF: 148 } },
@@ -293,7 +298,7 @@ export const EXERCISES: ExerciseAnim[] = [
   },
   {
     id: 'bandraise', label: 'Élévations latérales (élastique)', group: 'ms', view: 'front', period: 2.4, anchor: 'hip', equipment: 'band',
-    words: ['elevation laterale', 'elevations laterale', 'lateral raise', 'abduction d epaule', 'abduction epaule'],
+    words: ['elevation laterale elastique', 'elevations laterale elastique', 'elevation laterale a l elastique'],
     frames: [
       { pose: { torso: 0, thighN: 7, shinN: 6, thighF: 7, shinF: 6, armN: 10, foreN: 12, armF: 10, foreF: 12 } },
       { pose: { torso: 0, thighN: 7, shinN: 6, thighF: 7, shinF: 6, armN: 86, foreN: 90, armF: 86, foreF: 90 } },
@@ -387,7 +392,7 @@ export const EXERCISES: ExerciseAnim[] = [
   },
   {
     id: 'seatedkbraise', label: 'Élévation frontale assis (kettlebell)', group: 'ms', view: 'side', period: 2.4, anchor: 'hip', equipment: 'kettlebell', chairUnder: 'hip',
-    words: ['elevation frontale assis', 'elevation frontale', 'front raise'],
+    words: ['elevation frontale assis', 'elevation frontale kettlebell', 'elevation frontale assis kettlebell'],
     frames: [
       { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 30, foreN: 32, armF: 28, foreF: 30 } },
       { pose: { torso: 0, thighN: 90, shinN: 0, thighF: 88, shinF: 0, armN: 95, foreN: 95, armF: 93, foreF: 93 } },
@@ -409,6 +414,196 @@ export const EXERCISES: ExerciseAnim[] = [
       { pose: { torso: -88, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 70, foreN: 85, armF: 68, foreF: 85 } },
       { pose: { torso: -112, head: 14, thighN: 100, shinN: -5, thighF: 98, shinF: -5, armN: 60, foreN: 80, armF: 58, foreF: 80 }, w: 0.5 },
       { pose: { torso: -112, head: 14, thighN: 100, shinN: -5, thighF: 98, shinF: -5, armN: 60, foreN: 80, armF: 58, foreF: 80 } },
+    ],
+  },
+
+  // ---------- Sans matériel : MI ----------
+  {
+    id: 'bulgarian', label: 'Squat sur une jambe (pied sur la chaise)', group: 'mi', view: 'side', period: 2.8, anchor: 'feet', chairUnder: 'foot',
+    words: ['squat sur une jambe', 'squat bulgare', 'fente bulgare', 'split squat', 'squat une jambe'],
+    frames: [
+      { pose: { torso: 6, thighN: 10, shinN: 0, thighF: -40, shinF: -70, armN: 30, foreN: -20, armF: 28, foreF: -22 } },
+      { pose: { torso: 14, head: -8, thighN: 80, shinN: -15, thighF: -15, shinF: -138, armN: 30, foreN: -20, armF: 28, foreF: -22 } },
+    ],
+  },
+  {
+    id: 'toeraise', label: 'Relevé de la pointe des pieds', group: 'mi', view: 'side', period: 1.6, anchor: 'feet',
+    words: ['releve de la pointe', 'releve de pointe', 'pointe de pied', 'pointe des pied', 'flexion dorsale', 'releve pointe'],
+    frames: [
+      { pose: { ...STAND, armN: 4, foreN: 8, armF: -4, foreF: 2 } },
+      { pose: { ...STAND, armN: 4, foreN: 8, armF: -4, foreF: 2, heel: -28 }, w: 0.6 },
+      { pose: { ...STAND, armN: 4, foreN: 8, armF: -4, foreF: 2, heel: -28 } },
+    ],
+  },
+  {
+    id: 'legabduction', label: 'Abduction de la jambe', group: 'mi', view: 'front', period: 2.2, anchor: 'hip',
+    words: ['abduction de la jambe', 'abduction de jambe', 'abduction de hanche', 'abduction hanche', 'abduction'],
+    frames: [
+      { pose: { torso: 0, thighN: 4, shinN: 3, thighF: 3, shinF: 2, armN: 35, foreN: -60, armF: 35, foreF: -60 } },
+      { pose: { torso: 0, thighN: 38, shinN: 36, thighF: 3, shinF: 2, armN: 35, foreN: -60, armF: 35, foreF: -60 }, w: 0.6 },
+      { pose: { torso: 0, thighN: 38, shinN: 36, thighF: 3, shinF: 2, armN: 35, foreN: -60, armF: 35, foreF: -60 } },
+    ],
+  },
+  {
+    id: 'legadduction', label: 'Adduction de la jambe', group: 'mi', view: 'front', period: 2.2, anchor: 'hip',
+    words: ['adduction de la jambe', 'adduction de jambe', 'adduction de hanche', 'adduction hanche', 'adduction'],
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 4, shinF: 3, armN: 35, foreN: -60, armF: 35, foreF: -60 } },
+      { pose: { torso: 0, thighN: -16, shinN: -18, thighF: 4, shinF: 3, armN: 35, foreN: -60, armF: 35, foreF: -60 }, w: 0.6 },
+      { pose: { torso: 0, thighN: -16, shinN: -18, thighF: 4, shinF: 3, armN: 35, foreN: -60, armF: 35, foreF: -60 } },
+    ],
+  },
+  {
+    id: 'kickback', label: 'Extension de la jambe vers l’arrière', group: 'mi', view: 'side', period: 2.2, anchor: 'hip',
+    words: ['extension de la jambe vers l arriere', 'extension de jambe vers l arriere', 'extension de jambe arriere', 'extension de hanche', 'kickback', 'kick back', 'jambe arriere'],
+    frames: [
+      { pose: { torso: 12, head: -6, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 30, foreN: -20, armF: 28, foreF: -22 } },
+      { pose: { torso: 22, head: -10, thighN: -48, shinN: -55, thighF: -1, shinF: -1, armN: 30, foreN: -20, armF: 28, foreF: -22 }, w: 0.6 },
+      { pose: { torso: 22, head: -10, thighN: -48, shinN: -55, thighF: -1, shinF: -1, armN: 30, foreN: -20, armF: 28, foreF: -22 } },
+    ],
+  },
+  // ---------- Sans matériel : MS ----------
+  {
+    id: 'pressup', label: 'Poussée des épaules vers le haut', group: 'ms', view: 'front', period: 2.4, anchor: 'hip',
+    words: ['poussee des epaules vers le haut', 'poussee epaule vers le haut', 'poussee vers le haut', 'developpe epaule sans charge'],
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 92, foreN: 178, armF: 92, foreF: 178 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 162, foreN: 172, armF: 162, foreF: 172 } },
+    ],
+  },
+  {
+    id: 'pressforward', label: 'Poussée des épaules vers l’avant', group: 'ms', view: 'side', period: 2.2, anchor: 'feet',
+    words: ['poussee des epaules vers l avant', 'poussee epaule vers l avant', 'poussee vers l avant', 'poussee avant'],
+    frames: [
+      { pose: { ...STAND, armN: -55, foreN: 95, armF: -53, foreF: 93 } },
+      { pose: { ...STAND, armN: 90, foreN: 90, armF: 88, foreF: 88 } },
+    ],
+  },
+  {
+    id: 'curlbw', label: 'Biceps (flexion des coudes)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet',
+    words: ['curl biceps', 'curl', 'biceps', 'flexion du coude', 'flexion des coude'],
+    frames: [
+      { pose: { ...STAND, armN: 4, foreN: 10, armF: 2, foreF: 8 } },
+      { pose: { ...STAND, armN: 8, foreN: 150, armF: 6, foreF: 148 } },
+    ],
+  },
+  {
+    id: 'tricepsbw', label: 'Triceps (extension au-dessus de la tête)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet',
+    words: ['triceps', 'extension triceps', 'extension des triceps', 'extension au dessus de la tete'],
+    frames: [
+      { pose: { ...STAND, armN: 168, foreN: -25, armF: 166, foreF: -27 } },
+      { pose: { ...STAND, armN: 172, foreN: 176, armF: 170, foreF: 174 } },
+    ],
+  },
+  {
+    id: 'shrug', label: 'Haussement des épaules', group: 'ms', view: 'front', period: 1.8, anchor: 'hip',
+    words: ['haussement des epaule', 'haussement d epaule', 'hausser les epaule', 'shrug'],
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 6, foreN: 4, armF: 6, foreF: 4 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 6, foreN: 4, armF: 6, foreF: 4, shrug: 4 }, w: 0.5 },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 6, foreN: 4, armF: 6, foreF: 4, shrug: 4 } },
+    ],
+  },
+  {
+    id: 'uprightrow', label: 'Tirage menton', group: 'ms', view: 'front', period: 2.2, anchor: 'hip',
+    words: ['tirage menton', 'tirage au menton', 'upright row', 'rowing menton'],
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 12, foreN: -14, armF: 12, foreF: -14 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 78, foreN: -112, armF: 78, foreF: -112 } },
+    ],
+  },
+  {
+    id: 'lateralbw', label: 'Élévations latérales', group: 'ms', view: 'front', period: 2.4, anchor: 'hip',
+    words: ['elevation laterale', 'elevations laterale', 'lateral raise', 'abduction d epaule', 'abduction epaule'],
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 8, foreN: 10, armF: 8, foreF: 10 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 88, foreN: 90, armF: 88, foreF: 90 } },
+    ],
+  },
+  {
+    id: 'frontbw', label: 'Élévation frontale', group: 'ms', view: 'side', period: 2.4, anchor: 'feet',
+    words: ['elevation frontale', 'elevations frontale', 'front raise', 'flexion d epaule'],
+    frames: [
+      { pose: { ...STAND, armN: 6, foreN: 8, armF: 4, foreF: 6 } },
+      { pose: { ...STAND, armN: 92, foreN: 92, armF: 90, foreF: 90 } },
+    ],
+  },
+  {
+    id: 'pecfly', label: 'Pectoraux (coudes à 90°, se touchent devant)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet',
+    words: ['pectoraux', 'pectoral', 'butterfly', 'ecarte pectoraux', 'coude a 90', 'coudes qui se touchent'],
+    frames: [
+      { pose: { ...STAND, armN: -95, foreN: 178, armF: -93, foreF: 176 } },
+      { pose: { ...STAND, armN: 92, foreN: 178, armF: 90, foreF: 176 } },
+    ],
+  },
+  // ---------- Sans matériel : tronc ----------
+  {
+    id: 'situpfull', label: 'Sit-up', group: 'tronc', view: 'side', period: 2.6, anchor: 'hip',
+    words: ['sit up', 'situp', 'sit-up'],
+    frames: [
+      { pose: { torso: -84, head: 8, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 150, foreN: 150, armF: 146, foreF: 146 } },
+      { pose: { torso: 6, head: 0, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 70, foreN: 75, armF: 68, foreF: 73 } },
+    ],
+  },
+  {
+    id: 'obliques', label: 'Obliques (toucher les chevilles)', group: 'tronc', view: 'side', period: 1.8, anchor: 'hip',
+    words: ['oblique', 'toucher les cheville', 'touche cheville', 'touche talon', 'heel touch'],
+    frames: [
+      { pose: { torso: -70, head: 10, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 98, foreN: 96, armF: 80, foreF: 82 } },
+      { pose: { torso: -72, head: 10, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 80, foreN: 82, armF: 98, foreF: 96 } },
+    ],
+  },
+  {
+    id: 'shouldertap', label: 'Shoulder tap', group: 'tronc', view: 'side', period: 1.6, anchor: 'feet',
+    words: ['shoulder tap', 'shoulder taps', 'tap epaule', 'touche epaule', 'toucher l epaule'],
+    frames: [
+      { pose: HIGH_PLANK },
+      { pose: { ...HIGH_PLANK, armN: 55, foreN: -150 } },
+      { pose: HIGH_PLANK },
+      { pose: { ...HIGH_PLANK, armF: 55, foreF: -150 } },
+    ],
+  },
+  {
+    id: 'dynplank', label: 'Gainage dynamique', group: 'tronc', view: 'side', period: 3, anchor: 'feet',
+    words: ['gainage dynamique', 'planche dynamique', 'plank up down', 'up down plank'],
+    frames: [
+      { pose: { torso: 81, head: -4, thighN: -81, shinN: -81, thighF: -81, shinF: -81, armN: 0, foreN: 90, armF: 2, foreF: 90 } },
+      { pose: { torso: 74, head: -5, thighN: -74, shinN: -74, thighF: -74, shinF: -74, armN: 0, foreN: 0, armF: 2, foreF: 90 }, w: 0.8 },
+      { pose: HIGH_PLANK },
+      { pose: { torso: 74, head: -5, thighN: -74, shinN: -74, thighF: -74, shinF: -74, armN: 0, foreN: 90, armF: 3, foreF: 3 }, w: 0.8 },
+    ],
+  },
+  {
+    id: 'woodchop', label: 'Bûcheron', group: 'tronc', view: 'side', period: 2.4, anchor: 'feet',
+    words: ['bucheron', 'wood chop', 'woodchop'],
+    frames: [
+      { pose: { torso: 52, head: -20, thighN: 40, shinN: -18, thighF: 38, shinF: -18, armN: 25, foreN: 28, armF: 23, foreF: 26 } },
+      { pose: { torso: -4, head: 4, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 160, foreN: 165, armF: 158, foreF: 163 } },
+    ],
+  },
+  {
+    id: 'goodmorning', label: 'Good morning', group: 'tronc', view: 'side', period: 2.6, anchor: 'feet',
+    words: ['good morning', 'goodmorning', 'bonjour'],
+    frames: [
+      { pose: { torso: 0, thighN: 2, shinN: 0, thighF: 1, shinF: -1, armN: 150, foreN: -40, armF: 148, foreF: -42 } },
+      { pose: { torso: 75, head: -10, thighN: 14, shinN: -6, thighF: 13, shinF: -6, armN: 225, foreN: 40, armF: 223, foreF: 38 } },
+    ],
+  },
+  {
+    id: 'supermanfront', label: 'Superman frontal', group: 'tronc', view: 'side', period: 2.6, anchor: 'feet',
+    words: ['superman frontal', 'superman debout', 'superman incline'],
+    frames: [
+      { pose: { torso: 50, head: -14, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: -40, foreN: -35, armF: -38, foreF: -33 } },
+      { pose: { torso: 50, head: -14, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: 60, foreN: 65, armF: 58, foreF: 63 }, w: 0.6 },
+      { pose: { torso: 50, head: -14, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: 130, foreN: 130, armF: 128, foreF: 128 } },
+    ],
+  },
+  {
+    id: 'supermanside', label: 'Superman latéral', group: 'tronc', view: 'front', period: 2.4, anchor: 'hip',
+    words: ['superman lateral', 'superman lateraux', 'oiseau', 'reverse fly'],
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 6, foreN: 12, armF: 6, foreF: 12 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 95, foreN: 105, armF: 95, foreF: 105 } },
     ],
   },
 ];
@@ -531,6 +726,7 @@ export function chairPos(p: Placed): { seatY: number; front: number } | null {
   if (!p.ex.chairUnder) return null;
   const j0 = frameAt(p, 0).j;
   if (p.ex.chairUnder === 'hands') return { seatY: j0.handN[1] + p.d.wFore * 0.5, front: j0.handN[0] + 1.5 };
+  if (p.ex.chairUnder === 'foot') return { seatY: Math.max(j0.ankleF[1], j0.toeF[1]) + 2.4, front: Math.max(j0.ankleF[0], j0.toeF[0]) + 4 };
   return { seatY: j0.hip[1] + p.d.wTorso * 0.47, front: j0.hip[0] + 9 };
 }
 export const CHAIR_DEPTH = 20;

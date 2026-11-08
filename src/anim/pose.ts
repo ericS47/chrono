@@ -19,6 +19,8 @@ export interface Pose {
   lift?: number;
   /** Talons levés (degrés) : le pied pivote, pointe au sol (mollets, saut). */
   heel?: number;
+  /** Épaules haussées (unités vers le haut), pour le haussement d'épaules. */
+  shrug?: number;
   /** Vue de face : tout le corps basculé (degrés, sens horaire), pour le gainage latéral. */
   roll?: number;
 }
@@ -89,8 +91,9 @@ export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
     const up: Pt = [0, -1];
     const neck: Pt = [0, -d.torso];
     const headC = add(neck, up, d.neck + d.head);
-    const sN: Pt = [d.shoulderHalf, -d.torso + 2];
-    const sF: Pt = [-d.shoulderHalf, -d.torso + 2];
+    const sh = p.shrug ?? 0;
+    const sN: Pt = [d.shoulderHalf, -d.torso + 2 - sh];
+    const sF: Pt = [-d.shoulderHalf, -d.torso + 2 - sh];
     const hN: Pt = [d.hipHalf * 0.75, 0];
     const hF: Pt = [-d.hipHalf * 0.75, 0];
     const mirror = (a: number): Pt => { const v = dir(a); return [-v[0], v[1]]; };
@@ -114,7 +117,7 @@ export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
   const neck = add(hip, up, d.torso);
   const h = rad(t + (p.head ?? 0) + d.stoop);
   const headC = add(neck, [Math.sin(h), -Math.cos(h)], d.neck + d.head);
-  const shoulder = add(neck, up, -2.5);
+  const shoulder = add(neck, up, -2.5 + (p.shrug ?? 0));
   const heel = p.heel ?? 0;
   const leg = (thigh: number, shin: number) => {
     const knee = add(hip, dir(thigh), d.thigh);
@@ -186,6 +189,6 @@ export function lerpPose(a: Pose, b: Pose, t: number): Pose {
     torso: l(a.torso, b.torso), head: l(a.head, b.head),
     thighN: l(a.thighN, b.thighN), shinN: l(a.shinN, b.shinN), thighF: l(a.thighF, b.thighF), shinF: l(a.shinF, b.shinF),
     armN: l(a.armN, b.armN), foreN: l(a.foreN, b.foreN), armF: l(a.armF, b.armF), foreF: l(a.foreF, b.foreF),
-    lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll),
+    lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll), shrug: l(a.shrug, b.shrug),
   };
 }
