@@ -218,6 +218,8 @@ h1, h2, h3 { margin: 0; }
   padding: 14px; font-weight: 800; font-size: 18px; line-height: 1.15; text-align: center;
   color: var(--phase-ink);
 }
+.games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.games .big-tile { height: 132px; }
 .tiles.types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .tiles.types .tile { height: 96px; font-size: 18px; }
 .tile.solo { align-items: center; justify-content: center; text-align: center; }

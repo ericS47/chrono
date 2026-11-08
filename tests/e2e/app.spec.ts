@@ -214,6 +214,12 @@ test('Créer : choix entre séance de sport et jeu de société', async ({ page 
   await expect(page).toHaveURL(/#\/nouvelle/);
   await page.getByRole('button', { name: 'Jeu de société' }).click();
   await expect(page.getByRole('heading', { name: 'Jeu de société' })).toBeVisible();
+  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Monopoly', '1000 Bornes', 'Roulette russe']) {
+    await expect(page.getByRole('button', { name })).toBeVisible();
+  }
+  await page.getByRole('button', { name: 'Bataille navale' }).click();
+  await expect(page.getByRole('heading', { name: 'Bataille navale' })).toBeVisible();
+  await page.getByRole('button', { name: 'Retour' }).click();
   await page.getByRole('button', { name: 'Retour' }).click();
   await page.getByRole('button', { name: 'Séance de sport' }).click();
   await expect(page).toHaveURL(/#\/creer/);

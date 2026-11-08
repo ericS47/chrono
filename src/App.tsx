@@ -111,7 +111,7 @@ export function App() {
     case 'types': screen = <SessionTypes />; nav = false; break;
     case 'creer': screen = <Builder id={rest[0]} />; nav = false; break;
     case 'nouvelle': screen = <CreateChoice />; nav = false; break;
-    case 'jeu': screen = <BoardGame />; nav = false; break;
+    case 'jeu': screen = <BoardGame id={rest[0]} />; nav = false; break;
     case 'avatar': screen = <AvatarScreen />; nav = false; break;
     default: screen = <Home />;
   }
