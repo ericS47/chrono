@@ -21,6 +21,8 @@ export interface Pose {
   heel?: number;
   /** Épaules haussées (unités vers le haut), pour le haussement d'épaules. */
   shrug?: number;
+  /** De profil : longueur apparente des bras (1 = entière ; moins = bras tendus vers nous, ex. ouverture latérale). */
+  reach?: number;
   /** Vue de face : tout le corps basculé (degrés, sens horaire), pour le gainage latéral. */
   roll?: number;
 }
@@ -126,9 +128,10 @@ export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
     const toe = add(ankle, dir(shin + 90 - Math.min(0, shin) * 0.15 - heel), d.foot);
     return { knee, ankle, toe };
   };
+  const reach = p.reach ?? 1;
   const arm = (a: number, f: number) => {
-    const elbow = add(shoulder, dir(a), d.arm);
-    return { elbow, hand: add(elbow, dir(f), d.fore) };
+    const elbow = add(shoulder, dir(a), d.arm * reach);
+    return { elbow, hand: add(elbow, dir(f), d.fore * reach) };
   };
   const ln = leg(p.thighN, p.shinN);
   const lf = leg(p.thighF, p.shinF);
@@ -189,6 +192,6 @@ export function lerpPose(a: Pose, b: Pose, t: number): Pose {
     torso: l(a.torso, b.torso), head: l(a.head, b.head),
     thighN: l(a.thighN, b.thighN), shinN: l(a.shinN, b.shinN), thighF: l(a.thighF, b.thighF), shinF: l(a.shinF, b.shinF),
     armN: l(a.armN, b.armN), foreN: l(a.foreN, b.foreN), armF: l(a.armF, b.armF), foreF: l(a.foreF, b.foreF),
-    lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll), shrug: l(a.shrug, b.shrug),
+    lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll), shrug: l(a.shrug, b.shrug), reach: (a.reach ?? 1) + ((b.reach ?? 1) - (a.reach ?? 1)) * t,
   };
 }

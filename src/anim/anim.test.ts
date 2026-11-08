@@ -47,7 +47,11 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Superman frontal')).toBe('supermanfront');
     expect(matchExercise('Superman latéral')).toBe('supermanside');
     expect(matchExercise('Superman')).toBe('superman');
+    expect(matchExercise('Développé Arnold')).toBe('arnold');
+    expect(matchExercise('Développé Arnold haltères')).toBe('dbarnold');
     expect(matchExercise('Superman')).toBe('superman');
+    expect(matchExercise('Développé Arnold')).toBe('arnold');
+    expect(matchExercise('Développé Arnold haltères')).toBe('dbarnold');
     expect(matchExercise('Relevés de jambes')).toBe('legraise');
     expect(matchExercise('Mollets')).toBe('calfraise');
     expect(matchExercise('Bird dog')).toBe('birddog');
@@ -94,6 +98,8 @@ describe('reconnaissance des exercices', () => {
     expect(matchExercise('Superman frontal')).toBe('supermanfront');
     expect(matchExercise('Superman latéral')).toBe('supermanside');
     expect(matchExercise('Superman')).toBe('superman');
+    expect(matchExercise('Développé Arnold')).toBe('arnold');
+    expect(matchExercise('Développé Arnold haltères')).toBe('dbarnold');
     expect(matchExercise('Pas chassé D')).toBe('shuffleright');
     expect(matchExercise('Pas chassés droite')).toBe('shuffleright');
     expect(matchExercise('Pas chassé G')).toBe('shuffleleft');

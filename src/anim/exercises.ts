@@ -15,6 +15,7 @@ export type ExerciseId =
   | 'ringpress' | 'ringbridge'
   | 'bulgarian' | 'toeraise' | 'legabduction' | 'legadduction' | 'kickback'
   | 'pressup' | 'pressforward' | 'curlbw' | 'tricepsbw' | 'shrug' | 'uprightrow' | 'lateralbw' | 'frontbw' | 'pecfly'
+  | 'arnold' | 'dbarnold'
   | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside';
 
 type Anchor = 'feet' | 'hands' | 'hip';
@@ -529,28 +530,33 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'pecfly', label: 'Pectoraux (coudes à 90°, se touchent devant)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet',
+    id: 'pecfly', label: 'Pectoraux (coudes à 90°, se touchent devant)', group: 'ms', view: 'front', period: 2.2, anchor: 'hip',
     words: ['pectoraux', 'pectoral', 'butterfly', 'ecarte pectoraux', 'coude a 90', 'coudes qui se touchent'],
     frames: [
-      { pose: { ...STAND, armN: -95, foreN: 178, armF: -93, foreF: 176 } },
-      { pose: { ...STAND, armN: 92, foreN: 178, armF: 90, foreF: 176 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: -30, foreN: 180, armF: -30, foreF: 180 }, w: 0.5 },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: -30, foreN: 180, armF: -30, foreF: 180 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 88, foreN: 178, armF: 88, foreF: 178 } },
     ],
   },
   // ---------- Sans matériel : tronc ----------
   {
     id: 'situpfull', label: 'Sit-up', group: 'tronc', view: 'side', period: 2.6, anchor: 'hip',
-    words: ['sit up', 'situp', 'sit-up'],
+    words: ['sit up', 'situp', 'sit-up', 'v up', 'v-up', 'relevé en v', 'releve en v'],
     frames: [
-      { pose: { torso: -84, head: 8, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 150, foreN: 150, armF: 146, foreF: 146 } },
-      { pose: { torso: 6, head: 0, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 70, foreN: 75, armF: 68, foreF: 73 } },
+      { pose: { torso: -88, head: 4, thighN: 92, shinN: 92, thighF: 91, shinF: 91, armN: 270, foreN: 270, armF: 272, foreF: 272 } },
+      { pose: { torso: -70, head: 6, thighN: 115, shinN: 115, thighF: 114, shinF: 114, armN: 185, foreN: 185, armF: 187, foreF: 187 }, w: 0.5 },
+      { pose: { torso: -35, head: 6, thighN: 140, shinN: 140, thighF: 139, shinF: 139, armN: 128, foreN: 130, armF: 126, foreF: 128 }, w: 0.6 },
+      { pose: { torso: -35, head: 6, thighN: 140, shinN: 140, thighF: 139, shinF: 139, armN: 128, foreN: 130, armF: 126, foreF: 128 } },
     ],
   },
   {
-    id: 'obliques', label: 'Obliques (toucher les chevilles)', group: 'tronc', view: 'side', period: 1.8, anchor: 'hip',
+    id: 'obliques', label: 'Obliques (toucher les chevilles)', group: 'tronc', view: 'side', period: 2, anchor: 'hip',
     words: ['oblique', 'toucher les cheville', 'touche cheville', 'touche talon', 'heel touch'],
     frames: [
-      { pose: { torso: -70, head: 10, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 98, foreN: 96, armF: 80, foreF: 82 } },
-      { pose: { torso: -72, head: 10, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 80, foreN: 82, armF: 98, foreF: 96 } },
+      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 74, foreN: 74, armF: 52, foreF: 120 } },
+      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 74, foreN: 74, armF: 52, foreF: 120 }, w: 0.3 },
+      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 52, foreN: 120, armF: 74, foreF: 74 } },
+      { pose: { torso: -60, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 52, foreN: 120, armF: 74, foreF: 74 }, w: 0.3 },
     ],
   },
   {
@@ -577,8 +583,9 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'woodchop', label: 'Bûcheron', group: 'tronc', view: 'side', period: 2.4, anchor: 'feet',
     words: ['bucheron', 'wood chop', 'woodchop'],
     frames: [
-      { pose: { torso: 52, head: -20, thighN: 40, shinN: -18, thighF: 38, shinF: -18, armN: 25, foreN: 28, armF: 23, foreF: 26 } },
-      { pose: { torso: -4, head: 4, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 160, foreN: 165, armF: 158, foreF: 163 } },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 2, foreN: 4, armF: 0, foreF: 2 } },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: -78, foreN: 8, armF: -76, foreF: 6 }, w: 0.6 },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: -78, foreN: 8, armF: -76, foreF: 6 } },
     ],
   },
   {
@@ -593,17 +600,39 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'supermanfront', label: 'Superman frontal', group: 'tronc', view: 'side', period: 2.6, anchor: 'feet',
     words: ['superman frontal', 'superman debout', 'superman incline'],
     frames: [
-      { pose: { torso: 50, head: -14, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: -40, foreN: -35, armF: -38, foreF: -33 } },
-      { pose: { torso: 50, head: -14, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: 60, foreN: 65, armF: 58, foreF: 63 }, w: 0.6 },
-      { pose: { torso: 50, head: -14, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: 130, foreN: 130, armF: 128, foreF: 128 } },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: -92, foreN: -92, armF: -90, foreF: -90 } },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 0, foreN: 4, armF: 2, foreF: 6 }, w: 0.8 },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 92, foreN: 92, armF: 90, foreF: 90 }, w: 0.5 },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 92, foreN: 92, armF: 90, foreF: 90 } },
     ],
   },
   {
-    id: 'supermanside', label: 'Superman latéral', group: 'tronc', view: 'front', period: 2.4, anchor: 'hip',
+    id: 'supermanside', label: 'Superman latéral', group: 'tronc', view: 'side', period: 2.4, anchor: 'feet',
     words: ['superman lateral', 'superman lateraux', 'oiseau', 'reverse fly'],
     frames: [
-      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 6, foreN: 12, armF: 6, foreF: 12 } },
-      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 95, foreN: 105, armF: 95, foreF: 105 } },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 2, foreN: 6, armF: 0, foreF: 4 } },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 30, foreN: 40, armF: 28, foreF: 38, reach: 0.28 }, w: 0.5 },
+      { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 30, foreN: 40, armF: 28, foreF: 38, reach: 0.28 } },
+    ],
+  },
+  {
+    id: 'arnold', label: 'Développé Arnold', group: 'ms', view: 'side', period: 3, anchor: 'feet',
+    words: ['developpe arnold', 'arnold press', 'arnold'],
+    frames: [
+      { pose: { ...STAND, armN: 28, foreN: 168, armF: 26, foreF: 166 } },
+      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
+      { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 } },
+      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
+    ],
+  },
+  {
+    id: 'dbarnold', label: 'Développé Arnold (haltères)', group: 'ms', view: 'side', period: 3, anchor: 'feet', equipment: 'dumbbell',
+    words: ['developpe arnold haltere', 'arnold press haltere', 'arnold haltere'],
+    frames: [
+      { pose: { ...STAND, armN: 28, foreN: 168, armF: 26, foreF: 166 } },
+      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
+      { pose: { ...STAND, armN: 170, foreN: 176, armF: 168, foreF: 174 } },
+      { pose: { ...STAND, armN: 95, foreN: 176, armF: 93, foreF: 174 }, w: 0.7 },
     ],
   },
 ];
