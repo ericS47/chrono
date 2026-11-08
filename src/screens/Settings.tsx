@@ -57,10 +57,22 @@ export function SettingsScreen() {
 
   const doExport = async () => {
     const data = await exportBackup();
+    const name = `pulse-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    // iPhone (app installée) : le menu Partager propose « Enregistrer dans Fichiers ».
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Sauvegarde Pulse' });
+        setMsg('Sauvegarde prête');
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') setMsg('Partage impossible');
+      }
+      return;
+    }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `chrono-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = name;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     setMsg('Sauvegarde exportée');
