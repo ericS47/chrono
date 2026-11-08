@@ -237,7 +237,7 @@ export const EXERCISES: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'tapping', label: 'Tapping', group: 'cardio', view: 'side', period: 0.4, anchor: 'hip',
+    id: 'tapping', label: 'Tipping', group: 'cardio', view: 'side', period: 0.4, anchor: 'hip',
     words: ['tapping', 'tipping', 'pietinement', 'fast feet', 'appuis rapides', 'pas rapides'],
     frames: [
       { pose: { torso: 16, head: -12, thighN: 42, shinN: -22, thighF: 26, shinF: -18, armN: 25, foreN: 105, armF: -15, foreF: 75, lift: 1 } },
