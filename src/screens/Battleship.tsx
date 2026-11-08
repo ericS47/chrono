@@ -3,50 +3,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSettings } from '../data/hooks';
-import { TopBar, Segmented, Stepper } from '../ui/kit';
-import { ExerciseFigure, FigureFrame } from '../anim/Figure';
-import { EQUIPMENT_ICONS, GROUP_COLORS, POSITION_ICONS } from '../anim/ExercisePicker';
-import type { Equipment, ExerciseId, Position } from '../anim/exercises';
-import { EQUIPMENT_LABELS, EXERCISES, EXERCISE_BY_ID, POSITION_LABELS, equipmentOf, inPosition, isExerciseId } from '../anim/exercises';
+import { TopBar } from '../ui/kit';
+import { ExerciseFigure } from '../anim/Figure';
+import type { ExerciseId } from '../anim/exercises';
+import { EXERCISE_BY_ID } from '../anim/exercises';
+import type { ExSetup } from '../games/ExerciseSetup';
+import { ExerciseSetupFields, exercisePool, setupReady, useGameSetup } from '../games/ExerciseSetup';
 import type { Board } from '../games/battleship';
 import { aiShot, allSunk, assignRows, cellName, newBoard, rowOf, ROWS, shoot, SIZE, sunkShipAt } from '../games/battleship';
-
-interface Setup {
-  reps: number;
-  mode: 'random' | 'chosen';
-  position: Position;
-  equipment: Equipment[];
-  chosen: ExerciseId[];
-}
-
-const DEFAULT_SETUP: Setup = { reps: 10, mode: 'random', position: 'standing', equipment: ['none'], chosen: [] };
-const SETUP_KEY = 'pulse-bataille-navale';
-
-function loadSetup(): Setup {
-  try {
-    const s = JSON.parse(localStorage.getItem(SETUP_KEY) ?? 'null') as Partial<Setup> | null;
-    if (!s) return DEFAULT_SETUP;
-    return {
-      ...DEFAULT_SETUP,
-      ...s,
-      equipment: (s.equipment ?? DEFAULT_SETUP.equipment).filter((e) => e in EQUIPMENT_LABELS),
-      chosen: (s.chosen ?? []).filter((id) => isExerciseId(id)),
-    };
-  } catch {
-    return DEFAULT_SETUP;
-  }
-}
-
-function saveSetup(s: Setup) {
-  try {
-    localStorage.setItem(SETUP_KEY, JSON.stringify(s));
-  } catch {
-    /* stockage indisponible : réglages non retenus */
-  }
-}
-
-/** Exercices disponibles avec la position et le matériel choisis. */
-const available = (s: Setup) => EXERCISES.filter((x) => inPosition(x, s.position) && s.equipment.includes(equipmentOf(x)));
 
 /** Couleur de chaque exercice dans la grille et la légende. */
 const ROW_COLORS = ['#FFBE98', '#9BD3F5', '#B5D98A', '#FFC93C', '#B9A6FF', '#F5A8C8', '#3DD6C6', '#FF9F5A', '#8FA3FF', '#E6CBA8'];
@@ -71,11 +35,9 @@ interface Game {
   over: 'won' | 'lost' | null;
 }
 
-function newGame(s: Setup): Game {
-  const list = available(s).map((x) => x.id);
-  const pool = s.mode === 'chosen' ? s.chosen.filter((id) => list.includes(id)) : list;
+function newGame(s: ExSetup): Game {
   return {
-    rows: assignRows(pool),
+    rows: assignRows(exercisePool(s)),
     reps: s.reps,
     enemy: newBoard(),
     mine: newBoard(),
@@ -88,99 +50,21 @@ function newGame(s: Setup): Game {
 }
 
 export function Battleship() {
-  const [setup, setSetup] = useState<Setup>(loadSetup);
+  const [setup, update] = useGameSetup('pulse-bataille-navale');
   const [game, setGame] = useState<Game | null>(null);
-  const update = (patch: Partial<Setup>) => {
-    const next = { ...setup, ...patch };
-    setSetup(next);
-    saveSetup(next);
-  };
   if (!game) return <SetupScreen setup={setup} update={update} onStart={() => setGame(newGame(setup))} />;
   return <GameScreen game={game} setGame={setGame} onReplay={() => setGame(newGame(setup))} onSetup={() => setGame(null)} />;
 }
 
-function SetupScreen({ setup, update, onStart }: { setup: Setup; update: (p: Partial<Setup>) => void; onStart: () => void }) {
-  const avatar = useSettings().anim.avatar;
-  const list = available(setup);
-  const chosen = setup.chosen.filter((id) => list.some((x) => x.id === id));
-  const ready = setup.mode === 'random' ? list.length > 0 : chosen.length > 0;
-  const toggleEquip = (e: Equipment) => {
-    const has = setup.equipment.includes(e);
-    if (has && setup.equipment.length === 1) return;
-    update({ equipment: has ? setup.equipment.filter((x) => x !== e) : [...setup.equipment, e] });
-  };
-  const toggleEx = (id: ExerciseId) =>
-    update({ chosen: setup.chosen.includes(id) ? setup.chosen.filter((x) => x !== id) : [...setup.chosen, id] });
-
+function SetupScreen({ setup, update, onStart }: { setup: ExSetup; update: (p: Partial<ExSetup>) => void; onStart: () => void }) {
   return (
     <main className="screen no-nav">
       <TopBar title="Bataille navale" />
-      <p className="hint bn-rules">
+      <p className="hint game-rules">
         Coule la flotte de l’ordinateur. Chaque ligne de la grille est un exercice : à chaque tir raté, ou quand l’ordinateur te touche, tu fais l’exercice de la ligne.
       </p>
-
-      <section className="section" aria-label="Répétitions">
-        <div className="card" style={{ padding: 0 }}>
-          <Stepper label="Répétitions" hint="Par exercice à faire" value={setup.reps} min={1} max={100} onChange={(reps) => update({ reps })} />
-        </div>
-      </section>
-
-      <section className="section">
-        <h2 className="section-title">Position</h2>
-        <div className="ex-pos" role="radiogroup" aria-label="Position" style={{ border: 'none', padding: 0 }}>
-          {(Object.keys(POSITION_LABELS) as Position[]).map((k) => (
-            <button key={k} type="button" role="radio" aria-checked={k === setup.position} className="ex-pos-btn" onClick={() => update({ position: k })}>
-              {POSITION_ICONS[k]}
-              <span>{POSITION_LABELS[k]}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <h2 className="section-title">Matériel</h2>
-        <div className="ex-equip" role="group" aria-label="Matériel">
-          {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((k) => (
-            <button key={k} type="button" role="checkbox" aria-checked={setup.equipment.includes(k)} aria-label={EQUIPMENT_LABELS[k]} title={EQUIPMENT_LABELS[k]} className="ex-equip-btn" onClick={() => toggleEquip(k)}>
-              {EQUIPMENT_ICONS[k]}
-              <span>{EQUIPMENT_LABELS[k]}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <h2 className="section-title">Exercices</h2>
-        <Segmented
-          label="Exercices"
-          value={setup.mode}
-          onChange={(mode) => update({ mode })}
-          options={[{ value: 'random', label: 'Aléatoires' }, { value: 'chosen', label: 'Choisis' }]}
-        />
-        {!list.length && <p className="hint">Pas d’exercice {setup.position === 'chair' ? 'sur chaise' : 'debout'} avec ce matériel.</p>}
-        {setup.mode === 'random' && list.length > 0 && (
-          <p className="hint">{Math.min(list.length, SIZE)} exercices tirés au hasard parmi {list.length}, répartis au hasard sur les 10 lignes.</p>
-        )}
-        {setup.mode === 'chosen' && list.length > 0 && (
-          <>
-            <p className="hint">
-              {chosen.length ? `${chosen.length} choisi${chosen.length > 1 ? 's' : ''}` : 'Choisis au moins un exercice'} : ils seront répartis au hasard sur les 10 lignes.
-            </p>
-            <div className="ex-picker-grid" role="listbox" aria-multiselectable="true" aria-label="Exercices choisis">
-              {list.map((x) => (
-                <button key={x.id} type="button" role="option" aria-selected={chosen.includes(x.id)} className="ex-opt" onClick={() => toggleEx(x.id)}>
-                  <span className="ex-opt-thumb" aria-hidden="true" style={{ background: GROUP_COLORS[x.group] }}>
-                    <FigureFrame exercise={x.id} avatar={avatar} sec={x.period / 2} />
-                  </span>
-                  <span className="ex-opt-name">{x.label}</span>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-      </section>
-
-      <button className="btn block" disabled={!ready} onClick={onStart}>Lancer la partie</button>
+      <ExerciseSetupFields setup={setup} update={update} slots="les 10 lignes" max={SIZE} />
+      <button className="btn block" disabled={!setupReady(setup)} onClick={onStart}>Lancer la partie</button>
     </main>
   );
 }

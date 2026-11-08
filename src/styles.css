@@ -658,7 +658,7 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 }
 
 /* Bataille navale */
-.bn-rules { font-size: 14px; line-height: 1.4; }
+.game-rules { font-size: 14px; line-height: 1.4; }
 .bn-screen { gap: 16px; }
 .bn-status { font-weight: 700; min-height: 2.6em; }
 .bn-grid { display: grid; grid-template-columns: 24px repeat(10, minmax(0, 1fr)); gap: 3px; }
@@ -686,3 +686,41 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 .bn-ex-line { display: flex; flex-direction: column; gap: 2px; font-size: 20px; font-weight: 800; }
 .bn-ex-figure { height: 200px; display: flex; justify-content: center; background: var(--effort); border-radius: var(--radius); }
 .bn-ex-figure .figure { height: 100%; width: auto; }
+
+/* Jeu de l’oie */
+.goose-screen { gap: 14px; }
+.goose-players { display: flex; flex-direction: column; gap: 8px; }
+.goose-player-row { display: flex; align-items: center; gap: 10px; }
+.goose-player-row .input { flex: 1; min-width: 0; }
+.goose-token { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25); flex: none; }
+.goose-token.big { width: 22px; height: 22px; }
+.goose-turn { display: flex; align-items: center; gap: 12px; }
+.goose-turn-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.goose-turn .btn { flex: none; }
+.goose-scores { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.goose-scores li { display: flex; align-items: center; gap: 8px; font-weight: 600; padding: 4px 8px; border-radius: 10px; }
+.goose-scores li[aria-current='true'] { background: var(--accent-tint); }
+.goose-score-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.goose-start { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14px; }
+.goose-tokens { display: flex; flex-wrap: wrap; gap: 2px; }
+.goose-board { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.goose-case { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--phase-ink); }
+.goose-num { position: absolute; top: 2px; left: 4px; font-size: 11px; font-weight: 800; z-index: 1; }
+.goose-thumb { width: 78%; height: 78%; display: flex; }
+.goose-thumb .figure { width: 100%; height: 100%; }
+.goose-sp { position: absolute; bottom: 0; left: 0; right: 0; padding: 1px 0; text-align: center; font-size: 8px; font-weight: 800; white-space: nowrap; overflow: hidden; background: rgba(255, 255, 255, 0.85); z-index: 1; }
+.goose-case .goose-tokens { position: absolute; top: 2px; right: 2px; max-width: 60%; justify-content: flex-end; z-index: 2; }
+.goose-case.sp-goose { background: #FFFFFF; box-shadow: inset 0 0 0 2px #2E9E6B; }
+.goose-case.sp-bridge, .goose-case.sp-end { background: #FFC93C; }
+.goose-case.sp-hotel, .goose-case.sp-well, .goose-case.sp-prison { background: #B9A6FF; }
+.goose-case.sp-maze, .goose-case.sp-death { background: #F0907A; }
+.goose-case.sp-goose .goose-sp { color: #2E7A5E; }
+.goose-sheet { gap: 12px; }
+.goose-sheet h2 { font-size: 20px; font-weight: 800; }
+.goose-dice { display: flex; gap: 12px; justify-content: center; }
+.goose-die { width: 64px; height: 64px; }
+.goose-events { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; font-weight: 600; text-align: center; }
+.goose-ex { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; }
+.goose-ex-figure { width: 96px; height: 96px; flex: none; background: var(--effort); border-radius: 12px; display: flex; overflow: hidden; }
+.goose-ex-figure .figure { width: 100%; height: 100%; }
+.goose-ex-text { display: flex; flex-direction: column; gap: 2px; font-size: 18px; }

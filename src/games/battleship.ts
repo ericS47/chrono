@@ -133,13 +133,13 @@ export function aiShot(board: Board, rng: Rng = Math.random): number {
 }
 
 /**
- * Exercice de chaque ligne (10 lignes), réparti au hasard.
- * Plus de 10 exercices : 10 tirés au hasard. Moins : chacun revient autant de fois que possible (à un près).
+ * Exercice de chaque ligne (10 lignes, ou `count` cases), réparti au hasard.
+ * Plus d'exercices que de places : tirés au hasard, sans doublon. Moins : chacun revient autant de fois que possible (à un près).
  */
-export function assignRows<T>(exercises: readonly T[], rng: Rng = Math.random): T[] {
+export function assignRows<T>(exercises: readonly T[], rng: Rng = Math.random, count = SIZE): T[] {
   if (!exercises.length) return [];
-  if (exercises.length >= SIZE) return shuffle(exercises, rng).slice(0, SIZE);
+  if (exercises.length >= count) return shuffle(exercises, rng).slice(0, count);
   const order = shuffle(exercises, rng);
-  const rows = Array.from({ length: SIZE }, (_, i) => order[i % order.length]);
+  const rows = Array.from({ length: count }, (_, i) => order[i % order.length]);
   return shuffle(rows, rng);
 }

@@ -86,6 +86,8 @@ Pendant l'effort, un avatar animé montre l'exercice à côté du chrono ; il di
 
 ## Reste à faire / idées
 
+- Jeux de société sportifs (« Créer » → jeu de société) : bataille navale contre l’ordinateur et jeu de l’oie (1 à 6 joueurs sur le même téléphone) faits, logique dans `src/games/` (testée). Reste : Monopoly, 1000 Bornes, roulette russe. Une partie en cours n’est pas reprise si l’app est fermée.
+
 - Mini-fenêtre (image dans l'image, comme YouTube) : essayée puis retirée (nov. 2026). Safari sur iPhone refuse de mettre en mini-fenêtre une vidéo générée en direct (« non pris en charge ») ; seule une app native le permettrait. Alternative possible sur iPhone : la séance sur l'écran verrouillé / la Dynamic Island (avec « Son en arrière-plan »), avec barre de temps de la phase.
 
 - Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.

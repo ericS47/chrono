@@ -256,6 +256,24 @@ test('Bataille navale : réglages, tir raté, exercice de la ligne', async ({ pa
   await expect(page.getByLabel('Exercices faits')).not.toHaveText('0 ex.');
 });
 
+test('Jeu de l’oie : 2 joueurs, lancer les dés, exercices de la case', async ({ page }) => {
+  await page.goto('./#/jeu/jeu-de-l-oie');
+  await expect(page.getByRole('heading', { name: 'Jeu de l’oie' })).toBeVisible();
+  await page.getByLabel('Nom du joueur 1').fill('Ana');
+  await page.getByRole('button', { name: 'Ajouter un joueur' }).click();
+  await page.getByLabel('Nom du joueur 2').fill('Léo');
+  await page.getByRole('tab', { name: 'Choisis' }).click();
+  await page.getByRole('option', { name: 'Squat', exact: true }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.locator('.goose-case')).toHaveCount(63);
+  await expect(page.getByText('Au tour de Ana')).toBeVisible();
+  await page.getByRole('button', { name: 'Lancer les dés' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Tour de Ana' });
+  await expect(dialog).toContainText('10 × Squat');
+  await dialog.getByRole('button', { name: 'C’est fait' }).click();
+  await expect(page.getByText('Au tour de Léo')).toBeVisible();
+});
+
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {
   for (const name of ['Séance A', 'Séance B', 'Séance C']) {
     await page.goto('./#/seances');
