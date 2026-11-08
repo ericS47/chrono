@@ -346,16 +346,21 @@ test('créateur : choisir l’exercice animé d’un effort dans la liste', asyn
   await expect(page.getByRole('radio', { name: 'Sans matériel' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('radio', { name: 'Kettlebell' }).click();
   await expect(page.getByRole('option', { name: 'Goblet squat' })).toBeVisible();
-  await expect(page.getByRole('option', { name: 'Fente' })).toHaveCount(0);
+  await expect(page.getByRole('option', { name: 'Fente', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('option', { name: 'Fente (kettlebell)' })).toBeVisible();
   // Position « Chaise », puis matériel « Haltères » : les exercices assis aux haltères.
   await expect(page.getByRole('radio', { name: 'Debout' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('radio', { name: 'Chaise' }).click();
   await page.getByRole('radio', { name: 'Haltères' }).click();
   await expect(page.getByRole('option', { name: 'Curl biceps assis (haltères)' })).toBeVisible();
   await expect(page.getByRole('option', { name: 'Goblet squat' })).toHaveCount(0);
+  // Variantes générées : triceps aux haltères sur chaise, et sans matériel sur chaise.
+  await expect(page.getByRole('option', { name: 'Extension triceps assis (haltères)' })).toBeVisible();
+  await page.getByRole('radio', { name: 'Sans matériel' }).click();
+  await expect(page.getByRole('option', { name: 'Bûcheron assis' })).toBeVisible();
   await page.getByRole('radio', { name: 'Debout' }).click();
   await page.getByRole('radio', { name: 'Sans matériel' }).click();
-  await page.getByRole('option', { name: 'Fente' }).click();
+  await page.getByRole('option', { name: 'Fente', exact: true }).click();
   await expect(page.getByRole('img', { name: 'Animation : Fente' })).toBeVisible();
   await page.getByRole('button', { name: 'Terminé' }).click();
   await expect(page.getByRole('button', { name: /^Effort 0:30, Fente/ })).toBeVisible();

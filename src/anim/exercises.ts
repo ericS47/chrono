@@ -4,8 +4,11 @@
 import type { Pose, Dims, Joints, Pt } from './pose';
 import { lerpPose, lowest, rotate, solve, translate } from './pose';
 import { setExerciseLabels } from '../engine/timeline';
+import type { VariantKey } from './variants';
+import { variantsOf } from './variants';
 
-export type ExerciseId =
+/** Exercices écrits à la main. */
+export type BaseExerciseId =
   | 'squat' | 'pushup' | 'plank' | 'jumpingjack' | 'lunge' | 'burpee' | 'climber' | 'situp' | 'highknees'
   | 'kneepushup' | 'bridge' | 'superman' | 'sideplank' | 'legraise' | 'calfraise' | 'jumpsquat' | 'birddog' | 'tapping'
   | 'buttkicks' | 'shuffleright' | 'shuffleleft' | 'shufflealt'
@@ -17,10 +20,12 @@ export type ExerciseId =
   | 'pressup' | 'pressforward' | 'curlbw' | 'tricepsbw' | 'shrug' | 'uprightrow' | 'lateralbw' | 'frontbw' | 'pecfly'
   | 'arnold' | 'dbarnold'
   | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside';
+/** Exercice écrit à la main, ou une de ses variantes générées (chaise, matériel) : « curlbw-db-c »… */
+export type ExerciseId = BaseExerciseId | `${BaseExerciseId}-${VariantKey}`;
 
-type Anchor = 'feet' | 'hands' | 'hip';
+export type Anchor = 'feet' | 'hands' | 'hip';
 
-interface Frame {
+export interface Frame {
   pose: Pose;
   /** Point qui reste immobile au sol pendant le passage vers cette posture. */
   anchor?: Anchor;
@@ -53,7 +58,15 @@ export interface ExerciseAnim {
   positions?: Position[];
   /** Exercice sur chaise : chaise posée sous la hanche (assis) ou sous les mains (dips), d'après la première posture. */
   chairUnder?: ChairUnder;
+  /** Où se tient le matériel (par défaut selon le matériel et la vue). */
+  grip?: Grip;
 }
+
+/**
+ * Prise du matériel : `one` un seul objet tenu à deux mains, `each` un par main,
+ * `hands` anneau entre les mains, `knees` / `ankles` anneau ou élastique autour des genoux / des chevilles.
+ */
+export type Grip = 'one' | 'each' | 'hands' | 'knees' | 'ankles';
 
 /** Matériel : sans matériel, kettlebell, élastique, haltères, anneau de Pilates. */
 export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell' | 'ring';
@@ -61,8 +74,11 @@ export const EQUIPMENT_LABELS: Record<Equipment, string> = { none: 'Sans matéri
 
 /** Position : debout (ou au sol), ou sur une chaise (dessinée avec l'avatar). */
 export type Position = 'standing' | 'chair';
-/** Appui sur la chaise : hanche (assis), mains (dips) ou pied arrière (squat sur une jambe). */
-export type ChairUnder = 'hip' | 'hands' | 'foot';
+/**
+ * Appui sur la chaise : hanche (assis), mains (dips, dos à la chaise), pied arrière (squat sur une jambe),
+ * mains sur l'assise face à la chaise (`incline` : pompe inclinée, gainage) ou mains sur le dossier (`rest`).
+ */
+export type ChairUnder = 'hip' | 'hands' | 'foot' | 'incline' | 'rest';
 export const POSITION_LABELS: Record<Position, string> = { standing: 'Debout', chair: 'Chaise' };
 export const positionOf = (e: ExerciseAnim): Position => (e.chairUnder ? 'chair' : 'standing');
 /** L'exercice apparaît-il dans cette branche (debout ou chaise) ? */
@@ -109,7 +125,7 @@ function shuffleAlt(): Frame[] {
   return out;
 }
 
-export const EXERCISES: ExerciseAnim[] = [
+const BASE: ExerciseAnim[] = [
   {
     id: 'squat', label: 'Squat', group: 'mi', view: 'side', period: 2.4, anchor: 'feet', words: ['squat', 'flexion de jambe', 'flexions de jambe'],
     frames: [
@@ -651,6 +667,9 @@ export const EXERCISES: ExerciseAnim[] = [
   },
 ];
 
+/** Tous les exercices : ceux écrits à la main, puis leurs variantes sur chaise et avec matériel. */
+export const EXERCISES: ExerciseAnim[] = [...BASE, ...variantsOf(BASE)];
+
 export const EXERCISE_BY_ID: Record<ExerciseId, ExerciseAnim> = Object.fromEntries(EXERCISES.map((e) => [e.id, e])) as Record<ExerciseId, ExerciseAnim>;
 
 export function isExerciseId(id: string | undefined): id is ExerciseId {
@@ -764,16 +783,30 @@ export function frameAt(p: Placed, sec: number): { j: Joints; flat: Joints; roll
  * pour qu'une pompe (allongée) remplisse le dessin autant qu'un squat.
  * Un avatar plus petit reste plus petit dans le même cadre.
  */
-/** Chaise : dessus de l'assise et bord avant, d'après la première posture (fixe pendant le mouvement). */
-export function chairPos(p: Placed): { seatY: number; front: number } | null {
-  if (!p.ex.chairUnder) return null;
-  const j0 = frameAt(p, 0).j;
-  if (p.ex.chairUnder === 'hands') return { seatY: j0.handN[1] + p.d.wFore * 0.5, front: j0.handN[0] + 1.5 };
-  if (p.ex.chairUnder === 'foot') return { seatY: Math.max(j0.ankleF[1], j0.toeF[1]) + 2.4, front: Math.max(j0.ankleF[0], j0.toeF[0]) + 4 };
-  return { seatY: j0.hip[1] + p.d.wTorso * 0.47, front: j0.hip[0] + 9 };
-}
+/**
+ * Chaise, fixe pendant le mouvement et placée d'après la première posture :
+ * dessus de l'assise (`seatY`), bord gauche de l'assise (`x0`) et côté du dossier.
+ * De face (`back: 'behind'`), `x0` est le milieu de l'assise et le dossier est derrière l'avatar.
+ */
+export interface ChairPos { seatY: number; x0: number; back: 'left' | 'right' | 'behind' }
 export const CHAIR_DEPTH = 20;
 export const CHAIR_BACK = 30;
+/** De face : demi-largeur de l'assise. */
+export const CHAIR_HALF = 13;
+export function chairPos(p: Placed): ChairPos | null {
+  if (!p.ex.chairUnder) return null;
+  const j0 = frameAt(p, 0).j;
+  const hand = p.d.wFore * 0.5;
+  switch (p.ex.chairUnder) {
+    case 'hands': return { seatY: j0.handN[1] + hand, x0: j0.handN[0] + 1.5 - CHAIR_DEPTH, back: 'left' };
+    case 'foot': return { seatY: Math.max(j0.ankleF[1], j0.toeF[1]) + 2.4, x0: Math.max(j0.ankleF[0], j0.toeF[0]) + 4 - CHAIR_DEPTH, back: 'left' };
+    case 'incline': return { seatY: j0.handN[1] + hand, x0: j0.handN[0] - 3, back: 'right' };
+    case 'rest': return { seatY: j0.handN[1] + hand + CHAIR_BACK, x0: j0.handN[0] - 1.2, back: 'left' };
+    default:
+      if (p.ex.view === 'front') return { seatY: j0.hip[1] + p.d.wTorso * 0.47, x0: j0.hip[0], back: 'behind' };
+      return { seatY: j0.hip[1] + p.d.wTorso * 0.47, x0: j0.hip[0] + 9 - CHAIR_DEPTH, back: 'left' };
+  }
+}
 
 export interface Box { x: number; y: number; w: number; h: number }
 const boxes = new Map<ExerciseId, Box>();
@@ -794,7 +827,8 @@ export function frameBox(ex: ExerciseAnim, ref: Dims): Box {
   // Chaise : le cadre l'inclut entièrement (dossier compris).
   const chair = chairPos(p);
   if (chair) {
-    half = Math.max(half, VIEW_W / 2 - (chair.front - CHAIR_DEPTH - 1), chair.front + 1 - VIEW_W / 2);
+    const [l, r] = chair.back === 'behind' ? [chair.x0 - CHAIR_HALF, chair.x0 + CHAIR_HALF] : [chair.x0, chair.x0 + CHAIR_DEPTH];
+    half = Math.max(half, VIEW_W / 2 - (l - 1), r + 1 - VIEW_W / 2);
     top = Math.min(top, chair.seatY - CHAIR_BACK + ref.head);
   }
   const pad = 9;

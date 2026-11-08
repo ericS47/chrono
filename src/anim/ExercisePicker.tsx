@@ -1,5 +1,5 @@
 // Choix de l'exercice animé : une liste qui s'ouvre sous le champ, filtrée en deux temps
-// (position : debout ou chaise, puis matériel : sans matériel, kettlebell, élastique, haltères), en deux colonnes, rangée par catégorie
+// (position : debout ou chaise, puis matériel : sans matériel, kettlebell, élastique, haltères, anneau de Pilates), en deux colonnes, rangée par catégorie
 // avec un bandeau de couleur, et une miniature de chaque exercice.
 
 import { useId, useState, type ReactNode } from 'react';

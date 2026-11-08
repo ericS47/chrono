@@ -32,6 +32,8 @@ export interface Pose {
   twist?: number;
   /** Vue de face : tout le corps basculé (degrés, sens horaire), pour le gainage latéral. */
   roll?: number;
+  /** Vue de face : longueur apparente des cuisses (1 = entière ; moins = cuisses vers nous, assis sur une chaise). */
+  legReach?: number;
 }
 
 export type Pt = [number, number];
@@ -106,9 +108,10 @@ export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
     const hN: Pt = [d.hipHalf * 0.75, 0];
     const hF: Pt = [-d.hipHalf * 0.75, 0];
     const mirror = (a: number): Pt => { const v = dir(a); return [-v[0], v[1]]; };
-    const kneeN = add(hN, dir(p.thighN), d.thigh);
+    const lr = p.legReach ?? 1;
+    const kneeN = add(hN, dir(p.thighN), d.thigh * lr);
     const ankleN = add(kneeN, dir(p.shinN), d.shin);
-    const kneeF = add(hF, mirror(p.thighF), d.thigh);
+    const kneeF = add(hF, mirror(p.thighF), d.thigh * lr);
     const ankleF = add(kneeF, mirror(p.shinF), d.shin);
     const elbowN = add(sN, dir(p.armN), d.arm);
     const handN = add(elbowN, dir(p.foreN), d.fore);
@@ -206,5 +209,6 @@ export function lerpPose(a: Pose, b: Pose, t: number): Pose {
     lift: l(a.lift, b.lift), heel: l(a.heel, b.heel), roll: l(a.roll, b.roll), shrug: l(a.shrug, b.shrug), reach: (a.reach ?? 1) + ((b.reach ?? 1) - (a.reach ?? 1)) * t,
     reachUpper: (a.reachUpper ?? 1) + ((b.reachUpper ?? 1) - (a.reachUpper ?? 1)) * t,
     twist: l(a.twist, b.twist),
+    legReach: (a.legReach ?? 1) + ((b.legReach ?? 1) - (a.legReach ?? 1)) * t,
   };
 }
