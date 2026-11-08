@@ -560,13 +560,11 @@ export const EXERCISES: ExerciseAnim[] = [
     id: 'obliques', label: 'Obliques (toucher les chevilles)', group: 'tronc', view: 'side', period: 2, anchor: 'hip',
     words: ['oblique', 'toucher les cheville', 'touche cheville', 'touche talon', 'heel touch'],
     frames: [
-      // Bras tendus vers les chevilles : c'est le buste qui s'enroule et bascule d'un côté puis de l'autre.
-      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 78, foreN: 78, armF: 64, foreF: 64 } },
-      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 78, foreN: 78, armF: 64, foreF: 64 }, w: 0.3 },
-      { pose: { torso: -64, head: 8, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 70, foreN: 70, armF: 70, foreF: 70 }, w: 0.5 },
-      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 64, foreN: 64, armF: 78, foreF: 78 } },
-      { pose: { torso: -56, head: 10, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 64, foreN: 64, armF: 78, foreF: 78 }, w: 0.3 },
-      { pose: { torso: -64, head: 8, thighN: 145, shinN: 10, thighF: 143, shinF: 10, armN: 70, foreN: 70, armF: 70, foreF: 70 }, w: 0.5 },
+      // Buste relevé et fixe ; rotation à droite (cheville de devant), puis à gauche (cheville de derrière), bras tendus.
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 14, armN: 62, foreN: 62, armF: 82, foreF: 82 }, w: 0.35 },
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 14, armN: 62, foreN: 62, armF: 82, foreF: 82 } },
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 4, armN: 82, foreN: 82, armF: 62, foreF: 62 }, w: 0.35 },
+      { pose: { torso: -58, thighN: 145, shinN: 10, thighF: 143, shinF: 10, head: 4, armN: 82, foreN: 82, armF: 62, foreF: 62 } },
     ],
   },
   {
