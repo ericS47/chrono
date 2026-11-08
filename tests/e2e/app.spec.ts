@@ -226,6 +226,36 @@ test('Créer : choix entre séance de sport et jeu de société', async ({ page 
   await expect(page.getByLabel('Nom de la séance')).toBeVisible();
 });
 
+test('Bataille navale : réglages, tir raté, exercice de la ligne', async ({ page }) => {
+  await page.goto('./#/jeu/bataille-navale');
+  await expect(page.getByRole('heading', { name: 'Bataille navale' })).toBeVisible();
+  await page.getByRole('radio', { name: 'Debout' }).click();
+  await page.getByRole('tab', { name: 'Choisis' }).click();
+  await expect(page.getByRole('button', { name: 'Lancer la partie' })).toBeDisabled();
+  await page.getByRole('option', { name: 'Squat', exact: true }).click();
+  await page.getByRole('button', { name: 'Répétitions : plus' }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  const enemy = page.getByRole('region', { name: 'Grille ennemie' });
+  await expect(enemy.getByRole('gridcell')).toHaveCount(100);
+  // Un seul exercice choisi : toutes les lignes sont des squats.
+  await expect(page.getByRole('region', { name: 'Exercices des lignes' })).toContainText('A B C D E F G H I J');
+  // On tire jusqu'au premier raté (l'ordinateur peut nous toucher entre-temps).
+  for (let i = 0; i < 40; i++) {
+    const dialog = page.getByRole('dialog');
+    if (await dialog.isVisible()) {
+      const raté = /^Raté/.test((await dialog.getAttribute('aria-label')) ?? '');
+      await expect(dialog).toContainText('11 × Squat');
+      await dialog.getByRole('button', { name: 'C’est fait' }).click();
+      if (raté) break;
+      continue;
+    }
+    const cell = enemy.locator('.bn-cell.empty:not(:disabled)').first();
+    if (await cell.isVisible()) await cell.click();
+    else await page.waitForTimeout(300);
+  }
+  await expect(page.getByLabel('Exercices faits')).not.toHaveText('0 ex.');
+});
+
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {
   for (const name of ['Séance A', 'Séance B', 'Séance C']) {
     await page.goto('./#/seances');

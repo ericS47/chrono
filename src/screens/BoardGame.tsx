@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import { go } from '../lib/router';
 import { TopBar, Empty } from '../ui/kit';
+import { Battleship } from './Battleship';
 import { IconBattleship, IconGoose, IconMilestone, IconProperty, IconRoulette } from '../ui/icons';
 
 export const GAMES: { id: string; label: string; color: string; Icon: ComponentType<{ size?: number }> }[] = [
@@ -13,6 +14,7 @@ export const GAMES: { id: string; label: string; color: string; Icon: ComponentT
 
 /** Jeux de société : la liste, puis la page d’un jeu (à construire). */
 export function BoardGame({ id }: { id?: string }) {
+  if (id === 'bataille-navale') return <Battleship />;
   const game = GAMES.find((g) => g.id === id);
   if (game) {
     return (

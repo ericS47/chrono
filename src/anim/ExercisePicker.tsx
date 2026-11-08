@@ -14,7 +14,7 @@ export const GROUP_COLORS: Record<ExerciseGroup, string> = {
 };
 
 const ICON = { width: 26, height: 26, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.9, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
-const EQUIPMENT_ICONS: Record<Equipment, ReactNode> = {
+export const EQUIPMENT_ICONS: Record<Equipment, ReactNode> = {
   // Rond barré : séance sans matériel.
   none: <svg {...ICON}><circle cx="12" cy="12" r="8" /><path d="M6.3 17.7 17.7 6.3" /></svg>,
   // Kettlebell : grosse boule pleine, anse large au-dessus.
@@ -27,7 +27,7 @@ const EQUIPMENT_ICONS: Record<Equipment, ReactNode> = {
   dumbbell: <svg {...ICON}><path d="M7 12h10" strokeWidth={2.4} /><rect x="3.2" y="7.5" width="3.8" height="9" rx="1.3" fill="currentColor" stroke="none" /><rect x="17" y="7.5" width="3.8" height="9" rx="1.3" fill="currentColor" stroke="none" /></svg>,
 };
 
-const POSITION_ICONS: Record<Position, ReactNode> = {
+export const POSITION_ICONS: Record<Position, ReactNode> = {
   // Debout : silhouette.
   standing: <svg {...ICON}><circle cx="12" cy="4.6" r="2.1" fill="currentColor" stroke="none" /><path d="M12 7.6v7.2M12 14.8l-3 6M12 14.8l3 6M7.5 10.6h9" strokeWidth={2.2} /></svg>,
   // Chaise de profil.
