@@ -209,6 +209,8 @@ h1, h2, h3 { margin: 0; }
   font-weight: 800; font-size: 18px;
   box-shadow: 0 8px 24px rgba(79, 91, 213, 0.3);
 }
+.choice-btns { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+.create-btn.big { width: 164px; height: 164px; margin: 0; }
 .big-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-block: auto; }
 .big-tile {
   height: 150px; border: none; border-radius: var(--radius);

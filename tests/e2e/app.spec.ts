@@ -208,10 +208,23 @@ test('séance : les bips sont joués par une piste audio (arrière-plan)', async
   await expect.poll(() => page.evaluate(() => (window as unknown as { __tracks: number }).__tracks), { timeout: 15_000 }).toBeGreaterThan(0);
 });
 
+test('Créer : choix entre séance de sport et jeu de société', async ({ page }) => {
+  await page.goto('./#/seances');
+  await page.getByRole('button', { name: 'Créer' }).click();
+  await expect(page).toHaveURL(/#\/nouvelle/);
+  await page.getByRole('button', { name: 'Jeu de société' }).click();
+  await expect(page.getByRole('heading', { name: 'Jeu de société' })).toBeVisible();
+  await page.getByRole('button', { name: 'Retour' }).click();
+  await page.getByRole('button', { name: 'Séance de sport' }).click();
+  await expect(page).toHaveURL(/#\/creer/);
+  await expect(page.getByLabel('Nom de la séance')).toBeVisible();
+});
+
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {
   for (const name of ['Séance A', 'Séance B', 'Séance C']) {
     await page.goto('./#/seances');
     await page.getByRole('button', { name: 'Créer' }).click();
+    await page.getByRole('button', { name: 'Séance de sport' }).click();
     await page.getByLabel('Nom de la séance').fill(name);
     await page.getByRole('button', { name: 'Effort', exact: true }).click();
     await page.getByRole('button', { name: 'Enregistrer' }).click();

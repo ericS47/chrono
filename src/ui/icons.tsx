@@ -54,3 +54,14 @@ export const IconClock = make(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5
 export const IconGrid = make(<><rect x="4" y="4" width="7" height="7" rx="2" /><rect x="13" y="4" width="7" height="7" rx="2" /><rect x="4" y="13" width="7" height="7" rx="2" /><rect x="13" y="13" width="7" height="7" rx="2" /></>);
 export const IconExpand = make(<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />);
 export const IconHistory = make(<><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.4" /><path d="M3 4v4h4M12 7v5l3 2" /></>);
+export const IconDumbbell = make(<><path d="M7 12h10" /><rect x="4" y="7" width="3" height="10" rx="1" /><rect x="17" y="7" width="3" height="10" rx="1" /><path d="M2 10v4M22 10v4" /></>);
+export const IconBoardGame = make(
+  <>
+    <rect x="2.5" y="10" width="11" height="11" rx="2" />
+    <circle cx="5.5" cy="13" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="8" cy="15.5" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="10.5" cy="18" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="18" cy="6" r="2.5" />
+    <path d="M16.6 8.3L15 21h6l-1.6-12.7M14.5 21h7" />
+  </>,
+);
