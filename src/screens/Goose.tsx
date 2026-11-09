@@ -82,6 +82,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
   onSetup: () => void;
 }) {
   const avatar = useSettings().anim.avatar;
+  const cols = useBoardCols();
   const me = game.players[game.current];
   const solo = game.players.filter((p) => !p.bot).length === 1;
   const botTurn = !!me.bot;
@@ -114,7 +115,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
     <main className="screen no-nav goose-screen game-play">
       <TopBar title="Jeu de l’oie" />
 
-      <GameStage ratio={7 / 9} extra={34} board={<Board game={game} />}>
+      <GameStage ratio={cols / (LAST / cols)} extra={34} board={<Board game={game} cols={cols} />}>
       <div className="goose-turn card">
         <span className="goose-token big" style={{ background: PLAYER_COLORS[game.current] }} aria-hidden="true" />
         <div className="goose-turn-text">
@@ -159,6 +160,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
             {game.pending.turn.path.length > 0 && !game.players[game.pending.player].bot && (
               <>
                 <h2>{game.pending.turn.path.length > 1 ? `${game.pending.turn.path.length} exercices à faire` : 'Exercice à faire'}</h2>
+                <div className="ex-list">
                 {game.pending.turn.path.map((n, k) => {
                   const id = game.cases[n - 1];
                   const sp = specialOf(n);
@@ -172,6 +174,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
                     </div>
                   );
                 })}
+                </div>
               </>
             )}
             <button className="btn block" onClick={next}>{game.pending.turn.path.length && !game.players[game.pending.player].bot ? 'C’est fait' : 'Continuer'}</button>
@@ -203,10 +206,22 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
   );
 }
 
-const COLS = 7;
+/** Paysage : plateau en largeur (9 × 7) pour qu'il soit plus grand ; portrait : 7 × 9. */
+function useBoardCols(): number {
+  const query = '(orientation: landscape)';
+  const [land, setLand] = useState(() => window.matchMedia?.(query).matches ?? false);
+  useEffect(() => {
+    const mq = window.matchMedia?.(query);
+    if (!mq) return;
+    const fn = () => setLand(mq.matches);
+    mq.addEventListener('change', fn);
+    return () => mq.removeEventListener('change', fn);
+  }, []);
+  return land ? 9 : 7;
+}
 
-/** Plateau : 63 cases en serpentin (7 par ligne), départ au-dessus. */
-function Board({ game }: { game: Game }) {
+/** Plateau : 63 cases en serpentin, départ au-dessus. */
+function Board({ game, cols: COLS }: { game: Game; cols: number }) {
   const avatar = useSettings().anim.avatar;
   const order = useMemo(() => {
     const rows: number[][] = [];
@@ -215,7 +230,7 @@ function Board({ game }: { game: Game }) {
       rows.push(r % 2 ? row.reverse() : row);
     }
     return rows.flat();
-  }, []);
+  }, [COLS]);
   const tokens = (n: number) =>
     game.players.map((p, i) => (p.pos === n ? i : -1)).filter((i) => i >= 0).map((i) => (
       <span key={i} className="goose-token" style={{ background: PLAYER_COLORS[i] }} title={game.players[i].name} />
@@ -226,7 +241,7 @@ function Board({ game }: { game: Game }) {
         <span>Départ</span>
         <span className="goose-tokens">{tokens(0)}</span>
       </div>
-      <div className="goose-board">
+      <div className="goose-board" style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}>
         {order.map((n) => {
           const id = game.cases[n - 1];
           const sp = specialOf(n);

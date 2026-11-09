@@ -84,4 +84,10 @@ describe('playTurn (un seul dé)', () => {
     expect(specialOf(25)).toBe('down');
     expect(specialOf(10)).toBeNull();
   });
+
+  it('5 ascenseurs seulement : 3 qui montent, 2 qui descendent', () => {
+    const e = Object.entries(ELEVATORS).map(([a, b]) => [+a, b]);
+    expect(e).toHaveLength(5);
+    expect(e.filter(([a, b]) => b > a)).toHaveLength(3);
+  });
 });

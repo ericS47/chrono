@@ -15,8 +15,8 @@ export const DEATH = 58; // → départ
 
 /** Ascenseurs : case de départ → case d'arrivée (vers le haut ou vers le bas). */
 export const ELEVATORS: Record<number, number> = {
-  3: 22, 11: 28, 20: 38, 35: 47, 43: 56,
-  25: 8, 39: 21, 49: 33, 57: 40, 61: 44,
+  3: 22, 20: 38, 43: 56,
+  25: 8, 57: 40,
 };
 
 export type Special = 'goose' | 'bridge' | 'hotel' | 'well' | 'maze' | 'prison' | 'death' | 'end' | 'up' | 'down';

@@ -222,6 +222,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
         <div className="sheet-backdrop">
           <div className="sheet goose-sheet" role="dialog" aria-modal="true" aria-label="Pas une paire">
             <h2>Pas une paire : 2 exercices{vsBot ? '' : ` pour ${name}`}</h2>
+            <div className="ex-list">
             {game.pending.map((c, k) => {
               const id = game.cards[c];
               return (
@@ -231,6 +232,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
                 </div>
               );
             })}
+            </div>
             <button className="btn block" onClick={exercisesDone}>C’est fait</button>
           </div>
         </div>

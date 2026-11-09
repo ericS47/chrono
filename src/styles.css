@@ -714,6 +714,32 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 .game-rules { font-size: 14px; line-height: 1.4; }
 .bn-screen { gap: 16px; }
 
+/* Fiches d'exercice des jeux : exercices et bouton « C’est fait » tiennent à l'écran, sans défiler. */
+.sheet.goose-sheet, .sheet.bn-sheet { gap: 10px; padding-top: 14px; }
+.goose-sheet h2 { font-size: 18px; }
+.sheet .goose-die { width: 46px; height: 46px; }
+.ex-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.ex-list .goose-ex { flex-direction: column; text-align: center; gap: 4px; padding: 6px; }
+.sheet .goose-ex-figure { width: min(96px, 14dvh); height: min(96px, 14dvh); }
+.sheet .goose-ex-text { font-size: 16px; }
+.sheet .bn-ex-figure { height: min(200px, 30dvh); }
+.sheet .bn-ex-line { font-size: 18px; }
+.sheet.goose-sheet > .btn:last-child, .sheet.bn-sheet > .btn:last-child { position: sticky; bottom: 0; }
+@media (orientation: landscape) {
+  .sheet.goose-sheet, .sheet.bn-sheet { max-width: 760px; }
+  .sheet.goose-sheet, .sheet.bn-sheet { gap: 6px; padding-top: 10px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .goose-sheet h2 { font-size: 16px; }
+  .sheet .goose-ex-figure { width: min(96px, 18dvh); height: min(96px, 18dvh); }
+  /* Bataille navale : l'exercice animé à gauche, le texte et le bouton à droite. */
+  .sheet.bn-sheet:has(.bn-ex-figure) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; column-gap: 16px; }
+  .sheet.bn-sheet .bn-ex-figure { grid-column: 1; grid-row: 1 / 4; height: min(200px, 62dvh); }
+  .sheet.bn-sheet:has(.bn-ex-figure) > :not(.bn-ex-figure) { grid-column: 2; }
+}
+/* Pulse Party : le panneau au centre du plateau suit la taille du plateau. */
+.game-board .pp-die { width: min(96px, 20cqmin); height: min(96px, 20cqmin); font-size: min(72px, 16cqmin); }
+.game-board .pp-anim .figure { height: min(84px, 16cqmin); }
+.game-board .pp-thumb .figure { height: min(64px, 13cqmin); }
+
 /* ---------- Jeux : plateau plein écran ---------- */
 /* L'écran ne défile pas : le plateau prend la place libre, les infos défilent à part. */
 .screen.game-play { flex: none; height: 100dvh; min-height: 0; max-width: none; overflow: hidden; gap: 8px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
@@ -725,6 +751,10 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 .game-board .bn-grid.thumbs { grid-template-columns: minmax(0, 1.25fr) repeat(10, minmax(0, 1fr)); }
 .game-board .bn-rowthumb { aspect-ratio: auto; min-height: 0; }
 .game-board .bn-rowthumb .figure { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* Infos du jeu de l'oie compactes : plus de place pour le plateau. */
+.game-side .goose-turn.card { padding: 10px 12px; }
+.game-side .goose-scores { gap: 2px; }
+.game-side .goose-scores li { padding: 2px 8px; }
 .game-side { flex: none; max-height: 38dvh; overflow: auto; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 @media (orientation: landscape) {
   .game-stage { flex-direction: row; align-items: stretch; }
