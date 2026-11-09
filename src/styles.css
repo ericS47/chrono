@@ -652,3 +652,55 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 @media (min-width: 700px) {
   .tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
+
+/* ---------- Pulse Party (jeu de plateau) ---------- */
+
+.pp-setup select, .pp-setup .pp-name { flex: 1; min-width: 0; }
+.pp-name { height: 44px; border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; background: var(--bg); color: var(--ink); font: inherit; font-size: 16px; }
+.pp-dot { display: inline-block; flex: none; width: 14px; height: 14px; border-radius: 50%; }
+.pp-band { flex: none; width: 10px; height: 28px; border-radius: 4px; }
+.pp-play { gap: 10px; }
+.pp-board {
+  display: grid; grid-template-columns: 1.45fr repeat(9, 1fr) 1.45fr; grid-template-rows: 1.45fr repeat(9, 1fr) 1.45fr;
+  gap: 1.5px; width: 100%; max-width: 560px; aspect-ratio: 1; margin: 0 auto; background: var(--border); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden;
+}
+.pp-sq { position: relative; background: var(--card); display: flex; align-items: center; justify-content: center; overflow: hidden; min-width: 0; min-height: 0; }
+.pp-sq.corner { background: var(--accent-tint); }
+.pp-sq.gym { background: #D9DCF7; }
+.pp-sq.togym { background: #FFE1D0; }
+.pp-sq.cardio { background: #FFE9D6; }
+.pp-sq.defi { background: #FFF4CC; }
+.pp-sq.culture { background: #E3F2EC; }
+.pp-stripe { position: absolute; left: 0; right: 0; top: 0; height: 22%; }
+.pp-sq-label { font-size: clamp(5.5px, 1.55vw, 8.5px); line-height: 1.05; font-weight: 700; text-align: center; padding: 22% 1px 0; color: #14183A; overflow-wrap: anywhere; hyphens: auto; }
+.pp-sq.corner .pp-sq-label { padding: 0 2px; font-size: clamp(6px, 1.7vw, 9.5px); }
+.pp-pawns { position: absolute; bottom: 1px; left: 0; right: 0; display: flex; justify-content: center; gap: 1px; flex-wrap: wrap; }
+.pp-pawns b { width: clamp(6px, 2vw, 11px); height: clamp(6px, 2vw, 11px); border-radius: 50%; border: 1.5px solid #FFFFFF; box-shadow: 0 0 0 0.5px #14183A; }
+.pp-center { grid-row: 2 / 11; grid-column: 2 / 11; background: var(--bg); display: flex; flex-direction: column; padding: 6px; min-width: 0; min-height: 0; overflow: auto; }
+.pp-panel { width: 100%; margin: auto 0; display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
+.pp-panel h2 { font-size: 18px; font-weight: 800; }
+.pp-panel select { width: 100%; }
+.pp-turn { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 15px; }
+.pp-title { font-size: 16px; font-weight: 800; }
+.pp-who { font-size: 13px; font-weight: 700; color: var(--muted); }
+.pp-die { font-size: 72px; line-height: 1; width: 96px; height: 96px; border-radius: 20px; border: none; background: var(--card); color: var(--ink); box-shadow: 0 6px 16px rgba(20, 24, 58, 0.14); cursor: pointer; }
+.pp-thumb, .pp-anim { background: var(--effort); border-radius: 12px; display: flex; justify-content: center; padding: 2px; }
+.pp-thumb .figure { height: 64px; width: auto; display: block; }
+.pp-anim .figure { height: 84px; width: auto; display: block; }
+.pp-tasks { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.pp-tasks ul { list-style: none; padding: 0; margin: 0; font-size: 13px; font-weight: 600; }
+.pp-tasks li { opacity: 0.6; }
+.pp-tasks li.on { opacity: 1; }
+.pp-tasks b { font-size: 16px; font-weight: 800; }
+.pp-card { margin: 0; font-size: 14px; font-weight: 600; }
+.pp-answer { margin: 0; font-size: 14px; font-weight: 800; color: var(--success, #2E7A5E); }
+.pp-row { display: flex; gap: 6px; }
+.pp-rank { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.pp-rank li { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.pp-rank li span:last-child { margin-left: auto; color: var(--muted); font-weight: 600; }
+.pp-players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.pp-player { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 8px; border-radius: 12px; background: var(--card); border: 1.5px solid var(--border); font-size: 13px; }
+.pp-player span:last-child { width: 100%; color: var(--muted); font-weight: 600; font-size: 12px; }
+.pp-player.current { border-color: var(--accent); }
+.pp-player.out { opacity: 0.45; }
+.pp-log { margin: 0; text-align: center; }

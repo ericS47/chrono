@@ -4,6 +4,8 @@ import { TopBar } from '../ui/kit';
 
 /** Couleur de la tuile « WOD connus » (même famille que les couleurs des modes). */
 export const WOD_COLOR = '#E6CBA8';
+/** Couleur de la tuile du jeu de plateau « Pulse Party ». */
+export const GAME_COLOR = '#C9E265';
 
 /** Tous les types de séance, ouverts depuis la tuile « Types de séances » de l'accueil. */
 export function SessionTypes() {
@@ -18,6 +20,9 @@ export function SessionTypes() {
         ))}
         <button className="tile solo" style={{ background: WOD_COLOR }} onClick={() => go('/seances?tab=wod')}>
           WOD connus
+        </button>
+        <button className="tile solo" style={{ background: GAME_COLOR }} onClick={() => go('/jeu')}>
+          Pulse Party
         </button>
       </div>
     </main>

@@ -11,10 +11,10 @@ test('accueil : chrono rapide et navigation', async ({ page }) => {
   await expect(page.locator('.big-tile')).toHaveCount(2);
   await page.locator('.big-tile', { hasText: 'Types de séances' }).click();
   await expect(page.getByRole('heading', { name: 'Types de séances' })).toBeVisible();
-  for (const m of ['AMRAP', 'EMOM', 'For Time', 'Tabata', 'Intervalles', 'Chrono', 'Compte à rebours', 'Personnalisé', 'Musculation', 'Course', 'WOD connus']) {
+  for (const m of ['AMRAP', 'EMOM', 'For Time', 'Tabata', 'Intervalles', 'Chrono', 'Compte à rebours', 'Personnalisé', 'Musculation', 'Course', 'WOD connus', 'Pulse Party']) {
     await expect(page.locator('.tile', { hasText: m }).first()).toBeVisible();
   }
-  await expect(page.locator('.tile')).toHaveCount(11);
+  await expect(page.locator('.tile')).toHaveCount(12);
   await expect(page.getByRole('heading', { name: 'Mes séances' })).toHaveCount(0);
   await page.locator('.tile', { hasText: 'WOD connus' }).click();
   await expect(page.getByRole('link', { name: /Cindy/ })).toBeVisible();
@@ -444,4 +444,27 @@ test('créateur : déplacer un bloc avec la poignée, ou avec Monter / Descendre
   await page.mouse.up();
   await page.getByRole('dialog').getByRole('button', { name: 'Monter' }).click();
   await expect.poll(labels).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30']);
+});
+
+test('Pulse Party : préparer une partie, acheter une case, la partie est sauvegardée', async ({ page }) => {
+  // Dé toujours sur 1 : on tombe sur la case 1 (exercice).
+  await page.addInitScript(() => { Math.random = () => 0; });
+  await page.goto('./#/types');
+  await page.getByRole('button', { name: 'Pulse Party' }).click();
+  await page.getByLabel('Joueur 1').fill('Eric');
+  await page.getByLabel('Joueur 2').fill('Marie');
+  await page.getByRole('button', { name: 'Commencer la partie' }).click();
+  await expect(page.locator('.pp-sq')).toHaveCount(40);
+  await page.getByRole('button', { name: 'Lancer le dé' }).click();
+  await page.getByRole('button', { name: /^Acheter : 30 rép\./ }).click();
+  await expect(page.locator('.pp-tasks')).toContainText('30');
+  await page.getByRole('button', { name: 'C’est fait' }).click();
+  await expect(page.locator('.pp-player').first()).toContainText('1 case · 30 rép.');
+  // Marie tombe chez Eric : 20 répétitions.
+  await page.getByRole('button', { name: 'Lancer le dé' }).click();
+  await expect(page.locator('.pp-panel')).toContainText('Chez Eric');
+  await expect(page.locator('.pp-tasks')).toContainText('20');
+  // La partie est reprise après rechargement.
+  await page.reload();
+  await expect(page.locator('.pp-panel')).toContainText('Chez Eric');
 });
