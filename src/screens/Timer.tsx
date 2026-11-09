@@ -389,7 +389,7 @@ export function TimerScreen() {
       </div>
 
       {run.status === 'paused' && !confirm && (
-        <span style={{ position: 'absolute', top: 'calc(74px + env(safe-area-inset-top))', left: 0, right: 0, textAlign: 'center', fontWeight: 800 }}>EN PAUSE</span>
+        <span style={{ position: 'absolute', top: 'calc(74px + var(--safe-top))', left: 0, right: 0, textAlign: 'center', fontWeight: 800 }}>EN PAUSE</span>
       )}
 
       {confirm && (

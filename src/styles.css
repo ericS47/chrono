@@ -4,6 +4,8 @@
   /* Marges latérales qui évitent l'appareil photo (encoche) en paysage. */
   --side-l: max(20px, env(safe-area-inset-left));
   --side-r: max(20px, env(safe-area-inset-right));
+  /* Marge du haut qui évite l'appareil photo (encoche, caméra dans l'écran). */
+  --safe-top: env(safe-area-inset-top, 0px);
   --bg: #F7F6F3;
   --card: #FFFFFF;
   --border: #ECEAE4;
@@ -81,7 +83,7 @@ h1, h2, h3 { margin: 0; }
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
-  padding: calc(24px + env(safe-area-inset-top)) var(--side-r) calc(var(--nav-h) + 32px + env(safe-area-inset-bottom)) var(--side-l);
+  padding: calc(24px + var(--safe-top)) var(--side-r) calc(var(--nav-h) + 32px + env(safe-area-inset-bottom)) var(--side-l);
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -321,7 +323,7 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 
 .sheet-backdrop { position: fixed; inset: 0; z-index: 50; background: rgba(20, 24, 40, 0.42); display: flex; align-items: flex-end; justify-content: center; }
 .sheet {
-  width: 100%; max-width: 640px; max-height: 92vh; overflow: auto;
+  width: 100%; max-width: 640px; max-height: 92vh; max-height: calc(100dvh - var(--safe-top) - 24px); overflow: auto;
   background: var(--bg);
   border-radius: 24px 24px 0 0;
   padding: 18px var(--side-r) calc(24px + env(safe-area-inset-bottom)) var(--side-l);
@@ -370,7 +372,7 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
   background: var(--phase);
   color: var(--phase-ink);
   display: flex; flex-direction: column;
-  padding: calc(20px + env(safe-area-inset-top)) var(--side-r) calc(24px + env(safe-area-inset-bottom)) var(--side-l);
+  padding: calc(20px + var(--safe-top)) var(--side-r) calc(24px + env(safe-area-inset-bottom)) var(--side-l);
   gap: 18px;
   overflow: hidden;
   transition: background-color 0.35s ease;
@@ -431,7 +433,7 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .zoom-info { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: 100%; }
 .zoom-info b { font-weight: 800; font-size: clamp(28px, 9vmin, 72px); line-height: 1.05; }
 .zoom-info span { font-weight: 700; font-size: clamp(18px, 5.5vmin, 44px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
-.zoom-rest { position: absolute; top: calc(14px + env(safe-area-inset-top)); left: var(--side-l); right: var(--side-r); display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; }
+.zoom-rest { position: absolute; top: calc(14px + var(--safe-top)); left: var(--side-l); right: var(--side-r); display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; }
 .zoom-rest-row { display: flex; justify-content: space-between; gap: 12px; }
 .zoom-next { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.8; min-width: 0; }
 .zoom-bar { height: 4px; border-radius: 2px; background: rgba(20, 24, 58, 0.15); overflow: hidden; }
@@ -453,7 +455,7 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
 .zoom-hint { position: absolute; bottom: calc(14px + env(safe-area-inset-bottom)); left: 0; right: 0; font-size: 12px; font-weight: 700; opacity: 0.55; }
 @media (orientation: landscape) {
   /* Paysage : chrono plus petit, raccourcis en ligne dessous (pause au centre, petits boutons). */
-  .timer.zoom { gap: 0.5vh; padding-top: calc(60px + env(safe-area-inset-top)); padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .timer.zoom { gap: 0.5vh; padding-top: calc(60px + var(--safe-top)); padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   .zoom-ctl { bottom: calc(12px + env(safe-area-inset-bottom)); gap: 28px; }
   .zoom-ctl button { width: 46px; height: 46px; }
   .zoom-ctl button.main { width: 54px; height: 54px; }
@@ -479,7 +481,7 @@ input[type='range'] { width: 46%; accent-color: var(--accent); }
   .timer-body { flex-direction: row; align-items: center; }
   .ring { width: min(42vw, 72vh); }
   .timer-side { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-  .timer { gap: 10px; padding-top: calc(12px + env(safe-area-inset-top)); padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .timer { gap: 10px; padding-top: calc(12px + var(--safe-top)); padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
   .timer-controls .glass-btn, .timer-controls .main, .timer .tap-round { height: 56px; }
 }
 @media not ((orientation: landscape) and (max-height: 600px)) {
@@ -557,7 +559,7 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 /* ---------- Créateur de séance ---------- */
 
 .screen.bd-screen { padding-bottom: calc(120px + env(safe-area-inset-bottom)); gap: 14px; }
-.bd-head { position: sticky; top: env(safe-area-inset-top); z-index: 5; background: var(--bg); padding-block: 6px 10px; display: flex; flex-direction: column; gap: 10px; }
+.bd-head { position: sticky; top: var(--safe-top); z-index: 5; background: var(--bg); padding-block: 6px 10px; display: flex; flex-direction: column; gap: 10px; }
 .bd-name { width: 100%; height: 46px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); color: var(--ink); font: inherit; font-weight: 800; font-size: 17px; padding: 0 14px; }
 .bd-head-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .bd-head-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
@@ -571,7 +573,7 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 .bd-strip i.prep { background: var(--prep); }
 
 .bd-layout { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 12px; align-items: start; }
-.bd-palette { position: sticky; top: calc(env(safe-area-inset-top) + 104px); display: flex; flex-direction: column; gap: 10px; }
+.bd-palette { position: sticky; top: calc(var(--safe-top) + 104px); display: flex; flex-direction: column; gap: 10px; }
 .bd-pal {
   height: 84px; border: none; border-radius: var(--radius); color: var(--phase-ink);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
@@ -762,3 +764,12 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
 .memo-face-name { font-size: 11px; font-weight: 800; line-height: 1.1; text-align: center; padding-bottom: 2px; }
 @keyframes memo-flip { from { transform: scaleX(0.2); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { .memo-face { animation: none; } }
+
+/* Plein écran (chrono) : certains Android ne signalent pas l'appareil photo (marge nulle),
+   et le texte du haut passait dessous. Marge minimale en haut, et sur les côtés en paysage. */
+:root:fullscreen { --safe-top: max(env(safe-area-inset-top, 0px), 36px); }
+:root:-webkit-full-screen { --safe-top: max(env(safe-area-inset-top, 0px), 36px); }
+@media (orientation: landscape) {
+  :root:fullscreen { --safe-top: max(env(safe-area-inset-top, 0px), 12px); --side-l: max(20px, env(safe-area-inset-left), 44px); --side-r: max(20px, env(safe-area-inset-right), 44px); }
+  :root:-webkit-full-screen { --safe-top: max(env(safe-area-inset-top, 0px), 12px); --side-l: max(20px, env(safe-area-inset-left), 44px); --side-r: max(20px, env(safe-area-inset-right), 44px); }
+}
