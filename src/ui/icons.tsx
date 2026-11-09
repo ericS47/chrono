@@ -73,16 +73,13 @@ export const IconGoose = make(<path d="M12 12a1.5 1.5 0 0 1 3 0a3 3 0 0 1-6 0a4.
 export const IconProperty = make(<><path d="M3 21v-9l6-5 6 5v9z" /><path d="M7.5 21v-4h3v4" /><circle cx="19" cy="5.5" r="2.5" /><path d="M19 4.5v2" /></>);
 /** Jeu de route : une borne kilométrique. */
 export const IconMilestone = make(<><path d="M6 20V10a6 6 0 0 1 12 0v10" /><path d="M6 10a6 6 0 0 1 12 0z" fill="currentColor" /><path d="M3.5 20h17M10 14h4M10 17h4" /></>);
-/** Roulette : le barillet, une chambre pleine. */
-export const IconRoulette = make(
+/** Roue de la santé : une roue à rayons et son aiguille. */
+export const IconWheel = make(
   <>
-    <circle cx="12" cy="12" r="9" />
-    <circle cx="12" cy="7.5" r="1.3" strokeWidth={1.5} fill="currentColor" />
-    <circle cx="15.9" cy="9.75" r="1.3" strokeWidth={1.5} />
-    <circle cx="15.9" cy="14.25" r="1.3" strokeWidth={1.5} />
-    <circle cx="12" cy="16.5" r="1.3" strokeWidth={1.5} />
-    <circle cx="8.1" cy="14.25" r="1.3" strokeWidth={1.5} />
-    <circle cx="8.1" cy="9.75" r="1.3" strokeWidth={1.5} />
+    <circle cx="12" cy="13" r="8.5" />
+    <circle cx="12" cy="13" r="1.8" />
+    <path d="M12 4.5v6.7M12 14.8v6.7M3.5 13h6.7M13.8 13h6.7M6 7l4.7 4.7M13.3 14.3 18 19M18 7l-4.7 4.7M10.7 14.3 6 19" />
+    <path d="M10 1.5h4L12 4.2z" fill="currentColor" />
   </>,
 );
 /** Mémo : deux cartes, l'une retournée. */

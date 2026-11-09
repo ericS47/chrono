@@ -891,3 +891,38 @@ button.row-link { width: 100%; background: none; border: none; color: inherit; f
   :root:fullscreen { --safe-top: max(env(safe-area-inset-top, 0px), 12px); --side-l: max(20px, env(safe-area-inset-left), 44px); --side-r: max(20px, env(safe-area-inset-right), 44px); }
   :root:-webkit-full-screen { --safe-top: max(env(safe-area-inset-top, 0px), 12px); --side-l: max(20px, env(safe-area-inset-left), 44px); --side-r: max(20px, env(safe-area-inset-right), 44px); }
 }
+
+/* ---------- Roue de la santé ---------- */
+.wheel-wrap { position: relative; width: 100%; aspect-ratio: 1; container-type: size; }
+.wheel {
+  position: absolute; inset: 4%; border-radius: 50%;
+  box-shadow: 0 0 0 5px var(--ink), 0 10px 30px rgba(20, 24, 58, 0.25);
+  will-change: transform; cursor: pointer;
+}
+.wheel-item { position: absolute; left: 50%; top: 50%; width: 12cqmin; height: 12cqmin; display: flex; align-items: center; justify-content: center; }
+.wheel-item .figure { width: 100%; height: 100%; }
+.wheel-rest { display: flex; flex-direction: column; align-items: center; gap: 1px; color: var(--phase-ink); }
+.wheel-rest b { font-size: 2.6cqmin; font-weight: 800; text-transform: uppercase; }
+.wheel-pointer {
+  position: absolute; left: 50%; top: 0; z-index: 2; transform: translateX(-50%);
+  width: 0; height: 0; border-left: 4.5cqmin solid transparent; border-right: 4.5cqmin solid transparent; border-top: 8cqmin solid var(--danger);
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+}
+.wheel-hub {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
+  width: 22cqmin; height: 22cqmin; border-radius: 50%; border: 4px solid var(--ink);
+  background: var(--accent); color: var(--accent-ink); font-weight: 800; font-size: max(12px, 4cqmin);
+  box-shadow: 0 4px 12px rgba(20, 24, 58, 0.3);
+}
+.wheel-hub:disabled { opacity: 1; filter: saturate(0.6); }
+.wheel-sheet { align-items: stretch; text-align: center; }
+.wheel-ex-figure { height: min(30dvh, 220px); display: flex; justify-content: center; background: var(--effort); border-radius: var(--radius); }
+.wheel-ex-figure .figure { height: 100%; width: auto; }
+.wheel-count { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+.wheel-ring { position: relative; width: min(44vw, 22dvh, 180px); aspect-ratio: 1; align-self: center; }
+.wheel-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.wheel-ring-bg { fill: none; stroke: var(--chip); stroke-width: 10; }
+.wheel-ring-fg { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 0.1s linear; }
+.wheel-ring.rest .wheel-ring-fg { stroke: var(--success); }
+.wheel-ring-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: min(10vw, 5dvh, 40px); font-weight: 800; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .wheel-ring-fg { transition: none; } }

@@ -214,7 +214,7 @@ test('Créer : choix entre séance de sport et jeu de société', async ({ page 
   await expect(page).toHaveURL(/#\/nouvelle/);
   await page.getByRole('button', { name: 'Jeu de société' }).click();
   await expect(page.getByRole('heading', { name: 'Jeu de société' })).toBeVisible();
-  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Pulse Poly', '1000 Bornes', 'Roulette russe', 'Mémo']) {
+  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Pulse Poly', '1000 Bornes', 'La roue de la santé', 'Mémo']) {
     await expect(page.getByRole('button', { name })).toBeVisible();
   }
   await page.getByRole('button', { name: 'Bataille navale' }).click();
@@ -354,6 +354,54 @@ test('Mémo seul : l’ordinateur joue après moi', async ({ page }) => {
   await expect(page.getByRole('status')).toContainText('L’ordinateur');
   // L'ordinateur retourne ses cartes tout seul, puis me rend la main (ou termine la partie).
   await expect(page.getByRole('status').filter({ hasText: 'À toi' }).or(page.getByRole('dialog', { name: 'Partie terminée' }))).toBeVisible({ timeout: 30_000 });
+});
+
+test('Roue de la santé : répétitions, la roue désigne un exercice ou un repos, fin de partie', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./#/jeu/roue-de-la-sante');
+  await expect(page.getByRole('heading', { name: 'La roue de la santé' })).toBeVisible();
+  // 2 exercices dans la partie.
+  for (let i = 0; i < 8; i++) await page.getByRole('button', { name: 'Nombre d’exercices : moins' }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.getByText('0 / 2')).toBeVisible();
+  for (let i = 0; i < 12; i++) {
+    if (await page.getByRole('dialog', { name: 'Partie terminée' }).isVisible()) break;
+    await page.getByRole('button', { name: 'Faire tourner la roue' }).click();
+    const sheet = page.locator('.wheel-sheet');
+    await expect(sheet).toBeVisible();
+    if ((await sheet.getAttribute('aria-label')) === 'Repos') await sheet.getByRole('button', { name: 'Passer' }).click();
+    else {
+      await expect(sheet).toContainText('10 ×');
+      await sheet.getByRole('button', { name: 'C’est fait' }).click();
+    }
+  }
+  const end = page.getByRole('dialog', { name: 'Partie terminée' });
+  await expect(end).toContainText('20 répétitions');
+});
+
+test('Roue de la santé : en temps, le décompte se déclenche à la main', async ({ page }) => {
+  await page.clock.install();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./#/jeu/roue-de-la-sante');
+  await page.getByRole('tab', { name: 'Temps' }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  for (let i = 0; i < 10; i++) {
+    await page.getByRole('button', { name: 'Faire tourner la roue' }).click();
+    await page.clock.runFor(1000);
+    const sheet = page.locator('.wheel-sheet');
+    await expect(sheet).toBeVisible();
+    if ((await sheet.getAttribute('aria-label')) !== 'Repos') break;
+    await sheet.getByRole('button', { name: 'Passer' }).click();
+  }
+  const sheet = page.locator('.wheel-sheet');
+  await expect(sheet.getByRole('timer')).toHaveText('0:30');
+  await sheet.getByRole('button', { name: 'Démarrer le décompte' }).click();
+  await page.clock.runFor(10_000);
+  await expect(sheet.getByRole('timer')).toHaveText('0:20');
+  await page.clock.runFor(21_000);
+  await expect(sheet.getByRole('timer')).toHaveText('Fini !');
+  await sheet.getByRole('button', { name: 'Continuer' }).click();
+  await expect(page.getByText('1 / 10')).toBeVisible();
 });
 
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {

@@ -61,11 +61,13 @@ export function exercisePool(s: ExSetup): ExerciseId[] {
 export const setupReady = (s: ExSetup) => exercisePool(s).length > 0;
 
 /** Champs des réglages. `slots` : où les exercices sont répartis (« les 10 lignes »), `max` : combien au plus. */
-export function ExerciseSetupFields({ setup, update, slots, max }: {
+export function ExerciseSetupFields({ setup, update, slots, max, hideReps }: {
   setup: ExSetup;
   update: (p: Partial<ExSetup>) => void;
   slots: string;
   max: number;
+  /** Le jeu règle lui-même les répétitions (ou travaille en temps). */
+  hideReps?: boolean;
 }) {
   const avatar = useSettings().anim.avatar;
   const list = available(setup);
@@ -82,11 +84,13 @@ export function ExerciseSetupFields({ setup, update, slots, max }: {
 
   return (
     <>
-      <section className="section" aria-label="Répétitions">
-        <div className="card" style={{ padding: 0 }}>
-          <Stepper label="Répétitions" hint="Par exercice à faire" value={setup.reps} min={1} max={100} onChange={(reps) => update({ reps })} />
-        </div>
-      </section>
+      {!hideReps && (
+        <section className="section" aria-label="Répétitions">
+          <div className="card" style={{ padding: 0 }}>
+            <Stepper label="Répétitions" hint="Par exercice à faire" value={setup.reps} min={1} max={100} onChange={(reps) => update({ reps })} />
+          </div>
+        </section>
+      )}
 
       <section className="section">
         <h2 className="section-title">Position</h2>
