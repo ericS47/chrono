@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useRoute, go } from './lib/router';
 import { useSchedules, useSettings, useWorkouts } from './data/hooks';
 import { pruneHistory } from './data/db';
@@ -22,7 +22,8 @@ import { SessionTypes } from './screens/SessionTypes';
 import { Builder } from './screens/Builder';
 import { AvatarScreen } from './screens/AvatarScreen';
 import { CreateChoice } from './screens/CreateChoice';
-import { BoardGame } from './screens/BoardGame';
+// Jeux de société : chargés seulement quand on les ouvre (ouverture de l'app plus rapide).
+const BoardGame = lazy(() => import('./screens/BoardGame').then((m) => ({ default: m.BoardGame })));
 
 const TABS = [
   { path: '', label: 'Accueil', Icon: IconHome },
@@ -111,7 +112,7 @@ export function App() {
     case 'types': screen = <SessionTypes />; nav = false; break;
     case 'creer': screen = <Builder id={rest[0]} />; nav = false; break;
     case 'nouvelle': screen = <CreateChoice />; nav = false; break;
-    case 'jeu': screen = <BoardGame id={rest[0]} />; nav = false; break;
+    case 'jeu': screen = <Suspense fallback={null}><BoardGame id={rest[0]} /></Suspense>; nav = false; break;
     case 'avatar': screen = <AvatarScreen />; nav = false; break;
     default: screen = <Home />;
   }

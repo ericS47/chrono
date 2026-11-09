@@ -62,7 +62,7 @@ function Mine() {
         {favorites.length ? (
           <div className="list">{favorites.map((w) => <WorkoutItem key={w.id} w={w} star />)}</div>
         ) : (
-          workouts && <Empty>Pas encore de favori. Touchez ★ sur une séance pour la retrouver ici.</Empty>
+          !!workouts?.length && <Empty>Pas encore de favori. Touchez ★ sur une séance pour la retrouver ici.</Empty>
         )}
       </section>
 
