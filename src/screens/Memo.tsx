@@ -12,6 +12,7 @@ import type { ExSetup } from '../games/ExerciseSetup';
 import { ExerciseSetupFields, exercisePool, useGameSetup } from '../games/ExerciseSetup';
 import { PLAYER_COLORS, PlayersEditor, playerNames } from '../games/Players';
 import type { LevelId } from '../games/memo';
+import { GameStage } from '../ui/GameStage';
 import { BOT_MEMORY, botFirst, botSecond, deal, isPair, LEVELS, levelOf, ranking } from '../games/memo';
 
 interface MemoSetup extends ExSetup {
@@ -173,21 +174,11 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
   const winners = game.names.filter((_, i) => game.scores[i] === best);
 
   return (
-    <main className="screen no-nav memo-screen">
+    <main className="screen no-nav memo-screen game-play">
       <TopBar title="Mémo" right={<span className="chip accent">{game.removed.length / 2} / {game.cards.length / 2} paires</span>} />
 
-      <ul className="goose-scores" aria-label="Joueurs">
-        {game.names.map((n, i) => (
-          <li key={i} aria-current={i === game.current ? 'true' : undefined}>
-            <span className="goose-token" style={{ background: PLAYER_COLORS[i] }} aria-hidden="true" />
-            <span className="goose-score-name">{n}</span>
-            {i !== game.bot && <span className="hint">{game.done[i]} ex.</span>}
-            <strong className="memo-points" aria-label={`${game.scores[i]} point${game.scores[i] > 1 ? 's' : ''}`}>{game.scores[i]} pt{game.scores[i] > 1 ? 's' : ''}</strong>
-          </li>
-        ))}
-      </ul>
-      <p className="bn-status" role="status">{game.message}</p>
-
+      {/* Cartes 3:4 : le plateau garde la proportion colonnes × lignes. */}
+      <GameStage ratio={(game.cols * 3) / (Math.ceil(game.cards.length / game.cols) * 4)} board={(
       <div className="memo-grid" style={{ gridTemplateColumns: `repeat(${game.cols}, minmax(0, 1fr))` }}>
         {game.cards.map((id, i) => {
           const removed = game.removed.includes(i);
@@ -212,6 +203,20 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
           );
         })}
       </div>
+      )}>
+
+      <ul className="goose-scores" aria-label="Joueurs">
+        {game.names.map((n, i) => (
+          <li key={i} aria-current={i === game.current ? 'true' : undefined}>
+            <span className="goose-token" style={{ background: PLAYER_COLORS[i] }} aria-hidden="true" />
+            <span className="goose-score-name">{n}</span>
+            {i !== game.bot && <span className="hint">{game.done[i]} ex.</span>}
+            <strong className="memo-points" aria-label={`${game.scores[i]} point${game.scores[i] > 1 ? 's' : ''}`}>{game.scores[i]} pt{game.scores[i] > 1 ? 's' : ''}</strong>
+          </li>
+        ))}
+      </ul>
+      <p className="bn-status" role="status">{game.message}</p>
+      </GameStage>
 
       {game.pending && (
         <div className="sheet-backdrop">

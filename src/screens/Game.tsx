@@ -9,6 +9,7 @@ import {
   abandon, applyCard, BOARD, decide, DEFAULT_CARDIO, done, EXERCISE_SQUARES, GROUP_COLORS, newGame, ownedBy,
   playerById, randomExercises, ranking, roll, RULES, type GameConfig, type GameState, type Task,
 } from '../game/game';
+import { GameStage } from '../ui/GameStage';
 import { Segmented, Sheet, Stepper, TopBar } from '../ui/kit';
 
 const SAVE_KEY = 'pulse.game';
@@ -327,12 +328,12 @@ function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: 
   }
 
   return (
-    <main className="screen no-nav pp-play">
+    <main className="screen no-nav pp-play game-play">
       <TopBar
         title={`Pulse Party · tour ${s.round}${s.config.end.kind === 'turns' ? `/${s.config.end.turns}` : ''}`}
         right={pend.kind !== 'over' ? <button className="link-btn" onClick={() => setMenu(true)}>Menu</button> : undefined}
       />
-      <Board s={s}>{panel}</Board>
+      <GameStage ratio={1} board={<Board s={s}>{panel}</Board>}>
       <div className="pp-players">
         {s.players.map((x) => (
           <div key={x.id} className={`pp-player${x.id === p.id && pend.kind !== 'over' ? ' current' : ''}${x.out ? ' out' : ''}`}>
@@ -343,6 +344,7 @@ function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: 
         ))}
       </div>
       {s.log.length > 0 && <p className="hint pp-log">{s.log[0]}</p>}
+      </GameStage>
       {menu && (
         <Sheet title="Menu de la partie" onClose={() => setMenu(false)}>
           <span className="field-label">Abandon d’un joueur</span>

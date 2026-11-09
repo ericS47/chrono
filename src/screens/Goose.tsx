@@ -13,6 +13,7 @@ import type { ExSetup } from '../games/ExerciseSetup';
 import { ExerciseSetupFields, exercisePool, setupReady, useGameSetup } from '../games/ExerciseSetup';
 import { assignRows } from '../games/battleship';
 import type { Player, Turn } from '../games/goose';
+import { GameStage } from '../ui/GameStage';
 import { ELEVATORS, LAST, playTurn, rollDie, SPECIAL_LABELS, specialOf } from '../games/goose';
 
 interface GooseSetup extends ExSetup {
@@ -110,9 +111,10 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
   };
 
   return (
-    <main className="screen no-nav goose-screen">
+    <main className="screen no-nav goose-screen game-play">
       <TopBar title="Jeu de l’oie" />
 
+      <GameStage ratio={7 / 9} extra={34} board={<Board game={game} />}>
       <div className="goose-turn card">
         <span className="goose-token big" style={{ background: PLAYER_COLORS[game.current] }} aria-hidden="true" />
         <div className="goose-turn-text">
@@ -136,8 +138,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
           </li>
         ))}
       </ul>
-
-      <Board game={game} />
+      </GameStage>
 
       {game.pending && (
         <div className="sheet-backdrop">

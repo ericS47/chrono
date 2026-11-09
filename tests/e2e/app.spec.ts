@@ -426,6 +426,34 @@ test('créateur : le dernier bloc ajouté reste visible, la durée reste en haut
   await expect(page.getByTestId('builder-total')).toBeInViewport();
 });
 
+for (const [label, size] of [['portrait', { width: 390, height: 664 }], ['paysage', { width: 750, height: 340 }]] as const) {
+  test(`jeux : le plateau tient dans l’écran (${label}), sans défilement`, async ({ page }) => {
+    await page.setViewportSize(size);
+    const games: [string, (p: typeof page) => Promise<void>][] = [
+      ['jeu-de-l-oie', async (p) => { await p.getByRole('button', { name: 'Lancer la partie' }).click(); }],
+      ['bataille-navale', async (p) => {
+        await p.getByRole('button', { name: 'Lancer la partie' }).click();
+        await p.getByRole('button', { name: 'Au hasard' }).click();
+        await p.getByRole('button', { name: 'Commencer la partie' }).click();
+      }],
+      ['memo', async (p) => { await p.getByRole('button', { name: 'Lancer la partie' }).click(); }],
+      ['pulse-party', async (p) => { await p.getByRole('button', { name: 'Commencer la partie' }).click(); }],
+    ];
+    for (const [id, start] of games) {
+      await page.goto(`./#/jeu/${id}`);
+      await start(page);
+      const board = page.locator('.game-board-fit > *').first();
+      await expect(board).toBeVisible();
+      const fits = await page.evaluate(() => {
+        const r = document.querySelector('.game-board-fit > *')!.getBoundingClientRect();
+        return r.top >= 0 && r.left >= 0 && r.bottom <= innerHeight + 1 && r.right <= innerWidth + 1
+          && document.scrollingElement!.scrollHeight <= innerHeight + 1;
+      });
+      expect(fits, id).toBe(true);
+    }
+  });
+}
+
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __started: number };

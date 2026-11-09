@@ -12,6 +12,7 @@ import { EXERCISE_BY_ID } from '../anim/exercises';
 import type { ExSetup } from '../games/ExerciseSetup';
 import { ExerciseSetupFields, exercisePool, setupReady, useGameSetup } from '../games/ExerciseSetup';
 import type { Board } from '../games/battleship';
+import { GameStage } from '../ui/GameStage';
 import { aiShot, allSunk, assignRows, canPlace, cellName, newBoard, placeFleet, remainingFleet, rowOf, ROWS, shipCells, shoot, SIZE, sunkShipAt } from '../games/battleship';
 
 /** Couleur de chaque exercice dans la grille et la légende. */
@@ -155,21 +156,23 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
   const myTurn = game.turn === 'me' && !game.pending && !game.over;
 
   return (
-    <main className="screen no-nav bn-screen">
+    <main className="screen no-nav bn-screen game-play">
       <TopBar title="Bataille navale" right={<span className="chip accent" aria-label="Exercices faits">{game.done} ex.</span>} />
-      <p className="bn-status" role="status">{game.message}</p>
 
-      <section className="section" aria-label="Grille ennemie">
-        <div className="bn-grid-head">
-          <h2 className="section-title">Flotte ennemie</h2>
-          <Segmented label="Action" value={tool} onChange={setTool} options={[{ value: 'fire', label: 'Tirer' }, { value: 'mark', label: 'Marquer' }]} />
-        </div>
-        <Grid
-          board={game.enemy} colors={colors} rows={game.rows} avatar={avatar} marks={game.marks} reveal={!!game.over}
-          onCell={myTurn ? fire : undefined}
-          canTap={(cell) => !game.enemy.shots.includes(cell) && (tool === 'mark' || !game.marks.includes(cell))}
-        />
-      </section>
+      <GameStage ratio={1} board={(
+        <section aria-label="Grille ennemie">
+          <Grid
+            board={game.enemy} colors={colors} rows={game.rows} avatar={avatar} marks={game.marks} reveal={!!game.over}
+            onCell={myTurn ? fire : undefined}
+            canTap={(cell) => !game.enemy.shots.includes(cell) && (tool === 'mark' || !game.marks.includes(cell))}
+          />
+        </section>
+      )}>
+      <p className="bn-status" role="status">{game.message}</p>
+      <div className="bn-grid-head">
+        <h2 className="section-title">Flotte ennemie</h2>
+        <Segmented label="Action" value={tool} onChange={setTool} options={[{ value: 'fire', label: 'Tirer' }, { value: 'mark', label: 'Marquer' }]} />
+      </div>
 
       <section className="section" aria-label="Exercices des lignes">
         <h2 className="section-title">{game.reps} répétitions par exercice</h2>
@@ -188,6 +191,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
         <h2 className="section-title">Ma flotte</h2>
         <Grid board={game.mine} colors={colors} reveal small />
       </section>
+      </GameStage>
 
       {game.pending && (
         <div className="sheet-backdrop">
@@ -241,8 +245,9 @@ function Placement({ game, setGame, colors, avatar }: { game: Game; setGame: (g:
   };
 
   return (
-    <main className="screen no-nav bn-screen">
+    <main className="screen no-nav bn-screen game-play">
       <TopBar title="Place tes bateaux" />
+      <GameStage ratio={1} board={<Grid board={game.mine} colors={colors} rows={game.rows} avatar={avatar} reveal onCell={tap} canTap={() => true} />}>
       <p className="bn-status" role="status">
         {next ? `Touche une case pour poser ton bateau de ${next} cases (${horiz ? 'vers la droite' : 'vers le bas'}).` : 'Ta flotte est prête !'}
         {msg && <span className="hint bn-msg">{msg}</span>}
@@ -253,13 +258,13 @@ function Placement({ game, setGame, colors, avatar }: { game: Game; setGame: (g:
           {left.length ? left.map((n, k) => <span key={k} className={`chip ${k === 0 ? 'accent' : ''}`}>{n} cases</span>) : <span className="chip success">Tous posés</span>}
         </div>
       </div>
-      <Grid board={game.mine} colors={colors} rows={game.rows} avatar={avatar} reveal onCell={tap} canTap={() => true} />
       <p className="hint">Touche un bateau posé pour le retirer.</p>
       <div className="btn-row">
         <button className="btn secondary" onClick={() => { setShips(placeFleet()); setMsg(''); }}>Au hasard</button>
         <button className="btn secondary" onClick={() => { setShips([]); setMsg(''); }} disabled={!ships.length}>Tout effacer</button>
       </div>
       <button className="btn block" disabled={left.length > 0} onClick={() => setGame({ ...game, phase: 'play' })}>Commencer la partie</button>
+      </GameStage>
     </main>
   );
 }
