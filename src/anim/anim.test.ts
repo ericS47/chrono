@@ -183,6 +183,57 @@ describe('catégories', () => {
   });
 });
 
+describe('variantes sur chaise et avec matériel', () => {
+  it('identifiants uniques', async () => {
+    const ids = EXERCISES.map((e) => e.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+  it('chaque exercice sans matériel a sa version chaise, et des versions avec matériel debout et sur chaise', async () => {
+    const { EXERCISE_BY_ID, equipmentOf, inPosition, positionOf } = await import('./exercises');
+    const ids = ['toeraise', 'legabduction', 'legadduction', 'kickback', 'pressup', 'pressforward', 'curlbw', 'tricepsbw', 'shrug', 'uprightrow',
+      'lateralbw', 'frontbw', 'pecfly', 'arnold', 'situpfull', 'obliques', 'shouldertap', 'woodchop', 'goodmorning', 'supermanfront', 'supermanside'] as const;
+    for (const id of ids) {
+      const c = EXERCISE_BY_ID[`${id}-c`];
+      expect(positionOf(c)).toBe('chair');
+      expect(inPosition(c, 'standing')).toBe(false);
+      expect(equipmentOf(c)).toBe('none');
+    }
+    expect(equipmentOf(EXERCISE_BY_ID['tricepsbw-db'])).toBe('dumbbell');
+    expect(positionOf(EXERCISE_BY_ID['tricepsbw-db'])).toBe('standing');
+    expect(positionOf(EXERCISE_BY_ID['tricepsbw-db-c'])).toBe('chair');
+    expect(equipmentOf(EXERCISE_BY_ID['woodchop-kb-c'])).toBe('kettlebell');
+    expect(equipmentOf(EXERCISE_BY_ID['legabduction-band-c'])).toBe('band');
+    expect(equipmentOf(EXERCISE_BY_ID['pressup-ring'])).toBe('ring');
+    // Le squat bulgare (pied sur la chaise) garde ses deux branches avec matériel.
+    expect(inPosition(EXERCISE_BY_ID['bulgarian-db'], 'standing')).toBe(true);
+    expect(inPosition(EXERCISE_BY_ID['bulgarian-db'], 'chair')).toBe(true);
+  });
+  it('chaque branche (position × matériel) propose des exercices', async () => {
+    const { equipmentOf, inPosition } = await import('./exercises');
+    for (const pos of ['standing', 'chair'] as const) {
+      for (const eq of ['none', 'dumbbell', 'kettlebell', 'band', 'ring'] as const) {
+        expect(EXERCISES.filter((e) => inPosition(e, pos) && equipmentOf(e) === eq).length).toBeGreaterThanOrEqual(5);
+      }
+    }
+  });
+  it('reconnaît les variantes par leur nom, sans changer les noms déjà reconnus', () => {
+    expect(matchExercise('Triceps haltères assis')).toBe('tricepsbw-db-c');
+    expect(matchExercise('Triceps avec haltère')).toBe('tricepsbw-db');
+    expect(matchExercise('Tirage menton élastique')).toBe('uprightrow-band');
+    expect(matchExercise('Bûcheron kettlebell assis')).toBe('woodchop-kb-c');
+    expect(matchExercise('Obliques anneau')).toBe('obliques-ring');
+    expect(matchExercise('Abduction de la jambe assis')).toBe('legabduction-c');
+    expect(matchExercise('Pompes sur chaise')).toBe('pushup-c');
+    expect(matchExercise('Haussement des épaules assis')).toBe('shrug-c');
+    // Noms existants : inchangés.
+    expect(matchExercise('Triceps')).toBe('tricepsbw');
+    expect(matchExercise('Curl haltères')).toBe('dbcurl');
+    expect(matchExercise('Développé épaules assis')).toBe('seateddbpress');
+    expect(matchExercise('Élévation frontale assis')).toBe('seatedkbraise');
+    expect(matchExercise('Dips sur chaise')).toBe('chairdips');
+  });
+});
+
 describe('réglages', () => {
   it('activé par défaut, et complète un avatar partiel', () => {
     expect(normalizeAnim(undefined).enabled).toBe(true);

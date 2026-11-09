@@ -11,10 +11,10 @@ test('accueil : chrono rapide et navigation', async ({ page }) => {
   await expect(page.locator('.big-tile')).toHaveCount(2);
   await page.locator('.big-tile', { hasText: 'Types de séances' }).click();
   await expect(page.getByRole('heading', { name: 'Types de séances' })).toBeVisible();
-  for (const m of ['AMRAP', 'EMOM', 'For Time', 'Tabata', 'Intervalles', 'Chrono', 'Compte à rebours', 'Personnalisé', 'Musculation', 'Course', 'WOD connus', 'Pulse Party']) {
+  for (const m of ['AMRAP', 'EMOM', 'For Time', 'Tabata', 'Intervalles', 'Chrono', 'Compte à rebours', 'Personnalisé', 'Musculation', 'Course', 'WOD connus']) {
     await expect(page.locator('.tile', { hasText: m }).first()).toBeVisible();
   }
-  await expect(page.locator('.tile')).toHaveCount(12);
+  await expect(page.locator('.tile')).toHaveCount(11);
   await expect(page.getByRole('heading', { name: 'Mes séances' })).toHaveCount(0);
   await page.locator('.tile', { hasText: 'WOD connus' }).click();
   await expect(page.getByRole('link', { name: /Cindy/ })).toBeVisible();
@@ -208,10 +208,159 @@ test('séance : les bips sont joués par une piste audio (arrière-plan)', async
   await expect.poll(() => page.evaluate(() => (window as unknown as { __tracks: number }).__tracks), { timeout: 15_000 }).toBeGreaterThan(0);
 });
 
+test('Créer : choix entre séance de sport et jeu de société', async ({ page }) => {
+  await page.goto('./#/seances');
+  await page.getByRole('button', { name: 'Créer' }).click();
+  await expect(page).toHaveURL(/#\/nouvelle/);
+  await page.getByRole('button', { name: 'Jeu de société' }).click();
+  await expect(page.getByRole('heading', { name: 'Jeu de société' })).toBeVisible();
+  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Pulse Party', '1000 Bornes', 'Roulette russe', 'Mémo']) {
+    await expect(page.getByRole('button', { name })).toBeVisible();
+  }
+  await page.getByRole('button', { name: 'Bataille navale' }).click();
+  await expect(page.getByRole('heading', { name: 'Bataille navale' })).toBeVisible();
+  await page.getByRole('button', { name: 'Retour' }).click();
+  await page.getByRole('button', { name: 'Retour' }).click();
+  await page.getByRole('button', { name: 'Séance de sport' }).click();
+  await expect(page).toHaveURL(/#\/creer/);
+  await expect(page.getByLabel('Nom de la séance')).toBeVisible();
+});
+
+test('Bataille navale : réglages, tir raté, exercice de la ligne', async ({ page }) => {
+  await page.goto('./#/jeu/bataille-navale');
+  await expect(page.getByRole('heading', { name: 'Bataille navale' })).toBeVisible();
+  await page.getByRole('radio', { name: 'Debout' }).click();
+  await page.getByRole('tab', { name: 'Choisis' }).click();
+  await expect(page.getByRole('button', { name: 'Lancer la partie' })).toBeDisabled();
+  await page.getByRole('option', { name: 'Squat', exact: true }).click();
+  await page.getByRole('button', { name: 'Répétitions : plus' }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  // Placement de ma flotte : un bateau à la main, puis le reste au hasard.
+  await expect(page.getByRole('heading', { name: 'Place tes bateaux' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Commencer la partie' })).toBeDisabled();
+  await page.getByRole('gridcell', { name: 'A1', exact: true }).click();
+  await expect(page.getByRole('gridcell', { name: 'A5, bateau' })).toBeVisible();
+  await page.getByRole('gridcell', { name: 'B2', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('ni se toucher');
+  await page.getByRole('button', { name: 'Au hasard' }).click();
+  await page.getByRole('button', { name: 'Commencer la partie' }).click();
+  const enemy = page.getByRole('region', { name: 'Grille ennemie' });
+  // Mode « Marquer » : un drapeau, et la case n'est plus jouable en mode « Tirer ».
+  await page.getByRole('tab', { name: 'Marquer' }).click();
+  await enemy.getByRole('gridcell', { name: 'J10', exact: true }).click();
+  await expect(enemy.getByRole('gridcell', { name: 'J10, marquée' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Tirer' }).click();
+  await expect(enemy.getByRole('gridcell', { name: 'J10, marquée' })).toBeDisabled();
+  await expect(enemy.getByRole('gridcell')).toHaveCount(100);
+  // Un seul exercice choisi : toutes les lignes sont des squats.
+  await expect(page.getByRole('region', { name: 'Exercices des lignes' })).toContainText('A B C D E F G H I J');
+  // On tire jusqu'au premier raté (l'ordinateur peut nous toucher entre-temps).
+  for (let i = 0; i < 40; i++) {
+    const dialog = page.getByRole('dialog');
+    if (await dialog.isVisible()) {
+      const raté = /^Raté/.test((await dialog.getAttribute('aria-label')) ?? '');
+      await expect(dialog).toContainText('11 × Squat');
+      await dialog.getByRole('button', { name: 'C’est fait' }).click();
+      if (raté) break;
+      continue;
+    }
+    const cell = enemy.locator('.bn-cell.empty:not(:disabled)').first();
+    if (await cell.isVisible()) await cell.click();
+    else await page.waitForTimeout(300);
+  }
+  await expect(page.getByLabel('Exercices faits')).not.toHaveText('0 ex.');
+});
+
+test('Jeu de l’oie : 2 joueurs, lancer les dés, exercices de la case', async ({ page }) => {
+  await page.goto('./#/jeu/jeu-de-l-oie');
+  await expect(page.getByRole('heading', { name: 'Jeu de l’oie' })).toBeVisible();
+  await page.getByLabel('Nom du joueur 1').fill('Ana');
+  await page.getByRole('button', { name: 'Ajouter un joueur' }).click();
+  await page.getByLabel('Nom du joueur 2').fill('Léo');
+  await page.getByRole('tab', { name: 'Choisis' }).click();
+  await page.getByRole('option', { name: 'Squat', exact: true }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.locator('.goose-case')).toHaveCount(63);
+  await expect(page.getByText('Au tour de Ana')).toBeVisible();
+  await page.getByRole('button', { name: 'Lancer le dé' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Tour de Ana' });
+  await expect(dialog).toContainText('10 × Squat');
+  await dialog.getByRole('button', { name: 'C’est fait' }).click();
+  await expect(page.getByText('Au tour de Léo')).toBeVisible();
+});
+
+test('Jeu de l’oie seul : l’ordinateur joue après moi', async ({ page }) => {
+  await page.goto('./#/jeu/jeu-de-l-oie');
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.getByRole('list', { name: 'Joueurs' })).toContainText('L’ordinateur');
+  await page.getByRole('button', { name: 'Lancer le dé' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: /C’est fait|Continuer/ }).click();
+  const bot = page.getByRole('dialog', { name: 'Tour de l’ordinateur' });
+  await expect(bot).toBeVisible();
+  await expect(bot.locator('.goose-ex')).toHaveCount(0);
+  await bot.getByRole('button', { name: 'Continuer' }).click();
+  await expect(page.getByText('À toi de jouer')).toBeVisible();
+});
+
+test('Mémo : niveaux, paire retirée ou deux exercices, points', async ({ page }) => {
+  await page.goto('./#/jeu/memo');
+  await expect(page.getByRole('heading', { name: 'Mémo' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ajouter un joueur' }).click();
+  await page.getByRole('radio', { name: /Expert/ }).click();
+  await expect(page.getByRole('radio', { name: /Expert/ })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radio', { name: /Facile/ }).click();
+  // Choisis : il faut au moins 6 exercices différents pour le niveau facile.
+  await page.getByRole('tab', { name: 'Choisis' }).click();
+  await page.getByRole('option', { name: 'Squat', exact: true }).click();
+  await expect(page.getByText('Il faut au moins 6 exercices')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Lancer la partie' })).toBeDisabled();
+  await page.getByRole('tab', { name: 'Aléatoires' }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.locator('.memo-card')).toHaveCount(12);
+  for (let i = 0; i < 12; i++) {
+    const backs = page.locator('.memo-card:not(.removed):not(.up)');
+    await backs.nth(0).click();
+    await backs.nth(0).click();
+    const dialog = page.getByRole('dialog', { name: 'Pas une paire' });
+    await expect.poll(async () => (await dialog.isVisible()) || (await page.locator('.memo-card.up').count()) === 0).toBe(true);
+    if (!(await dialog.isVisible())) await expect(page.getByLabel(/^\d+ points?$/).first()).not.toHaveText('0 pt');
+    if (await dialog.isVisible()) {
+      await expect(dialog.locator('.goose-ex')).toHaveCount(2);
+      await dialog.getByRole('button', { name: 'C’est fait' }).click();
+      await expect(page.getByRole('status')).toContainText('Au tour de Joueur 2');
+      return;
+    }
+    await page.waitForTimeout(100);
+  }
+});
+
+test('Mémo seul : l’ordinateur joue après moi', async ({ page }) => {
+  await page.goto('./#/jeu/memo');
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.getByRole('list', { name: 'Joueurs' })).toContainText('L’ordinateur');
+  // Je retourne des cartes jusqu'à me tromper (une paire me fait rejouer).
+  for (let i = 0; i < 6; i++) {
+    const backs = page.locator('.memo-card:not(.removed):not(.up)');
+    await backs.nth(0).click();
+    await backs.nth(0).click();
+    const dialog = page.getByRole('dialog', { name: 'Pas une paire' });
+    // Soit la fenêtre des exercices, soit la paire retirée (plus aucune carte retournée).
+    await expect.poll(async () => (await dialog.isVisible()) || (await page.locator('.memo-card.up').count()) === 0).toBe(true);
+    if (await dialog.isVisible()) {
+      await dialog.getByRole('button', { name: 'C’est fait' }).click();
+      break;
+    }
+  }
+  await expect(page.getByRole('status')).toContainText('L’ordinateur');
+  // L'ordinateur retourne ses cartes tout seul, puis me rend la main (ou termine la partie).
+  await expect(page.getByRole('status').filter({ hasText: 'À toi' }).or(page.getByRole('dialog', { name: 'Partie terminée' }))).toBeVisible({ timeout: 30_000 });
+});
+
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {
   for (const name of ['Séance A', 'Séance B', 'Séance C']) {
     await page.goto('./#/seances');
     await page.getByRole('button', { name: 'Créer' }).click();
+    await page.getByRole('button', { name: 'Séance de sport' }).click();
     await page.getByLabel('Nom de la séance').fill(name);
     await page.getByRole('button', { name: 'Effort', exact: true }).click();
     await page.getByRole('button', { name: 'Enregistrer' }).click();
@@ -346,16 +495,21 @@ test('créateur : choisir l’exercice animé d’un effort dans la liste', asyn
   await expect(page.getByRole('radio', { name: 'Sans matériel' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('radio', { name: 'Kettlebell' }).click();
   await expect(page.getByRole('option', { name: 'Goblet squat' })).toBeVisible();
-  await expect(page.getByRole('option', { name: 'Fente' })).toHaveCount(0);
+  await expect(page.getByRole('option', { name: 'Fente', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('option', { name: 'Fente (kettlebell)' })).toBeVisible();
   // Position « Chaise », puis matériel « Haltères » : les exercices assis aux haltères.
   await expect(page.getByRole('radio', { name: 'Debout' })).toHaveAttribute('aria-checked', 'true');
   await page.getByRole('radio', { name: 'Chaise' }).click();
   await page.getByRole('radio', { name: 'Haltères' }).click();
   await expect(page.getByRole('option', { name: 'Curl biceps assis (haltères)' })).toBeVisible();
   await expect(page.getByRole('option', { name: 'Goblet squat' })).toHaveCount(0);
+  // Variantes générées : triceps aux haltères sur chaise, et sans matériel sur chaise.
+  await expect(page.getByRole('option', { name: 'Extension triceps assis (haltères)' })).toBeVisible();
+  await page.getByRole('radio', { name: 'Sans matériel' }).click();
+  await expect(page.getByRole('option', { name: 'Bûcheron assis' })).toBeVisible();
   await page.getByRole('radio', { name: 'Debout' }).click();
   await page.getByRole('radio', { name: 'Sans matériel' }).click();
-  await page.getByRole('option', { name: 'Fente' }).click();
+  await page.getByRole('option', { name: 'Fente', exact: true }).click();
   await expect(page.getByRole('img', { name: 'Animation : Fente' })).toBeVisible();
   await page.getByRole('button', { name: 'Terminé' }).click();
   await expect(page.getByRole('button', { name: /^Effort 0:30, Fente/ })).toBeVisible();
@@ -449,7 +603,7 @@ test('créateur : déplacer un bloc avec la poignée, ou avec Monter / Descendre
 test('Pulse Party : préparer une partie, acheter une case, la partie est sauvegardée', async ({ page }) => {
   // Dé toujours sur 1 : on tombe sur la case 1 (exercice).
   await page.addInitScript(() => { Math.random = () => 0; });
-  await page.goto('./#/types');
+  await page.goto('./#/jeu');
   await page.getByRole('button', { name: 'Pulse Party' }).click();
   await page.getByLabel('Joueur 1').fill('Eric');
   await page.getByLabel('Joueur 2').fill('Marie');

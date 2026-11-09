@@ -54,3 +54,36 @@ export const IconClock = make(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5
 export const IconGrid = make(<><rect x="4" y="4" width="7" height="7" rx="2" /><rect x="13" y="4" width="7" height="7" rx="2" /><rect x="4" y="13" width="7" height="7" rx="2" /><rect x="13" y="13" width="7" height="7" rx="2" /></>);
 export const IconExpand = make(<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />);
 export const IconHistory = make(<><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3.4" /><path d="M3 4v4h4M12 7v5l3 2" /></>);
+export const IconDumbbell = make(<><path d="M7 12h10" /><rect x="4" y="7" width="3" height="10" rx="1" /><rect x="17" y="7" width="3" height="10" rx="1" /><path d="M2 10v4M22 10v4" /></>);
+export const IconBoardGame = make(
+  <>
+    <rect x="2.5" y="10" width="11" height="11" rx="2" />
+    <circle cx="5.5" cy="13" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="8" cy="15.5" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="10.5" cy="18" r="0.9" fill="currentColor" stroke="none" />
+    <circle cx="18" cy="6" r="2.5" />
+    <path d="M16.6 8.3L15 21h6l-1.6-12.7M14.5 21h7" />
+  </>,
+);
+/** Bataille navale : un bateau sur l’eau. */
+export const IconBattleship = make(<><path d="M3 14h18l-2.5 4.5h-13z" /><path d="M7 14v-3.5h8V14M11 10.5V5l4 2.5-4 1" /><path d="M2 21c1.7 0 1.7-1 3.3-1s1.7 1 3.4 1 1.6-1 3.3-1 1.7 1 3.3 1 1.7-1 3.4-1 1.6 1 2.3 1" /></>);
+/** Jeu de l’oie : le plateau en spirale. */
+export const IconGoose = make(<path d="M12 12a1.5 1.5 0 0 1 3 0a3 3 0 0 1-6 0a4.5 4.5 0 0 1 9 0a6 6 0 0 1-12 0a7.5 7.5 0 0 1 15 0" />);
+/** Jeu de propriétés : une maison et une pièce. */
+export const IconProperty = make(<><path d="M3 21v-9l6-5 6 5v9z" /><path d="M7.5 21v-4h3v4" /><circle cx="19" cy="5.5" r="2.5" /><path d="M19 4.5v2" /></>);
+/** Jeu de route : une borne kilométrique. */
+export const IconMilestone = make(<><path d="M6 20V10a6 6 0 0 1 12 0v10" /><path d="M6 10a6 6 0 0 1 12 0z" fill="currentColor" /><path d="M3.5 20h17M10 14h4M10 17h4" /></>);
+/** Roulette : le barillet, une chambre pleine. */
+export const IconRoulette = make(
+  <>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="7.5" r="1.3" strokeWidth={1.5} fill="currentColor" />
+    <circle cx="15.9" cy="9.75" r="1.3" strokeWidth={1.5} />
+    <circle cx="15.9" cy="14.25" r="1.3" strokeWidth={1.5} />
+    <circle cx="12" cy="16.5" r="1.3" strokeWidth={1.5} />
+    <circle cx="8.1" cy="14.25" r="1.3" strokeWidth={1.5} />
+    <circle cx="8.1" cy="9.75" r="1.3" strokeWidth={1.5} />
+  </>,
+);
+/** Mémo : deux cartes, l'une retournée. */
+export const IconMemo = make(<><rect x="2.5" y="5" width="9" height="14" rx="2" /><rect x="12.5" y="5" width="9" height="14" rx="2" /><path d="M5.5 10a1.5 1.5 0 1 1 2 1.4c-.5.2-.5.6-.5 1.1M7 15.5v.01" /><circle cx="17" cy="12" r="2.2" /></>);

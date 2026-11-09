@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Avatar } from './avatar';
 import { DEFAULT_AVATAR } from './avatar';
 import { mix, SKIN_TONES } from './avatar';
-import type { ExerciseId } from './exercises';
-import { CHAIR_BACK, CHAIR_DEPTH, chairPos, EXERCISE_BY_ID, frameAt, frameBox, GROUND, place, VIEW_W } from './exercises';
+import type { ChairPos, ExerciseAnim, ExerciseId } from './exercises';
+import { CHAIR_BACK, CHAIR_DEPTH, CHAIR_HALF, chairPos, EXERCISE_BY_ID, frameAt, frameBox, GROUND, place, VIEW_W } from './exercises';
 import { dims } from './pose';
 import type { Colors } from './Body';
 import { FrontBody, SideBody } from './Body';
@@ -39,6 +39,28 @@ function Band({ foot, hand }: { foot: Pt; hand: Pt }) {
   return <line x1={foot[0]} y1={foot[1]} x2={hand[0]} y2={hand[1]} stroke={BAND} strokeWidth={1.7} strokeLinecap="round" />;
 }
 
+/** Point à la fraction `t` du segment a → b. */
+const along = (a: Pt, b: Pt, t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+
+/** Mini-bande ou anneau autour des deux jambes (genoux ou chevilles) : de face, tendu entre les jambes ; de profil, vu par la tranche. */
+function LegLoop({ a, b, color, view, ry, edge }: { a: Pt; b: Pt; color: string; view: 'side' | 'front'; ry: number; edge: Pt }) {
+  const cx = (a[0] + b[0]) / 2;
+  const cy = (a[1] + b[1]) / 2;
+  if (view === 'front') {
+    const rx = Math.max(3, Math.abs(b[0] - a[0]) / 2 + 2);
+    return <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke={color} strokeWidth={1.9} />;
+  }
+  // De profil : la boucle suit le membre (vers `edge`), et relie les deux jambes si elles sont écartées.
+  const ang = (Math.atan2(edge[1] - cy, edge[0] - cx) * 180) / Math.PI;
+  const gap = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  return (
+    <g>
+      {gap > 3 && <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={color} strokeWidth={1.7} strokeLinecap="round" />}
+      <ellipse cx={a[0]} cy={a[1]} rx={ry} ry={2.2} fill="none" stroke={color} strokeWidth={1.6} transform={`rotate(${ang + 90} ${a[0]} ${a[1]})`} />
+    </g>
+  );
+}
+
 const IRON = '#2B2F3A';
 
 /** Haltère tenu en main : de profil, vu de bout (un disque) ; de face, à plat. */
@@ -64,26 +86,56 @@ function Dumbbell({ hand, view }: { hand: Pt; view: 'side' | 'front' }) {
 const WOOD = '#B07A4E';
 const WOOD_DARK = '#8C5D38';
 /**
- * Chaise vue de profil (l'avatar regarde à droite), dossier à gauche.
- * `seat` : point du dessus de l'assise ; `front` : bord avant de l'assise.
+ * Chaise : de profil (l'avatar regarde à droite), assise de `x0` à `x0 + CHAIR_DEPTH`, dossier à gauche ou à droite ;
+ * de face, assise centrée sur `x0`, dossier derrière l'avatar.
  */
-function Chair({ seatY, front }: { seatY: number; front: number }) {
-  const depth = CHAIR_DEPTH;
-  const back = front - depth;
+function Chair({ seatY, x0, back }: ChairPos) {
   const legW = 1.8;
+  if (back === 'behind') {
+    const l = x0 - CHAIR_HALF;
+    const w = CHAIR_HALF * 2;
+    return (
+      <g>
+        <rect x={l + 0.6} y={seatY - CHAIR_BACK} width={2.2} height={CHAIR_BACK} rx={1.1} fill={WOOD_DARK} />
+        <rect x={l + w - 2.8} y={seatY - CHAIR_BACK} width={2.2} height={CHAIR_BACK} rx={1.1} fill={WOOD_DARK} />
+        <rect x={l} y={seatY - CHAIR_BACK} width={w} height={6} rx={1.6} fill={WOOD_DARK} />
+        <rect x={l + 0.4} y={seatY} width={legW} height={GROUND - seatY} fill={WOOD_DARK} />
+        <rect x={l + w - legW - 0.4} y={seatY} width={legW} height={GROUND - seatY} fill={WOOD_DARK} />
+        <rect x={l - 0.5} y={seatY} width={w + 1} height={2.8} rx={1.2} fill={WOOD} />
+      </g>
+    );
+  }
+  const depth = CHAIR_DEPTH;
+  const bx = back === 'left' ? x0 : x0 + depth - 2.4;
   return (
     <g>
-      <rect x={back} y={seatY - CHAIR_BACK} width={2.4} height={CHAIR_BACK} rx={1.2} fill={WOOD_DARK} />
-      <rect x={back} y={seatY} width={legW} height={GROUND - seatY} fill={WOOD_DARK} />
-      <rect x={front - legW} y={seatY} width={legW} height={GROUND - seatY} fill={WOOD_DARK} />
-      <rect x={back - 0.5} y={seatY} width={depth + 1} height={2.6} rx={1.2} fill={WOOD} />
+      <rect x={bx} y={seatY - CHAIR_BACK} width={2.4} height={CHAIR_BACK} rx={1.2} fill={WOOD_DARK} />
+      <rect x={x0} y={seatY} width={legW} height={GROUND - seatY} fill={WOOD_DARK} />
+      <rect x={x0 + depth - legW} y={seatY} width={legW} height={GROUND - seatY} fill={WOOD_DARK} />
+      <rect x={x0 - 0.5} y={seatY} width={depth + 1} height={2.6} rx={1.2} fill={WOOD} />
     </g>
   );
 }
 
 const RING = '#3DB8AD';
-/** Anneau de Pilates : de face, tenu entre les mains ; de profil, serré entre les genoux. */
-function Ring({ j, view }: { j: Joints; view: 'side' | 'front' }) {
+/** Anneau de Pilates : de face, tenu entre les mains ; de profil, serré entre les genoux (ou tenu à deux mains, `hands`). */
+function Ring({ j, view, grip }: { j: Joints; view: 'side' | 'front'; grip?: string }) {
+  if (grip === 'knees' || grip === 'ankles') {
+    const [a, b] = grip === 'knees' ? [j.kneeN, j.kneeF] : [along(j.kneeN, j.ankleN, 0.8), along(j.kneeF, j.ankleF, 0.8)];
+    if (view === 'front') return <LegLoop a={a} b={b} color={RING} view={view} ry={6} edge={a} />;
+    const ang = (Math.atan2(a[1] - j.hipN[1], a[0] - j.hipN[0]) * 180) / Math.PI;
+    return <ellipse cx={a[0]} cy={a[1]} rx={2.4} ry={7} fill="none" stroke={RING} strokeWidth={1.9} transform={`rotate(${ang} ${a[0]} ${a[1]})`} />;
+  }
+  if (view === 'side' && grip === 'hands') {
+    // De profil, l'anneau serré entre les paumes est vu de face : un cercle devant les mains.
+    const [x, y] = [(j.handN[0] + j.handF[0]) / 2, (j.handN[1] + j.handF[1]) / 2];
+    return (
+      <g>
+        <circle cx={x} cy={y} r={7.5} fill="none" stroke={RING} strokeWidth={1.9} />
+        <rect x={x - 2.2} y={y - 2.8} width={4.4} height={5.6} rx={1.5} fill="#2B2F3A" opacity={0.85} />
+      </g>
+    );
+  }
   if (view === 'front') {
     const [ax, ay] = j.handF;
     const [bx, by] = j.handN;
@@ -105,17 +157,32 @@ function Ring({ j, view }: { j: Joints; view: 'side' | 'front' }) {
 }
 
 /** Matériel tenu ou utilisé (dessiné par-dessus le corps ; la chaise est dessinée derrière). */
-function Equipment({ kind, j, view }: { kind: 'kettlebell' | 'band' | 'dumbbell' | 'ring'; j: Joints; view: 'side' | 'front' }) {
+function Equipment({ ex, j }: { ex: ExerciseAnim; j: Joints }) {
+  const { view, grip } = ex;
+  const kind = ex.equipment;
   const mid = (a: Pt, b: Pt): Pt => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-  if (kind === 'kettlebell') return <Kettlebell hand={mid(j.handN, j.handF)} r={5} />;
-  if (kind === 'ring') return <Ring j={j} view={view} />;
+  const apart = Math.hypot(j.handN[0] - j.handF[0], j.handN[1] - j.handF[1]) > 8;
+  if (kind === 'kettlebell') {
+    // Une kettlebell à deux mains si elles sont proches, sinon une par main.
+    if (grip === 'each' || (grip !== 'one' && apart)) {
+      return <g><Kettlebell hand={j.handF} r={4} /><Kettlebell hand={j.handN} r={4} /></g>;
+    }
+    return <Kettlebell hand={mid(j.handN, j.handF)} r={5} />;
+  }
+  if (kind === 'ring') return <Ring j={j} view={view} grip={grip} />;
   if (kind === 'dumbbell') {
+    if (grip === 'one') return <Dumbbell hand={mid(j.handN, j.handF)} view={view} />;
     return (
       <g>
         <Dumbbell hand={j.handF} view={view} />
         <Dumbbell hand={j.handN} view={view} />
       </g>
     );
+  }
+  if (grip === 'knees' || grip === 'ankles') {
+    const t = grip === 'knees' ? 0.12 : 0.8;
+    const [a, b] = [along(j.kneeN, j.ankleN, t), along(j.kneeF, j.ankleF, t)];
+    return <LegLoop a={a} b={b} color={BAND} view={view} ry={grip === 'knees' ? 4.5 : 3.6} edge={j.ankleN} />;
   }
   return (
     <g>
@@ -140,11 +207,11 @@ export function FigureFrame({ exercise, avatar, sec, title }: { exercise: Exerci
   return (
     <svg viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`} className={`figure ${b.w > b.h * 1.25 ? 'wide' : ''}`} role="img" aria-label={title ?? `Animation : ${ex.label}`}>
       <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={Math.min(ex.view === 'front' ? 26 : 48, b.w / 2 - 3)} ry={3.2} fill="rgba(20,24,58,0.12)" />
-      {chair && <Chair seatY={chair.seatY} front={chair.front} />}
+      {chair && <Chair {...chair} />}
       {ex.view === 'front'
         ? <g transform={roll ? `rotate(${roll} ${flat.hip[0]} ${flat.hip[1]})` : undefined}><FrontBody j={flat} d={placed.d} av={avatar} c={c} /></g>
         : <SideBody j={j} d={placed.d} av={avatar} c={c} />}
-      {ex.equipment && ex.equipment !== 'none' && <Equipment kind={ex.equipment} j={j} view={ex.view} />}
+      {ex.equipment && ex.equipment !== 'none' && <Equipment ex={ex} j={j} />}
     </svg>
   );
 }
