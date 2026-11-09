@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSettings } from '../data/hooks';
 import { TopBar } from '../ui/kit';
-import { IconMinus, IconPlus } from '../ui/icons';
+import { PLAYER_COLORS, PlayersEditor, playerNames } from '../games/Players';
 import { ExerciseFigure, FigureFrame } from '../anim/Figure';
 import { GROUP_COLORS } from '../anim/ExercisePicker';
 import type { ExerciseId } from '../anim/exercises';
@@ -19,8 +19,6 @@ interface GooseSetup extends ExSetup {
   players: string[];
 }
 
-const MAX_PLAYERS = 6;
-export const PLAYER_COLORS = ['#4F5BD5', '#E0533D', '#2E9E6B', '#D99A00', '#9B59D0', '#1FA2C4'];
 
 interface Game {
   players: Player[];
@@ -36,7 +34,7 @@ interface Game {
 }
 
 function newGame(s: GooseSetup): Game {
-  const names = s.players.map((n, i) => n.trim() || `Joueur ${i + 1}`);
+  const names = playerNames(s.players);
   const players: Player[] = names.map((name) => ({ name, pos: 0, skip: 0 }));
   // Seul : on joue contre l'ordinateur.
   if (players.length === 1) players.push({ name: 'L’ordinateur', bot: true, pos: 0, skip: 0 });
@@ -59,8 +57,6 @@ export function Goose() {
 }
 
 function SetupScreen({ setup, update, onStart }: { setup: GooseSetup; update: (p: Partial<GooseSetup>) => void; onStart: () => void }) {
-  const players = setup.players.length ? setup.players : ['Joueur 1'];
-  const rename = (i: number, name: string) => update({ players: players.map((n, k) => (k === i ? name : n)) });
   return (
     <main className="screen no-nav">
       <TopBar title="Jeu de l’oie" />
@@ -70,27 +66,7 @@ function SetupScreen({ setup, update, onStart }: { setup: GooseSetup; update: (p
         Seul, tu joues contre l’ordinateur.
       </p>
 
-      <section className="section" aria-label="Joueurs">
-        <h2 className="section-title">Joueurs</h2>
-        <div className="card goose-players">
-          {players.map((name, i) => (
-            <div key={i} className="goose-player-row">
-              <span className="goose-token" style={{ background: PLAYER_COLORS[i] }} aria-hidden="true" />
-              <input type="text" className="input" aria-label={`Nom du joueur ${i + 1}`} value={name} maxLength={20} onChange={(e) => rename(i, e.target.value)} />
-              {players.length > 1 && (
-                <button type="button" className="mini-btn" aria-label={`Retirer ${name || `le joueur ${i + 1}`}`} onClick={() => update({ players: players.filter((_, k) => k !== i) })}>
-                  <IconMinus size={18} />
-                </button>
-              )}
-            </div>
-          ))}
-          {players.length < MAX_PLAYERS && (
-            <button type="button" className="btn ghost small" onClick={() => update({ players: [...players, `Joueur ${players.length + 1}`] })}>
-              <IconPlus size={18} />Ajouter un joueur
-            </button>
-          )}
-        </div>
-      </section>
+      <PlayersEditor players={setup.players} onChange={(players) => update({ players })} />
 
       <ExerciseSetupFields setup={setup} update={update} slots="les 63 cases" max={LAST} />
       <button className="btn block" disabled={!setupReady(setup)} onClick={onStart}>Lancer la partie</button>

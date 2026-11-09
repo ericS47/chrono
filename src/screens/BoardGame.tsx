@@ -3,6 +3,7 @@ import { go } from '../lib/router';
 import { TopBar, Empty } from '../ui/kit';
 import { Battleship } from './Battleship';
 import { Goose } from './Goose';
+import { Memo } from './Memo';
 import { IconBattleship, IconGoose, IconMemo, IconMilestone, IconProperty, IconRoulette } from '../ui/icons';
 
 export const GAMES: { id: string; label: string; color: string; Icon: ComponentType<{ size?: number }> }[] = [
@@ -18,6 +19,7 @@ export const GAMES: { id: string; label: string; color: string; Icon: ComponentT
 export function BoardGame({ id }: { id?: string }) {
   if (id === 'bataille-navale') return <Battleship />;
   if (id === 'jeu-de-l-oie') return <Goose />;
+  if (id === 'memo') return <Memo />;
   const game = GAMES.find((g) => g.id === id);
   if (game) {
     return (

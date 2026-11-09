@@ -302,6 +302,38 @@ test('Jeu de l’oie seul : l’ordinateur joue après moi', async ({ page }) =>
   await expect(page.getByText('À toi de jouer')).toBeVisible();
 });
 
+test('Mémo : niveaux, paire retirée ou deux exercices, points', async ({ page }) => {
+  await page.goto('./#/jeu/memo');
+  await expect(page.getByRole('heading', { name: 'Mémo' })).toBeVisible();
+  await page.getByRole('button', { name: 'Ajouter un joueur' }).click();
+  await page.getByRole('radio', { name: /Expert/ }).click();
+  await expect(page.getByRole('radio', { name: /Expert/ })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('radio', { name: /Facile/ }).click();
+  // Choisis : il faut au moins 6 exercices différents pour le niveau facile.
+  await page.getByRole('tab', { name: 'Choisis' }).click();
+  await page.getByRole('option', { name: 'Squat', exact: true }).click();
+  await expect(page.getByText('Il faut au moins 6 exercices')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Lancer la partie' })).toBeDisabled();
+  await page.getByRole('tab', { name: 'Aléatoires' }).click();
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.locator('.memo-card')).toHaveCount(12);
+  for (let i = 0; i < 12; i++) {
+    const backs = page.locator('.memo-card:not(.removed):not(.up)');
+    await backs.nth(0).click();
+    await backs.nth(0).click();
+    const dialog = page.getByRole('dialog', { name: 'Pas une paire' });
+    const pts = page.getByLabel(/^1 point$/);
+    await expect(dialog.or(pts.first())).toBeVisible();
+    if (await dialog.isVisible()) {
+      await expect(dialog.locator('.goose-ex')).toHaveCount(2);
+      await dialog.getByRole('button', { name: 'C’est fait' }).click();
+      await expect(page.getByRole('status')).toContainText('Au tour de Joueur 2');
+      return;
+    }
+    await page.waitForTimeout(100);
+  }
+});
+
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {
   for (const name of ['Séance A', 'Séance B', 'Séance C']) {
     await page.goto('./#/seances');
