@@ -512,6 +512,61 @@ test('Pulse Poly : sur une carte cardio libre, les 3 exercices sont détaillés'
   await expect(page.getByRole('button', { name: /^Passer : 30 rép\. 15 Tipping · 10 Jumping jack · 5 Burpee/ })).toBeVisible();
 });
 
+/** Active « Son en arrière-plan » (piste audio), désactivé par défaut. */
+async function backgroundSoundOn(page: import('@playwright/test').Page) {
+  await page.goto('./#/reglages');
+  const bg = page.getByRole('switch', { name: 'Son en arrière-plan' });
+  await bg.click();
+  await expect(bg).toBeChecked();
+}
+
+test('son en arrière-plan : la piste coupée par le téléphone est relancée', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __plays: number; __player?: HTMLMediaElement };
+    w.__plays = 0;
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
+      if (this.src.startsWith('blob:') && this.duration > 5) { w.__plays++; w.__player = this; }
+      return play.call(this);
+    };
+  });
+  await backgroundSoundOn(page);
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  const plays = () => page.evaluate(() => (window as unknown as { __plays: number }).__plays);
+  await expect.poll(plays, { timeout: 15_000 }).toBe(1);
+  // Le téléphone met la piste en pause (appel, autre app…).
+  await page.evaluate(() => (window as unknown as { __player: HTMLMediaElement }).__player.pause());
+  await expect.poll(plays, { timeout: 15_000 }).toBe(2);
+});
+
+test('son en arrière-plan : piste qui ne se charge pas → bips en direct', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __osc: number };
+    w.__osc = 0;
+    // La piste ne se charge jamais : son adresse est ignorée.
+    const desc = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src')!;
+    Object.defineProperty(HTMLMediaElement.prototype, 'src', {
+      configurable: true,
+      get() { return desc.get!.call(this); },
+      set(v: string) { if (!String(v).startsWith('blob:')) desc.set!.call(this, v); },
+    });
+    const start = OscillatorNode.prototype.start;
+    OscillatorNode.prototype.start = function (this: OscillatorNode, ...a: [number?]) {
+      if (this.context instanceof AudioContext) w.__osc++;
+      return start.apply(this, a);
+    };
+  });
+  await backgroundSoundOn(page);
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.evaluate(() => { (window as unknown as { __osc: number }).__osc = 0; });
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  // Bips de la préparation (à 7, 8 et 9 s) : programmés en direct après l'échec de la piste.
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __osc: number }).__osc), { timeout: 15_000 }).toBeGreaterThan(0);
+});
+
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __started: number };

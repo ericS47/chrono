@@ -49,7 +49,9 @@ export const SOUND_LABELS: Record<SoundName, string> = {
 
 /** Piste de séance : fréquence basse (bips seulement) et durée bornée pour garder un fichier léger. */
 const TRACK_RATE = 11025;
-const TRACK_MAX_S = 30 * 60;
+const TRACK_MAX_S = 60 * 60;
+/** Au-delà, une piste qui ne se charge pas est abandonnée au profit des bips en direct. */
+const TRACK_LOAD_TIMEOUT_MS = 4000;
 /** Les bips des premières secondes partent en direct pendant que la piste se prépare. */
 const TRACK_LEAD_S = 2;
 
@@ -72,6 +74,8 @@ class AudioEngine {
   private playerReady = false;
   private trackUrl: string | null = null;
   private trackGen = 0;
+  /** La piste a bien démarré : si elle est ensuite à l'arrêt, c'est le téléphone qui l'a coupée. */
+  private trackStarted = false;
   private onTrackEnd: (() => void) | null = null;
   /** Réglage « Son en arrière-plan ». Coupé tant que les réglages ne sont pas lus : on ne coupe jamais la musique par défaut. */
   private background = false;
@@ -117,6 +121,8 @@ class AudioEngine {
    * qui a pris du retard sur le chrono. Il faut alors les reprogrammer.
    */
   needsResync(): boolean {
+    // Piste coupée par le téléphone (appel, autre app…) : il faut la relancer.
+    if (this.trackStalled()) return true;
     if (!this.anchor || !this.ctx || this.trackPlaying()) return false;
     // Audio arrêté : on tente de le relancer ; on reprogrammera quand il tournera
     // (son horloge aura pris du retard), sans couper la voix en boucle d'ici là.
@@ -144,6 +150,11 @@ class AudioEngine {
   /** Vrai si la piste de séance est en train de jouer. */
   trackPlaying(): boolean {
     return !!this.player && !this.player.paused && !!this.trackUrl;
+  }
+
+  /** Vrai si la piste avait démarré mais est à l'arrêt sans que l'app l'ait demandé. */
+  trackStalled(): boolean {
+    return this.trackStarted && !!this.trackUrl && !!this.player?.paused;
   }
 
   /** Appelé quand la piste se termine avant la séance (durée bornée). */
@@ -357,13 +368,21 @@ class AudioEngine {
       await new Promise<void>((res, rej) => {
         p.addEventListener('loadedmetadata', () => res(), { once: true });
         p.addEventListener('error', () => rej(new Error('piste illisible')), { once: true });
+        // Piste qui ne se charge jamais : on n'attend pas indéfiniment.
+        window.setTimeout(() => rej(new Error('piste trop longue à charger')), TRACK_LOAD_TIMEOUT_MS);
       });
       if (gen !== this.trackGen) return;
       p.currentTime = (performance.now() - t0) / 1000;
       await p.play();
+      if (gen === this.trackGen) this.trackStarted = true;
     } catch {
-      // Piste impossible : on retombe sur les bips en direct.
+      // Piste impossible (illisible, trop lente, lecture refusée) : on retombe sur les bips en direct.
       if (gen !== this.trackGen || !this.ctx) return;
+      if (this.trackUrl) {
+        this.player?.pause();
+        URL.revokeObjectURL(this.trackUrl);
+        this.trackUrl = null;
+      }
       const late = (performance.now() - t0) / 1000;
       for (const b of kept) {
         if (b.at >= late) this.scheduled.nodes.push(...this.play(b.sound, this.ctx.currentTime + b.at - late, b.volume));
@@ -384,6 +403,7 @@ class AudioEngine {
     this.scheduled = { nodes: [], timers: [] };
     this.anchor = null;
     this.trackGen++;
+    this.trackStarted = false;
     if (this.trackUrl) {
       this.player?.pause();
       URL.revokeObjectURL(this.trackUrl);

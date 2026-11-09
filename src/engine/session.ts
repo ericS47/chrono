@@ -124,8 +124,19 @@ function media(s: Session): void {
   }
   const where = ph.rounds && ph.round ? `Tour ${ph.round}/${ph.rounds} – ` : '';
   setMediaSession(`${where}${ph.kind === 'rest' ? 'Repos' : ph.label}`, s.workout.name, {
-    play: () => toggle(),
-    pause: () => toggle(),
+    // Lecture : reprend une séance en pause, ou relance le son si le téléphone l'a coupé
+    // (jamais de pause par erreur). Pause : met en pause une séance qui tourne.
+    play: () => {
+      if (!current) return;
+      if (current.run.status === 'paused') toggle();
+      else if (current.run.status === 'running') {
+        audio.unlock();
+        reschedule(current, false);
+      }
+    },
+    pause: () => {
+      if (current?.run.status === 'running') toggle();
+    },
     next: () => skip(),
   });
 }
@@ -321,7 +332,7 @@ if (typeof document !== 'undefined') {
   // depuis le temps réel de la séance.
   const resync = (needGesture: boolean) => {
     if (!current || current.run.status !== 'running') return;
-    if (needGesture && audio.isRunning()) return;
+    if (needGesture && audio.isRunning() && !audio.trackStalled()) return;
     // La piste de séance a continué à jouer : elle est toujours calée, rien à refaire.
     if (audio.trackPlaying()) return;
     audio.unlock();
