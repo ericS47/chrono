@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deal, isPair, LEVELS, ranking } from './memo';
+import { botFirst, botSecond, deal, isPair, LEVELS, ranking } from './memo';
 
 function seeded(seed: number) {
   let s = seed >>> 0;
@@ -39,5 +39,24 @@ describe('isPair et ranking', () => {
   });
   it('classement avec ex æquo', () => {
     expect(ranking([3, 5, 3, 1])).toEqual([2, 1, 2, 4]);
+  });
+});
+
+describe('ordinateur', () => {
+  const cards = ['a', 'b', 'a', 'c', 'b', 'c'];
+  it('joue une paire qu’il connaît', () => {
+    const first = botFirst(cards, [], [1, 3, 4], seeded(1));
+    expect([1, 4]).toContain(first);
+    expect(botSecond(cards, [], [1, 3, 4], first, seeded(1))).toBe(first === 1 ? 4 : 1);
+  });
+  it('sinon, retourne une carte jamais vue', () => {
+    for (let k = 1; k < 20; k++) expect([0, 2, 5]).toContain(botFirst(cards, [], [1, 3], seeded(k)));
+  });
+  it('deuxième carte : la jumelle s’il s’en souvient, sinon une inconnue, jamais une retirée', () => {
+    expect(botSecond(cards, [], [2], 0, seeded(1))).toBe(2);
+    for (let k = 1; k < 20; k++) {
+      const b = botSecond(cards, [3, 5], [1], 0, seeded(k));
+      expect([2, 4]).toContain(b);
+    }
   });
 });

@@ -86,7 +86,7 @@ Pendant l'effort, un avatar animé montre l'exercice à côté du chrono ; il di
 
 ## Reste à faire / idées
 
-- Jeux de société sportifs (« Créer » → jeu de société) : bataille navale contre l’ordinateur (placement des bateaux à la main, marques « rien ici ») et jeu de l’oie (un dé, ascenseurs, 1 à 6 joueurs, seul contre l’ordinateur) faits, logique dans `src/games/` (testée). Mémo fait (4 niveaux, 1 à 6 joueurs, points). Reste : Monopoly, 1000 Bornes, roulette russe. Une partie en cours n’est pas reprise si l’app est fermée.
+- Jeux de société sportifs (« Créer » → jeu de société) : bataille navale contre l’ordinateur (placement des bateaux à la main, marques « rien ici ») et jeu de l’oie (un dé, ascenseurs, 1 à 6 joueurs, seul contre l’ordinateur) faits, logique dans `src/games/` (testée). Mémo fait (4 niveaux, 1 à 6 joueurs, points ; seul contre l’ordinateur, qui retient 3 cartes sur 4). Reste : Monopoly, 1000 Bornes, roulette russe. Une partie en cours n’est pas reprise si l’app est fermée.
 
 - Mini-fenêtre (image dans l'image, comme YouTube) : essayée puis retirée (nov. 2026). Safari sur iPhone refuse de mettre en mini-fenêtre une vidéo générée en direct (« non pris en charge ») ; seule une app native le permettrait. Alternative possible sur iPhone : la séance sur l'écran verrouillé / la Dynamic Island (avec « Son en arrière-plan »), avec barre de temps de la phase.
 

@@ -322,8 +322,8 @@ test('Mémo : niveaux, paire retirée ou deux exercices, points', async ({ page 
     await backs.nth(0).click();
     await backs.nth(0).click();
     const dialog = page.getByRole('dialog', { name: 'Pas une paire' });
-    const pts = page.getByLabel(/^1 point$/);
-    await expect(dialog.or(pts.first())).toBeVisible();
+    await expect.poll(async () => (await dialog.isVisible()) || (await page.locator('.memo-card.up').count()) === 0).toBe(true);
+    if (!(await dialog.isVisible())) await expect(page.getByLabel(/^\d+ points?$/).first()).not.toHaveText('0 pt');
     if (await dialog.isVisible()) {
       await expect(dialog.locator('.goose-ex')).toHaveCount(2);
       await dialog.getByRole('button', { name: 'C’est fait' }).click();
@@ -332,6 +332,28 @@ test('Mémo : niveaux, paire retirée ou deux exercices, points', async ({ page 
     }
     await page.waitForTimeout(100);
   }
+});
+
+test('Mémo seul : l’ordinateur joue après moi', async ({ page }) => {
+  await page.goto('./#/jeu/memo');
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.getByRole('list', { name: 'Joueurs' })).toContainText('L’ordinateur');
+  // Je retourne des cartes jusqu'à me tromper (une paire me fait rejouer).
+  for (let i = 0; i < 6; i++) {
+    const backs = page.locator('.memo-card:not(.removed):not(.up)');
+    await backs.nth(0).click();
+    await backs.nth(0).click();
+    const dialog = page.getByRole('dialog', { name: 'Pas une paire' });
+    // Soit la fenêtre des exercices, soit la paire retirée (plus aucune carte retournée).
+    await expect.poll(async () => (await dialog.isVisible()) || (await page.locator('.memo-card.up').count()) === 0).toBe(true);
+    if (await dialog.isVisible()) {
+      await dialog.getByRole('button', { name: 'C’est fait' }).click();
+      break;
+    }
+  }
+  await expect(page.getByRole('status')).toContainText('L’ordinateur');
+  // L'ordinateur retourne ses cartes tout seul, puis me rend la main (ou termine la partie).
+  await expect(page.getByRole('status').filter({ hasText: 'À toi' }).or(page.getByRole('dialog', { name: 'Partie terminée' }))).toBeVisible({ timeout: 30_000 });
 });
 
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {
