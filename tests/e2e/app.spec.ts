@@ -645,8 +645,11 @@ test('Pulse Poly : préparer une partie, acheter une case, la partie est sauvega
   await page.getByRole('button', { name: 'Pulse Poly' }).click();
   await page.getByLabel('Joueur 1').fill('Eric');
   await page.getByLabel('Joueur 2').fill('Marie');
+  await expect(page.getByText('Le premier joueur qui fait 4 tours de plateau gagne')).toBeVisible();
   await page.getByRole('button', { name: 'Commencer la partie' }).click();
   await expect(page.locator('.pp-sq')).toHaveCount(40);
+  await expect(page.getByRole('heading', { name: /course en 4 tours/ })).toBeVisible();
+  await expect(page.locator('.pp-player').first()).toContainText('0/4 tours');
   await page.getByRole('button', { name: 'Lancer le dé' }).click();
   await page.getByRole('button', { name: /^Acheter : 30 rép\./ }).click();
   await expect(page.locator('.pp-tasks')).toContainText('30');

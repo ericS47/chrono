@@ -90,7 +90,7 @@ Jeu de plateau sportif, 2 à 6 joueurs sur le même téléphone (Séances › Cr
 - Case exercice libre : la passer = 15 rép., l'acheter = 30 rép. ; ensuite le propriétaire ne fait plus rien chez lui ; les autres y font 20 rép.
 - Carte cardio (de base 15 tipping + 10 jumping jacks + 5 burpees, modifiable) : passer = son contenu, acheter = deux fois son contenu ; les autres font son contenu, +20 % si le propriétaire en a 2, +50 % à 3, +100 % à 4 (arrondi à l'entier supérieur).
 - Un dé ; un 6 fait rejouer ; trois 6 de suite, la case « Direction… » ou une carte Défi envoient en salle de sport. Là, on fait aussi tous les exercices des autres joueurs ; on en sort sur un 6 ou après 3 tours.
-- Fin : illimitée, nombre de tours, ou abandon (ses cases se libèrent). Gagnant : le plus de cases ; à égalité, le moins de répétitions.
+- Fin : course en N tours de plateau (4 par défaut ; un tour = un passage par le Départ, y compris par une carte ; la salle de sport ne compte pas) : le premier qui les termine gagne et la partie s’arrête. Ou illimitée (« Terminer la partie » dans le menu), ou abandon (ses cases se libèrent). Sans course, gagnant : le plus de cases ; à égalité, le moins de répétitions.
 - Exercices du plateau : aléatoires (debout, sans matériel) ou choisis case par case. Partie sauvegardée sur le téléphone.
 - Cartes Défi et Culture AP provisoires (dont le don d'exercice à un autre joueur) : à retravailler.
 - Moteur pur et testé : `src/game/game.ts`.

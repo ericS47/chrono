@@ -77,9 +77,15 @@ export interface Player {
   /** Six de suite (trois : salle de sport). */
   sixes: number;
   out: boolean;
+  /** Tours de plateau terminés (passages par le Départ). */
+  laps?: number;
 }
 
-export type EndMode = { kind: 'unlimited' } | { kind: 'turns'; turns: number };
+/**
+ * Fin de partie : illimitée, ou course en N tours de plateau (le premier qui les
+ * termine gagne). « turns » (tours de table) reste lu pour les parties déjà commencées.
+ */
+export type EndMode = { kind: 'unlimited' } | { kind: 'laps'; laps: number } | { kind: 'turns'; turns: number };
 
 export interface GameConfig {
   /** Exercice de chaque case exercice (index de case → exercice). */
@@ -119,6 +125,8 @@ export interface GameState {
   owner: Record<number, string>;
   pending: Pending;
   lastRoll: number | null;
+  /** Course en tours de plateau : le joueur qui a fini le premier. */
+  winner?: string;
   log: string[];
   /** Pioches mélangées (indices dans les paquets). */
   decks: { defi: number[]; culture: number[] };
@@ -244,10 +252,26 @@ export function roll(s: GameState, die: number): GameState {
   return moveBy(st, p.id, die);
 }
 
+/** Passage par le Départ : un tour de plateau de plus ; en course, le premier à N tours gagne. */
+function addLap(s: GameState, id: string): GameState {
+  const p = playerById(s, id);
+  const laps = (p.laps ?? 0) + 1;
+  const st = say(patchPlayer(s, id, { laps }), `${p.name} termine son ${laps === 1 ? '1er' : `${laps}e`} tour de plateau.`);
+  if (s.config.end.kind === 'laps' && laps >= s.config.end.laps) {
+    return say({ ...st, winner: id, pending: { kind: 'over' } }, `${p.name} gagne la course !`);
+  }
+  return st;
+}
+
 function moveBy(s: GameState, id: string, by: number): GameState {
   const p = playerById(s, id);
   const pos = (((p.pos + by) % BOARD.length) + BOARD.length) % BOARD.length;
-  return land(say(patchPlayer(s, id, { pos }), `${p.name} avance de ${by} case${Math.abs(by) > 1 ? 's' : ''}.`), id);
+  let st = say(patchPlayer(s, id, { pos }), `${p.name} avance de ${by} case${Math.abs(by) > 1 ? 's' : ''}.`);
+  if (by > 0 && p.pos + by >= BOARD.length) {
+    st = addLap(st, id);
+    if (st.pending.kind === 'over') return st;
+  }
+  return land(st, id);
 }
 
 /** Effet de la case où le joueur vient d'arriver. */
@@ -325,7 +349,12 @@ export function applyCard(s: GameState, opts: { correct?: boolean; target?: stri
   switch (e.kind) {
     case 'gym': return endTurn(sendToGym(st, p.id));
     case 'move': {
-      const moved = say(patchPlayer(st, p.id, { pos: e.to }), `${p.name} va case ${e.to}.`);
+      let moved = say(patchPlayer(st, p.id, { pos: e.to }), `${p.name} va case ${e.to}.`);
+      // On avance jusqu'à la case : passer (ou arriver) au Départ compte un tour.
+      if (e.to === 0 || e.to < p.pos) {
+        moved = addLap(moved, p.id);
+        if (moved.pending.kind === 'over') return moved;
+      }
       return e.to === 0 ? endTurn(moved) : land(moved, p.id);
     }
     case 'step': return moveBy(st, p.id, e.by);
@@ -371,9 +400,16 @@ function endTurn(s: GameState): GameState {
   return st;
 }
 
-/** Classement : le plus de cases détenues ; à égalité, le moins de répétitions faites. */
+/**
+ * Classement. Course en tours de plateau : le vainqueur, puis le plus de tours.
+ * Ensuite : le plus de cases détenues ; à égalité, le moins de répétitions faites.
+ */
 export function ranking(s: GameState): { player: Player; squares: number }[] {
+  const race = s.config.end.kind === 'laps';
   return s.players
     .map((player) => ({ player, squares: player.out ? -1 : ownedBy(s, player.id).length }))
-    .sort((a, b) => b.squares - a.squares || a.player.reps - b.player.reps);
+    .sort((a, b) =>
+      (race ? Number(b.player.id === s.winner) - Number(a.player.id === s.winner) : 0)
+      || (race ? (b.player.laps ?? 0) - (a.player.laps ?? 0) : 0)
+      || b.squares - a.squares || a.player.reps - b.player.reps);
 }

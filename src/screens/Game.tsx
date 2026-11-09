@@ -45,15 +45,15 @@ export function GameScreen() {
 
 function Setup({ onStart }: { onStart: (s: GameState) => void }) {
   const [names, setNames] = useState(['', '']);
-  const [endKind, setEndKind] = useState<'unlimited' | 'turns'>('unlimited');
-  const [turns, setTurns] = useState(10);
+  const [endKind, setEndKind] = useState<'unlimited' | 'laps'>('laps');
+  const [laps, setLaps] = useState(4);
   const [mode, setMode] = useState<'random' | 'choose'>('random');
   const [chosen, setChosen] = useState<GameConfig['exercises']>(() => randomExercises(POOL, Math.random));
   const [cardio, setCardio] = useState<Task[]>(DEFAULT_CARDIO);
 
   const start = () => {
     const exercises = mode === 'random' ? randomExercises(POOL, Math.random) : chosen;
-    onStart(newGame(names, { exercises, cardio, end: endKind === 'turns' ? { kind: 'turns', turns } : { kind: 'unlimited' } }, Math.random));
+    onStart(newGame(names, { exercises, cardio, end: endKind === 'laps' ? { kind: 'laps', laps } : { kind: 'unlimited' } }, Math.random));
   };
 
   return (
@@ -79,9 +79,13 @@ function Setup({ onStart }: { onStart: (s: GameState) => void }) {
 
       <section className="section">
         <h2 className="section-title">Fin de partie</h2>
-        <Segmented label="Fin de partie" value={endKind} onChange={setEndKind} options={[{ value: 'unlimited', label: 'Illimitée' }, { value: 'turns', label: 'Nombre de tours' }]} />
-        {endKind === 'turns' && <div className="form"><Stepper label="Tours" value={turns} min={1} max={50} onChange={setTurns} /></div>}
-        <p className="hint" style={{ margin: 0 }}>Un joueur peut aussi abandonner. Gagnant : celui qui détient le plus de cases.</p>
+        <Segmented label="Fin de partie" value={endKind} onChange={setEndKind} options={[{ value: 'laps', label: 'Tours de plateau' }, { value: 'unlimited', label: 'Illimitée' }]} />
+        {endKind === 'laps' && <div className="form"><Stepper label="Tours de plateau" value={laps} min={1} max={20} onChange={setLaps} /></div>}
+        <p className="hint" style={{ margin: 0 }}>
+          {endKind === 'laps'
+            ? `Un tour = un passage par le Départ. Le premier joueur qui fait ${laps} tour${laps > 1 ? 's' : ''} de plateau gagne et termine la partie.`
+            : 'Un joueur peut abandonner ; « Terminer la partie » est dans le menu. Gagnant : celui qui détient le plus de cases.'}
+        </p>
       </section>
 
       <section className="section">
@@ -263,15 +267,18 @@ function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: 
   let panel: React.ReactNode;
   if (pend.kind === 'over') {
     const rank = ranking(s);
+    const race = s.config.end.kind === 'laps';
+    const winner = s.winner ? playerById(s, s.winner) : null;
     panel = (
       <div className="pp-panel">
-        <h2>Fin de partie</h2>
+        <h2>{winner ? `${winner.name} gagne !` : 'Fin de partie'}</h2>
+        {winner && race && <span className="hint">Premier à faire {s.config.end.kind === 'laps' ? s.config.end.laps : ''} tours de plateau</span>}
         <ol className="pp-rank">
           {rank.map(({ player, squares }, k) => (
             <li key={player.id}>
               <span className="pp-dot" style={{ background: player.color }} />
               <b>{k === 0 ? '🏆 ' : ''}{player.name}</b>
-              <span>{player.out ? 'abandon' : `${squares} case${squares > 1 ? 's' : ''}`} · {player.reps} rép.</span>
+              <span>{player.out ? 'abandon' : `${race ? `${player.laps ?? 0} tour${(player.laps ?? 0) > 1 ? 's' : ''} · ` : ''}${squares} case${squares > 1 ? 's' : ''}`} · {player.reps} rép.</span>
             </li>
           ))}
         </ol>
@@ -341,7 +348,7 @@ function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: 
   return (
     <main className="screen no-nav pp-play game-play">
       <TopBar
-        title={`Pulse Poly · tour ${s.round}${s.config.end.kind === 'turns' ? `/${s.config.end.turns}` : ''}`}
+        title={s.config.end.kind === 'laps' ? `Pulse Poly · course en ${s.config.end.laps} tours` : `Pulse Poly · tour ${s.round}${s.config.end.kind === 'turns' ? `/${s.config.end.turns}` : ''}`}
         right={pend.kind !== 'over' ? <button className="link-btn" onClick={() => setMenu(true)}>Menu</button> : undefined}
       />
       <GameStage ratio={1} board={<Board s={s}>{panel}</Board>}>
@@ -350,7 +357,7 @@ function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: 
           <div key={x.id} className={`pp-player${x.id === p.id && pend.kind !== 'over' ? ' current' : ''}${x.out ? ' out' : ''}`}>
             <span className="pp-dot" style={{ background: x.color }} />
             <b>{x.name}</b>
-            <span>{ownedBy(s, x.id).length} case{ownedBy(s, x.id).length > 1 ? 's' : ''} · {x.reps} rép.{x.inGym ? ' · 🏋️' : ''}</span>
+            <span>{s.config.end.kind === 'laps' ? `${x.laps ?? 0}/${s.config.end.laps} tours · ` : ''}{ownedBy(s, x.id).length} case{ownedBy(s, x.id).length > 1 ? 's' : ''} · {x.reps} rép.{x.inGym ? ' · 🏋️' : ''}</span>
           </div>
         ))}
       </div>

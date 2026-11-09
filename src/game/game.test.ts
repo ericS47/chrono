@@ -145,3 +145,41 @@ describe('fin de partie', () => {
     expect(ranking(s).map((r) => r.player.id)).toEqual(['p1', 'p0']);
   });
 });
+
+describe('tours de plateau', () => {
+  it('passer par le Départ compte un tour (pas la salle de sport)', () => {
+    let s = roll(at(start(), 38), 3); // 38 → 1 : passe le Départ
+    expect(s.players[0]).toMatchObject({ pos: 1, laps: 1 });
+    expect(s.pending.kind).toBe('buy');
+    const toGym = BOARD.findIndex((q) => q.kind === 'togym');
+    s = roll(at(start(), toGym - 2), 2); // direction salle de sport : on y va sans passer le Départ
+    expect(s.players[0].laps ?? 0).toBe(0);
+  });
+
+  it('carte « Retour au Départ » : un tour de plus', () => {
+    const s0 = at(start(), 12);
+    const s = applyCard({ ...s0, pending: { kind: 'card', deck: 'defi', card: { id: 'x', text: '', effect: { kind: 'move', to: 0 } } } });
+    expect(s.players[0]).toMatchObject({ pos: 0, laps: 1 });
+  });
+
+  it('course en 2 tours : le premier qui les termine gagne, la partie s’arrête', () => {
+    let s = start(3, { kind: 'laps', laps: 2 });
+    s = { ...s, players: s.players.map((p, i) => (i === 0 ? { ...p, pos: 37, laps: 1 } : i === 1 ? { ...p, laps: 1 } : p)) };
+    s = { ...s, owner: { 1: 'p1', 3: 'p1' } };
+    s = roll(s, 5); // 37 → 2 : 2e tour
+    expect(s.pending.kind).toBe('over');
+    expect(s.winner).toBe('p0');
+    const r = ranking(s).map((x) => x.player.id);
+    expect(r[0]).toBe('p0'); // le vainqueur d'abord, même avec moins de cases
+    expect(r[1]).toBe('p1'); // puis le plus de tours
+  });
+
+  it('partie illimitée : les tours sont comptés mais ne terminent pas la partie', () => {
+    let s = start();
+    s = { ...s, players: s.players.map((p, i) => (i === 0 ? { ...p, pos: 38, laps: 9 } : p)) };
+    s = roll(s, 3);
+    expect(s.players[0].laps).toBe(10);
+    expect(s.pending.kind).not.toBe('over');
+  });
+});
+
