@@ -214,7 +214,7 @@ test('Créer : choix entre séance de sport et jeu de société', async ({ page 
   await expect(page).toHaveURL(/#\/nouvelle/);
   await page.getByRole('button', { name: 'Jeu de société' }).click();
   await expect(page.getByRole('heading', { name: 'Jeu de société' })).toBeVisible();
-  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Monopoly', '1000 Bornes', 'Roulette russe']) {
+  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Monopoly', '1000 Bornes', 'Roulette russe', 'Mémo']) {
     await expect(page.getByRole('button', { name })).toBeVisible();
   }
   await page.getByRole('button', { name: 'Bataille navale' }).click();
@@ -235,7 +235,22 @@ test('Bataille navale : réglages, tir raté, exercice de la ligne', async ({ pa
   await page.getByRole('option', { name: 'Squat', exact: true }).click();
   await page.getByRole('button', { name: 'Répétitions : plus' }).click();
   await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  // Placement de ma flotte : un bateau à la main, puis le reste au hasard.
+  await expect(page.getByRole('heading', { name: 'Place tes bateaux' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Commencer la partie' })).toBeDisabled();
+  await page.getByRole('gridcell', { name: 'A1', exact: true }).click();
+  await expect(page.getByRole('gridcell', { name: 'A5, bateau' })).toBeVisible();
+  await page.getByRole('gridcell', { name: 'B2', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('ni se toucher');
+  await page.getByRole('button', { name: 'Au hasard' }).click();
+  await page.getByRole('button', { name: 'Commencer la partie' }).click();
   const enemy = page.getByRole('region', { name: 'Grille ennemie' });
+  // Mode « Marquer » : un drapeau, et la case n'est plus jouable en mode « Tirer ».
+  await page.getByRole('tab', { name: 'Marquer' }).click();
+  await enemy.getByRole('gridcell', { name: 'J10', exact: true }).click();
+  await expect(enemy.getByRole('gridcell', { name: 'J10, marquée' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Tirer' }).click();
+  await expect(enemy.getByRole('gridcell', { name: 'J10, marquée' })).toBeDisabled();
   await expect(enemy.getByRole('gridcell')).toHaveCount(100);
   // Un seul exercice choisi : toutes les lignes sont des squats.
   await expect(page.getByRole('region', { name: 'Exercices des lignes' })).toContainText('A B C D E F G H I J');
@@ -267,11 +282,24 @@ test('Jeu de l’oie : 2 joueurs, lancer les dés, exercices de la case', async 
   await page.getByRole('button', { name: 'Lancer la partie' }).click();
   await expect(page.locator('.goose-case')).toHaveCount(63);
   await expect(page.getByText('Au tour de Ana')).toBeVisible();
-  await page.getByRole('button', { name: 'Lancer les dés' }).click();
+  await page.getByRole('button', { name: 'Lancer le dé' }).click();
   const dialog = page.getByRole('dialog', { name: 'Tour de Ana' });
   await expect(dialog).toContainText('10 × Squat');
   await dialog.getByRole('button', { name: 'C’est fait' }).click();
   await expect(page.getByText('Au tour de Léo')).toBeVisible();
+});
+
+test('Jeu de l’oie seul : l’ordinateur joue après moi', async ({ page }) => {
+  await page.goto('./#/jeu/jeu-de-l-oie');
+  await page.getByRole('button', { name: 'Lancer la partie' }).click();
+  await expect(page.getByRole('list', { name: 'Joueurs' })).toContainText('L’ordinateur');
+  await page.getByRole('button', { name: 'Lancer le dé' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: /C’est fait|Continuer/ }).click();
+  const bot = page.getByRole('dialog', { name: 'Tour de l’ordinateur' });
+  await expect(bot).toBeVisible();
+  await expect(bot.locator('.goose-ex')).toHaveCount(0);
+  await bot.getByRole('button', { name: 'Continuer' }).click();
+  await expect(page.getByText('À toi de jouer')).toBeVisible();
 });
 
 test('Mes séances : créer, 2 favoris au plus, puis toutes les séances', async ({ page }) => {

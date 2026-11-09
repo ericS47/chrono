@@ -1,6 +1,7 @@
-// Jeu de l'oie sportif, de 1 à 6 joueurs sur le même téléphone : chaque case est un exercice.
+// Jeu de l'oie sportif, de 1 à 6 joueurs sur le même téléphone (seul : contre l'ordinateur) :
+// chaque case est un exercice.
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSettings } from '../data/hooks';
 import { TopBar } from '../ui/kit';
 import { IconMinus, IconPlus } from '../ui/icons';
@@ -12,7 +13,7 @@ import type { ExSetup } from '../games/ExerciseSetup';
 import { ExerciseSetupFields, exercisePool, setupReady, useGameSetup } from '../games/ExerciseSetup';
 import { assignRows } from '../games/battleship';
 import type { Player, Turn } from '../games/goose';
-import { LAST, playTurn, rollDie, SPECIAL_LABELS, specialOf } from '../games/goose';
+import { ELEVATORS, LAST, playTurn, rollDie, SPECIAL_LABELS, specialOf } from '../games/goose';
 
 interface GooseSetup extends ExSetup {
   players: string[];
@@ -36,13 +37,16 @@ interface Game {
 
 function newGame(s: GooseSetup): Game {
   const names = s.players.map((n, i) => n.trim() || `Joueur ${i + 1}`);
+  const players: Player[] = names.map((name) => ({ name, pos: 0, skip: 0 }));
+  // Seul : on joue contre l'ordinateur.
+  if (players.length === 1) players.push({ name: 'L’ordinateur', bot: true, pos: 0, skip: 0 });
   return {
-    players: names.map((name) => ({ name, pos: 0, skip: 0 })),
+    players,
     cases: assignRows(exercisePool(s), Math.random, LAST),
     reps: s.reps,
     current: 0,
     pending: null,
-    done: names.map(() => 0),
+    done: players.map(() => 0),
     winner: null,
   };
 }
@@ -61,8 +65,9 @@ function SetupScreen({ setup, update, onStart }: { setup: GooseSetup; update: (p
     <main className="screen no-nav">
       <TopBar title="Jeu de l’oie" />
       <p className="hint game-rules">
-        Règles du jeu de l’oie, 63 cases, deux dés. Chaque case porte un exercice : tu fais celui de la case où tu t’arrêtes.
-        Une oie, le pont, le labyrinthe ou la tête de mort te font avancer ou reculer : tu fais alors les deux exercices.
+        Règles du jeu de l’oie, 63 cases, un seul dé, avec des ascenseurs qui montent ou descendent. Chaque case porte un exercice : tu fais celui de la case où tu t’arrêtes.
+        Une oie, un ascenseur, le pont, le labyrinthe ou la tête de mort te font avancer ou reculer : tu fais alors les deux exercices.
+        Seul, tu joues contre l’ordinateur.
       </p>
 
       <section className="section" aria-label="Joueurs">
@@ -101,18 +106,26 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
 }) {
   const avatar = useSettings().anim.avatar;
   const me = game.players[game.current];
-  const solo = game.players.length === 1;
+  const solo = game.players.filter((p) => !p.bot).length === 1;
+  const botTurn = !!me.bot;
 
   const roll = () => {
     if (game.pending || game.winner !== null) return;
-    const { players, turn } = playTurn(game.players, game.current, [rollDie(), rollDie()]);
+    const { players, turn } = playTurn(game.players, game.current, rollDie());
     setGame({ ...game, players, pending: { turn, player: game.current } });
   };
+
+  // Tour de l'ordinateur : il lance le dé tout seul.
+  useEffect(() => {
+    if (!botTurn || game.pending || game.winner !== null) return;
+    const t = window.setTimeout(roll, 900);
+    return () => window.clearTimeout(t);
+  });
 
   const next = () => {
     if (!game.pending) return;
     const { turn, player } = game.pending;
-    const done = game.done.map((d, i) => (i === player ? d + turn.path.length : d));
+    const done = game.done.map((d, i) => (i === player && !game.players[i].bot ? d + turn.path.length : d));
     if (turn.won) {
       setGame({ ...game, pending: null, done, winner: player });
       return;
@@ -127,47 +140,46 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
       <div className="goose-turn card">
         <span className="goose-token big" style={{ background: PLAYER_COLORS[game.current] }} aria-hidden="true" />
         <div className="goose-turn-text">
-          <strong>{solo ? 'À toi de jouer' : `Au tour de ${me.name}`}</strong>
+          <strong>{botTurn ? 'L’ordinateur joue…' : solo ? 'À toi de jouer' : `Au tour de ${me.name}`}</strong>
           <span className="hint">
             {me.pos === 0 ? 'Au départ' : `Case ${me.pos}`}
             {me.skip > 0 ? ` · passe encore ${me.skip} tour${me.skip > 1 ? 's' : ''}` : ''}
           </span>
         </div>
-        <button className="btn" onClick={roll} disabled={!!game.pending || game.winner !== null}>
-          {me.skip > 0 ? 'Passer' : 'Lancer les dés'}
+        <button className="btn" onClick={roll} disabled={botTurn || !!game.pending || game.winner !== null}>
+          {me.skip > 0 ? 'Passer' : 'Lancer le dé'}
         </button>
       </div>
 
-      {!solo && (
-        <ul className="goose-scores" aria-label="Joueurs">
-          {game.players.map((p, i) => (
-            <li key={i} aria-current={i === game.current ? 'true' : undefined}>
-              <span className="goose-token" style={{ background: PLAYER_COLORS[i] }} aria-hidden="true" />
-              <span className="goose-score-name">{p.name}</span>
-              <span className="hint">{p.pos ? `case ${p.pos}` : 'départ'} · {game.done[i]} ex.</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="goose-scores" aria-label="Joueurs">
+        {game.players.map((p, i) => (
+          <li key={i} aria-current={i === game.current ? 'true' : undefined}>
+            <span className="goose-token" style={{ background: PLAYER_COLORS[i] }} aria-hidden="true" />
+            <span className="goose-score-name">{p.name}</span>
+            <span className="hint">{p.pos ? `case ${p.pos}` : 'départ'}{p.bot ? '' : ` · ${game.done[i]} ex.`}</span>
+          </li>
+        ))}
+      </ul>
 
       <Board game={game} />
 
       {game.pending && (
         <div className="sheet-backdrop">
-          <div className="sheet goose-sheet" role="dialog" aria-modal="true" aria-label={`Tour de ${game.players[game.pending.player].name}`}>
-            {game.pending.turn.dice && (
-              <div className="goose-dice" aria-label={`Dés : ${game.pending.turn.dice[0]} et ${game.pending.turn.dice[1]}`}>
-                <Die n={game.pending.turn.dice[0]} />
-                <Die n={game.pending.turn.dice[1]} />
+          <div className="sheet goose-sheet" role="dialog" aria-modal="true" aria-label={game.players[game.pending.player].bot ? 'Tour de l’ordinateur' : `Tour de ${game.players[game.pending.player].name}`}>
+            {game.pending.turn.die && (
+              <div className="goose-dice" aria-label={`Dé : ${game.pending.turn.die}`}>
+                <Die n={game.pending.turn.die} />
               </div>
             )}
             <ul className="goose-events">
-              {game.pending.turn.events.length === 0 && game.pending.turn.dice && (
-                <li>{solo ? 'Tu avances' : `${game.players[game.pending.player].name} avance`} en case {game.pending.turn.path.at(-1)}.</li>
+              {game.pending.turn.events.length === 0 && game.pending.turn.die && (
+                <li>
+                  {game.players[game.pending.player].bot ? 'L’ordinateur avance' : solo ? 'Tu avances' : `${game.players[game.pending.player].name} avance`} en case {game.pending.turn.path.at(-1)}.
+                </li>
               )}
               {game.pending.turn.events.map((e, i) => <li key={i}>{e}</li>)}
             </ul>
-            {game.pending.turn.path.length > 0 && (
+            {game.pending.turn.path.length > 0 && !game.players[game.pending.player].bot && (
               <>
                 <h2>{game.pending.turn.path.length > 1 ? `${game.pending.turn.path.length} exercices à faire` : 'Exercice à faire'}</h2>
                 {game.pending.turn.path.map((n, k) => {
@@ -185,7 +197,7 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
                 })}
               </>
             )}
-            <button className="btn block" onClick={next}>{game.pending.turn.path.length ? 'C’est fait' : 'Continuer'}</button>
+            <button className="btn block" onClick={next}>{game.pending.turn.path.length && !game.players[game.pending.player].bot ? 'C’est fait' : 'Continuer'}</button>
           </div>
         </div>
       )}
@@ -193,13 +205,13 @@ function GameScreen({ game, setGame, onReplay, onSetup }: {
       {game.winner !== null && (
         <div className="sheet-backdrop">
           <div className="sheet goose-sheet" role="dialog" aria-modal="true" aria-label="Partie terminée">
-            <h2>{solo ? 'Arrivé !' : `${game.players[game.winner].name} gagne !`}</h2>
+            <h2>{game.players[game.winner].bot ? 'L’ordinateur gagne !' : solo ? 'Gagné !' : `${game.players[game.winner].name} gagne !`}</h2>
             <ul className="goose-scores">
               {game.players.map((p, i) => (
                 <li key={i}>
                   <span className="goose-token" style={{ background: PLAYER_COLORS[i] }} aria-hidden="true" />
                   <span className="goose-score-name">{p.name}</span>
-                  <span className="hint">{game.done[i]} exercices · {game.done[i] * game.reps} rép.</span>
+                  <span className="hint">{p.bot ? `case ${p.pos}` : `${game.done[i]} exercices · ${game.done[i] * game.reps} rép.`}</span>
                 </li>
               ))}
             </ul>
@@ -241,12 +253,12 @@ function Board({ game }: { game: Game }) {
         {order.map((n) => {
           const id = game.cases[n - 1];
           const sp = specialOf(n);
-          const label = `Case ${n}${sp ? `, ${SPECIAL_LABELS[sp]}` : ''} : ${EXERCISE_BY_ID[id].label}`;
+          const label = `Case ${n}${sp ? `, ${SPECIAL_LABELS[sp]}${ELEVATORS[n] ? ` vers ${ELEVATORS[n]}` : ''}` : ''} : ${EXERCISE_BY_ID[id].label}`;
           return (
             <div key={n} className={`goose-case${sp ? ` sp-${sp}` : ''}`} aria-label={label} title={label} style={{ background: sp ? undefined : GROUP_COLORS[EXERCISE_BY_ID[id].group] }}>
               <span className="goose-num">{n}</span>
               <span className="goose-thumb" aria-hidden="true"><FigureFrame exercise={id} avatar={avatar} sec={EXERCISE_BY_ID[id].period / 2} /></span>
-              {sp && <span className="goose-sp">{SPECIAL_LABELS[sp]}</span>}
+              {sp && <span className="goose-sp">{sp === 'up' ? `↑ ${ELEVATORS[n]}` : sp === 'down' ? `↓ ${ELEVATORS[n]}` : SPECIAL_LABELS[sp]}</span>}
               <span className="goose-tokens">{tokens(n)}</span>
             </div>
           );

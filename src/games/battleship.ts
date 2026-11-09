@@ -41,6 +41,29 @@ function neighbors(cell: number): number[] {
   return out;
 }
 
+/** Cases d'un bateau posé à partir de `anchor` (case en haut à gauche), ou null s'il sort de la grille. */
+export function shipCells(anchor: number, len: number, horiz: boolean): number[] | null {
+  const r = rowOf(anchor), c = colOf(anchor);
+  if (horiz ? c + len > SIZE : r + len > SIZE) return null;
+  return Array.from({ length: len }, (_, i) => (horiz ? anchor + i : anchor + i * SIZE));
+}
+
+/** Le bateau peut-il être posé : ni chevauchement, ni contact (même en diagonale) avec les autres. */
+export function canPlace(ships: number[][], cells: number[]): boolean {
+  return ships.every((s) => s.every((x) => cells.every((y) =>
+    Math.max(Math.abs(rowOf(x) - rowOf(y)), Math.abs(colOf(x) - colOf(y))) > 1)));
+}
+
+/** Longueurs des bateaux qui restent à poser, du plus grand au plus petit. */
+export function remainingFleet(ships: number[][], fleet: number[] = FLEET): number[] {
+  const left = [...fleet];
+  for (const s of ships) {
+    const i = left.indexOf(s.length);
+    if (i >= 0) left.splice(i, 1);
+  }
+  return left.sort((a, b) => b - a);
+}
+
 /** Place la flotte au hasard : pas de chevauchement, et les bateaux ne se touchent pas (même en diagonale). */
 export function placeFleet(rng: Rng = Math.random, fleet: number[] = FLEET): number[][] {
   for (;;) {

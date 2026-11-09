@@ -85,3 +85,5 @@ export const IconRoulette = make(
     <circle cx="8.1" cy="9.75" r="1.3" strokeWidth={1.5} />
   </>,
 );
+/** Mémo : deux cartes, l'une retournée. */
+export const IconMemo = make(<><rect x="2.5" y="5" width="9" height="14" rx="2" /><rect x="12.5" y="5" width="9" height="14" rx="2" /><path d="M5.5 10a1.5 1.5 0 1 1 2 1.4c-.5.2-.5.6-.5 1.1M7 15.5v.01" /><circle cx="17" cy="12" r="2.2" /></>);

@@ -6,8 +6,8 @@ import { useSettings } from '../data/hooks';
 import { Segmented, Stepper } from '../ui/kit';
 import { FigureFrame } from '../anim/Figure';
 import { EQUIPMENT_ICONS, GROUP_COLORS, POSITION_ICONS } from '../anim/ExercisePicker';
-import type { Equipment, ExerciseId, Position } from '../anim/exercises';
-import { EQUIPMENT_LABELS, EXERCISES, POSITION_LABELS, equipmentOf, inPosition, isExerciseId } from '../anim/exercises';
+import type { Equipment, ExerciseGroup, ExerciseId, Position } from '../anim/exercises';
+import { EQUIPMENT_LABELS, EXERCISES, GROUP_LABELS, POSITION_LABELS, equipmentOf, inGroup, inPosition, isExerciseId } from '../anim/exercises';
 
 export interface ExSetup {
   reps: number;
@@ -75,6 +75,8 @@ export function ExerciseSetupFields({ setup, update, slots, max }: {
     if (has && setup.equipment.length === 1) return;
     update({ equipment: has ? setup.equipment.filter((x) => x !== e) : [...setup.equipment, e] });
   };
+  const toggleGroup = (ids: ExerciseId[], on: boolean) =>
+    update({ chosen: on ? [...new Set([...setup.chosen, ...ids])] : setup.chosen.filter((x) => !ids.includes(x)) });
   const toggleEx = (id: ExerciseId) =>
     update({ chosen: setup.chosen.includes(id) ? setup.chosen.filter((x) => x !== id) : [...setup.chosen, id] });
 
@@ -127,15 +129,32 @@ export function ExerciseSetupFields({ setup, update, slots, max }: {
             <p className="hint">
               {chosen.length ? `${chosen.length} choisi${chosen.length > 1 ? 's' : ''}` : 'Choisis au moins un exercice'} : ils seront répartis au hasard sur {slots}.
             </p>
-            <div className="ex-picker-grid" role="listbox" aria-multiselectable="true" aria-label="Exercices choisis">
-              {list.map((x) => (
-                <button key={x.id} type="button" role="option" aria-selected={chosen.includes(x.id)} className="ex-opt" onClick={() => toggleEx(x.id)}>
-                  <span className="ex-opt-thumb" aria-hidden="true" style={{ background: GROUP_COLORS[x.group] }}>
-                    <FigureFrame exercise={x.id} avatar={avatar} sec={x.period / 2} />
-                  </span>
-                  <span className="ex-opt-name">{x.label}</span>
-                </button>
-              ))}
+            <div className="ex-picker-options" role="listbox" aria-multiselectable="true" aria-label="Exercices choisis">
+              {(Object.keys(GROUP_LABELS) as ExerciseGroup[]).map((g) => {
+                const items = list.filter((x) => inGroup(x, g)).sort((a, b) => a.label.localeCompare(b.label, 'fr'));
+                if (!items.length) return null;
+                const all = items.every((x) => chosen.includes(x.id));
+                return (
+                  <div key={g} className="ex-picker-group" role="group" aria-label={GROUP_LABELS[g]}>
+                    <div className="ex-picker-head game-group-head" style={{ background: GROUP_COLORS[g] }}>
+                      <span>{GROUP_LABELS[g]}</span>
+                      <button type="button" className="link-btn" onClick={() => toggleGroup(items.map((x) => x.id), !all)}>
+                        {all ? 'Aucun' : 'Tous'}
+                      </button>
+                    </div>
+                    <div className="ex-picker-grid">
+                      {items.map((x) => (
+                        <button key={x.id} type="button" role="option" aria-selected={chosen.includes(x.id)} className="ex-opt" onClick={() => toggleEx(x.id)}>
+                          <span className="ex-opt-thumb" aria-hidden="true" style={{ background: GROUP_COLORS[x.group] }}>
+                            <FigureFrame exercise={x.id} avatar={avatar} sec={x.period / 2} />
+                          </span>
+                          <span className="ex-opt-name">{x.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </>
         )}

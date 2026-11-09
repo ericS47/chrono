@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aiShot, allSunk, assignRows, colOf, FLEET, newBoard, placeFleet, rowOf, shoot, SIZE, type Board } from './battleship';
+import { aiShot, allSunk, assignRows, canPlace, colOf, FLEET, newBoard, placeFleet, remainingFleet, rowOf, shipCells, shoot, SIZE, type Board } from './battleship';
 
 /** Générateur pseudo-aléatoire reproductible. */
 function seeded(seed: number) {
@@ -87,5 +87,25 @@ describe('assignRows', () => {
   });
   it('aucun exercice : aucune ligne', () => {
     expect(assignRows([], seeded(1))).toEqual([]);
+  });
+});
+
+describe('placement à la main', () => {
+  it('shipCells : horizontal, vertical, et refus hors de la grille', () => {
+    expect(shipCells(0, 3, true)).toEqual([0, 1, 2]);
+    expect(shipCells(0, 3, false)).toEqual([0, 10, 20]);
+    expect(shipCells(8, 3, true)).toBeNull();
+    expect(shipCells(80, 3, false)).toBeNull();
+  });
+  it('canPlace : refuse le chevauchement et le contact, même en diagonale', () => {
+    const ships = [[0, 1, 2]];
+    expect(canPlace(ships, [1, 11])).toBe(false);
+    expect(canPlace(ships, [13, 14])).toBe(false);
+    expect(canPlace(ships, [4, 5])).toBe(true);
+    expect(canPlace(ships, [20, 21])).toBe(true);
+  });
+  it('remainingFleet : ce qui reste à poser', () => {
+    expect(remainingFleet([])).toEqual([5, 4, 3, 3, 2]);
+    expect(remainingFleet([[0, 1, 2], [40, 41, 42, 43, 44]])).toEqual([4, 3, 2]);
   });
 });

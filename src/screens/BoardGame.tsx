@@ -3,7 +3,7 @@ import { go } from '../lib/router';
 import { TopBar, Empty } from '../ui/kit';
 import { Battleship } from './Battleship';
 import { Goose } from './Goose';
-import { IconBattleship, IconGoose, IconMilestone, IconProperty, IconRoulette } from '../ui/icons';
+import { IconBattleship, IconGoose, IconMemo, IconMilestone, IconProperty, IconRoulette } from '../ui/icons';
 
 export const GAMES: { id: string; label: string; color: string; Icon: ComponentType<{ size?: number }> }[] = [
   { id: 'bataille-navale', label: 'Bataille navale', color: '#9BD3F5', Icon: IconBattleship },
@@ -11,6 +11,7 @@ export const GAMES: { id: string; label: string; color: string; Icon: ComponentT
   { id: 'monopoly', label: 'Monopoly', color: '#FFBE98', Icon: IconProperty },
   { id: '1000-bornes', label: '1000 Bornes', color: '#FFC93C', Icon: IconMilestone },
   { id: 'roulette-russe', label: 'Roulette russe', color: '#F5A8C8', Icon: IconRoulette },
+  { id: 'memo', label: 'Mémo', color: '#B9A6FF', Icon: IconMemo },
 ];
 
 /** Jeux de société : la liste, puis la page d’un jeu (à construire). */

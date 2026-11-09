@@ -1,6 +1,7 @@
-// Jeu de l'oie sportif : règles classiques, 63 cases, deux dés, de 1 à 6 joueurs.
+// Jeu de l'oie sportif : règles classiques, 63 cases, un seul dé (deux iraient trop vite),
+// des ascenseurs qui montent ou descendent, de 1 à 6 joueurs (seul : contre l'ordinateur).
 // Chaque case porte un exercice ; chaque case où l'on s'arrête (y compris celles
-// où une oie, le pont, le labyrinthe ou la tête de mort nous envoient) donne son exercice.
+// où une oie, un ascenseur, le pont, le labyrinthe ou la tête de mort nous envoient) donne son exercice.
 
 export const LAST = 63;
 /** Oies : on rejoue la même distance. */
@@ -12,10 +13,16 @@ export const MAZE = 42; // → 30
 export const PRISON = 52; // attend d'être délivré (3 tours au plus)
 export const DEATH = 58; // → départ
 
-export type Special = 'goose' | 'bridge' | 'hotel' | 'well' | 'maze' | 'prison' | 'death' | 'end';
+/** Ascenseurs : case de départ → case d'arrivée (vers le haut ou vers le bas). */
+export const ELEVATORS: Record<number, number> = {
+  3: 22, 11: 28, 20: 38, 35: 47, 43: 56,
+  25: 8, 39: 21, 49: 33, 57: 40, 61: 44,
+};
+
+export type Special = 'goose' | 'bridge' | 'hotel' | 'well' | 'maze' | 'prison' | 'death' | 'end' | 'up' | 'down';
 
 export const SPECIAL_LABELS: Record<Special, string> = {
-  goose: 'Oie', bridge: 'Pont', hotel: 'Hôtel', well: 'Puits', maze: 'Labyrinthe', prison: 'Prison', death: 'Tête de mort', end: 'Arrivée',
+  goose: 'Oie', up: 'Ascenseur', down: 'Ascenseur', bridge: 'Pont', hotel: 'Hôtel', well: 'Puits', maze: 'Labyrinthe', prison: 'Prison', death: 'Tête de mort', end: 'Arrivée',
 };
 
 export function specialOf(n: number): Special | null {
@@ -27,6 +34,7 @@ export function specialOf(n: number): Special | null {
   if (n === MAZE) return 'maze';
   if (n === PRISON) return 'prison';
   if (n === DEATH) return 'death';
+  if (ELEVATORS[n]) return ELEVATORS[n] > n ? 'up' : 'down';
   return null;
 }
 
@@ -35,14 +43,16 @@ const WAIT: Partial<Record<Special, number>> = { hotel: 2, well: 3, prison: 3 };
 
 export interface Player {
   name: string;
+  /** Joueur tenu par l'ordinateur. */
+  bot?: boolean;
   pos: number;
   /** Tours restant à passer. */
   skip: number;
 }
 
 export interface Turn {
-  /** Dés lancés (rien si le joueur passe son tour). */
-  dice: [number, number] | null;
+  /** Dé lancé (rien si le joueur passe son tour). */
+  die: number | null;
   /** Cases où le joueur s'arrête, dans l'ordre : chacune donne son exercice. */
   path: number[];
   /** Ce qui s'est passé, en phrases courtes. */
@@ -53,39 +63,28 @@ export interface Turn {
 }
 
 /**
- * Joue le tour du joueur `i` avec les dés donnés. Renvoie les nouveaux joueurs et le récit du tour.
- * Le joueur qui doit passer son tour ne lance pas : ses dés sont ignorés.
+ * Joue le tour du joueur `i` avec le dé donné. Renvoie les nouveaux joueurs et le récit du tour.
+ * Le joueur qui doit passer son tour ne lance pas : son dé est ignoré.
  */
-export function playTurn(players: Player[], i: number, dice: [number, number]): { players: Player[]; turn: Turn } {
+export function playTurn(players: Player[], i: number, die: number): { players: Player[]; turn: Turn } {
   const ps = players.map((p) => ({ ...p }));
   const me = ps[i];
   const events: string[] = [];
   if (me.skip > 0) {
     me.skip--;
     events.push(me.skip ? `${me.name} passe son tour (encore ${me.skip}).` : `${me.name} passe son tour, et rejouera au prochain.`);
-    return { players: ps, turn: { dice: null, path: [], events, won: false } };
+    return { players: ps, turn: { die: null, path: [], events, won: false } };
   }
 
-  const [a, b] = dice;
-  const sum = a + b;
+  const sum = die;
   const from = me.pos;
   const path: number[] = [];
-  let pos: number;
+  let pos = from + sum;
   let dir = 1;
-
-  if (from === 0 && ((a === 6 && b === 3) || (a === 3 && b === 6))) {
-    pos = 26;
-    events.push('6 et 3 au premier lancer : direction la case 26.');
-  } else if (from === 0 && ((a === 5 && b === 4) || (a === 4 && b === 5))) {
-    pos = 53;
-    events.push('5 et 4 au premier lancer : direction la case 53.');
-  } else {
-    pos = from + sum;
-    if (pos > LAST) {
-      pos = LAST - (pos - LAST);
-      dir = -1;
-      events.push(`Il faut tomber pile sur ${LAST} : on recule jusqu’à la case ${pos}.`);
-    }
+  if (pos > LAST) {
+    pos = LAST - (pos - LAST);
+    dir = -1;
+    events.push(`Il faut tomber pile sur ${LAST} : on recule jusqu’à la case ${pos}.`);
   }
 
   // Effets des cases, enchaînés (une oie peut mener à une autre oie…).
@@ -100,6 +99,12 @@ export function playTurn(players: Player[], i: number, dice: [number, number]): 
       }
       events.push(`Oie en ${pos} : on ${dir > 0 ? 'avance' : 'recule'} encore de ${sum}, case ${next}.`);
       pos = next;
+      continue;
+    }
+    if (sp === 'up' || sp === 'down') {
+      const to = ELEVATORS[pos];
+      events.push(`Ascenseur en ${pos} : on ${sp === 'up' ? 'monte' : 'descend'} à la case ${to}.`);
+      pos = to;
       continue;
     }
     if (sp === 'bridge') { events.push('Le pont : on file à la case 12.'); pos = 12; continue; }
@@ -130,7 +135,7 @@ export function playTurn(players: Player[], i: number, dice: [number, number]): 
 
   const won = pos === LAST;
   if (won) events.push(`${me.name} arrive sur la case ${LAST} : gagné !`);
-  return { players: ps, turn: { dice, path: path.filter((n) => n > 0), events, bumped, won } };
+  return { players: ps, turn: { die, path: path.filter((n) => n > 0), events, bumped, won } };
 }
 
 export const rollDie = (rng: () => number = Math.random) => 1 + Math.min(5, Math.floor(rng() * 6));
