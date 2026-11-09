@@ -1,4 +1,4 @@
-// « Pulse Party » : jeu de plateau sportif, à plusieurs sur le même téléphone.
+// « Pulse Poly » : jeu de plateau sportif, à plusieurs sur le même téléphone.
 // Les règles sont dans src/game/game.ts ; cet écran affiche le plateau et les choix.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -58,7 +58,7 @@ function Setup({ onStart }: { onStart: (s: GameState) => void }) {
 
   return (
     <main className="screen no-nav pp-setup">
-      <TopBar title="Pulse Party" />
+      <TopBar title="Pulse Poly" />
       <p className="hint" style={{ margin: 0 }}>
         Faites le tour du plateau : achetez des exercices en répétitions, et faites payer les autres en répétitions quand ils tombent chez vous.
       </p>
@@ -214,6 +214,17 @@ function Tasks({ tasks }: { tasks: Task[] }) {
   );
 }
 
+/** Choix sur une case libre : le total, et le détail des exercices s'il y en a plusieurs (carte cardio). */
+function Choice({ label, tasks, secondary, onClick }: { label: string; tasks: Task[]; secondary?: boolean; onClick: () => void }) {
+  const total = tasks.reduce((t, x) => t + x.reps, 0);
+  return (
+    <button className={`btn small block pp-choice${secondary ? ' secondary' : ''}`} onClick={onClick}>
+      <span>{label} : {total} rép.</span>
+      {tasks.length > 1 && <small>{tasks.map((t) => `${t.reps} ${t.label}`).join(' · ')}</small>}
+    </button>
+  );
+}
+
 function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: GameState | null) => void; onQuit: () => void }) {
   const settings = useSettings();
   const [rolling, setRolling] = useState<number | null>(null);
@@ -284,8 +295,8 @@ function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: 
         <b className="pp-title">{label}</b>
         {isExerciseId(exId) && <div className="pp-thumb"><FigureFrame exercise={exId} avatar={settings.anim.avatar} sec={EXERCISE_BY_ID[exId].period / 2} /></div>}
         <span className="hint">Case libre</span>
-        <button className="btn small block" onClick={() => setState(decide(s, true))}>Acheter : {pend.cost.reduce((t, x) => t + x.reps, 0)} rép.</button>
-        <button className="btn small secondary block" onClick={() => setState(decide(s, false))}>Passer : {pend.pass.reduce((t, x) => t + x.reps, 0)} rép.</button>
+        <Choice label="Acheter" tasks={pend.cost} onClick={() => setState(decide(s, true))} />
+        <Choice label="Passer" tasks={pend.pass} secondary onClick={() => setState(decide(s, false))} />
       </div>
     );
   } else if (pend.kind === 'tasks') {
@@ -330,7 +341,7 @@ function Play({ state: s, setState, onQuit }: { state: GameState; setState: (s: 
   return (
     <main className="screen no-nav pp-play game-play">
       <TopBar
-        title={`Pulse Party · tour ${s.round}${s.config.end.kind === 'turns' ? `/${s.config.end.turns}` : ''}`}
+        title={`Pulse Poly · tour ${s.round}${s.config.end.kind === 'turns' ? `/${s.config.end.turns}` : ''}`}
         right={pend.kind !== 'over' ? <button className="link-btn" onClick={() => setMenu(true)}>Menu</button> : undefined}
       />
       <GameStage ratio={1} board={<Board s={s}>{panel}</Board>}>

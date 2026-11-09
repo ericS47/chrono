@@ -214,7 +214,7 @@ test('Créer : choix entre séance de sport et jeu de société', async ({ page 
   await expect(page).toHaveURL(/#\/nouvelle/);
   await page.getByRole('button', { name: 'Jeu de société' }).click();
   await expect(page.getByRole('heading', { name: 'Jeu de société' })).toBeVisible();
-  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Pulse Party', '1000 Bornes', 'Roulette russe', 'Mémo']) {
+  for (const name of ['Bataille navale', 'Jeu de l’oie', 'Pulse Poly', '1000 Bornes', 'Roulette russe', 'Mémo']) {
     await expect(page.getByRole('button', { name })).toBeVisible();
   }
   await page.getByRole('button', { name: 'Bataille navale' }).click();
@@ -454,6 +454,16 @@ for (const [label, size] of [['portrait', { width: 390, height: 664 }], ['paysag
   });
 }
 
+test('Pulse Poly : sur une carte cardio libre, les 3 exercices sont détaillés', async ({ page }) => {
+  // Dé toujours sur 4 : case 4, carte cardio libre.
+  await page.addInitScript(() => { Math.random = () => 0.5; });
+  await page.goto('./#/jeu/pulse-party');
+  await page.getByRole('button', { name: 'Commencer la partie' }).click();
+  await page.getByRole('button', { name: 'Lancer le dé' }).click();
+  await expect(page.getByRole('button', { name: /^Acheter : 60 rép\. 30 Tipping · 20 Jumping jack · 10 Burpee/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Passer : 30 rép\. 15 Tipping · 10 Jumping jack · 5 Burpee/ })).toBeVisible();
+});
+
 test('réglages : le bouton Tester joue bien le son', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __started: number };
@@ -628,11 +638,11 @@ test('créateur : déplacer un bloc avec la poignée, ou avec Monter / Descendre
   await expect.poll(labels).toEqual(['Effort 0:30, Squats', 'Repos 0:15', 'Effort 0:30']);
 });
 
-test('Pulse Party : préparer une partie, acheter une case, la partie est sauvegardée', async ({ page }) => {
+test('Pulse Poly : préparer une partie, acheter une case, la partie est sauvegardée', async ({ page }) => {
   // Dé toujours sur 1 : on tombe sur la case 1 (exercice).
   await page.addInitScript(() => { Math.random = () => 0; });
   await page.goto('./#/jeu');
-  await page.getByRole('button', { name: 'Pulse Party' }).click();
+  await page.getByRole('button', { name: 'Pulse Poly' }).click();
   await page.getByLabel('Joueur 1').fill('Eric');
   await page.getByLabel('Joueur 2').fill('Marie');
   await page.getByRole('button', { name: 'Commencer la partie' }).click();

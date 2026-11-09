@@ -84,9 +84,9 @@ Pendant l'effort, un avatar animé montre l'exercice à côté du chrono ; il di
 - Suite prévue : plus d'exercices avec matériel ; exercices sur chaise pour les seniors ; variantes (fente grand pas / petit pas, mains sur les hanches) ; liste aussi dans l'éditeur par blocs ; plus d'exercices (mobilité, assis, élastique, kettlebell…) ; animation dans l'affichage agrandi ; joindre sa propre photo / GIF à un exercice.
 - Piste à plus long terme : offres payantes par mode et deux profils (coach qui programme, pratiquant qui réalise). Un vrai partage coach → pratiquant demanderait un serveur et des comptes, contraire au « 100 % local » actuel : à décider le moment venu.
 
-## Pulse Party
+## Pulse Poly
 
-Jeu de plateau sportif, 2 à 6 joueurs sur le même téléphone (Séances › Créer › Jeu de société › Pulse Party). Plateau original de 40 cases (pas celui d'un jeu existant) : Départ, Salle de sport, Récup, « Direction la salle de sport » ; 22 cases exercice en 8 groupes de couleur ; 4 cartes cardio ; cases Défi et Culture AP. Règles, toutes en répétitions faites pour de vrai (avatar animé) :
+Jeu de plateau sportif, 2 à 6 joueurs sur le même téléphone (Séances › Créer › Jeu de société › Pulse Poly). Plateau original de 40 cases (pas celui d'un jeu existant) : Départ, Salle de sport, Récup, « Direction la salle de sport » ; 22 cases exercice en 8 groupes de couleur ; 4 cartes cardio ; cases Défi et Culture AP. Règles, toutes en répétitions faites pour de vrai (avatar animé) :
 - Case exercice libre : la passer = 15 rép., l'acheter = 30 rép. ; ensuite le propriétaire ne fait plus rien chez lui ; les autres y font 20 rép.
 - Carte cardio (de base 15 tipping + 10 jumping jacks + 5 burpees, modifiable) : passer = son contenu, acheter = deux fois son contenu ; les autres font son contenu, +20 % si le propriétaire en a 2, +50 % à 3, +100 % à 4 (arrondi à l'entier supérieur).
 - Un dé ; un 6 fait rejouer ; trois 6 de suite, la case « Direction… » ou une carte Défi envoient en salle de sport. Là, on fait aussi tous les exercices des autres joueurs ; on en sort sur un 6 ou après 3 tours.

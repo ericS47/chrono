@@ -1,4 +1,4 @@
-// Jeu de plateau sportif « Pulse Party » : moteur pur (aucun accès au DOM), testé par Vitest.
+// Jeu de plateau sportif « Pulse Poly » : moteur pur (aucun accès au DOM), testé par Vitest.
 //
 // Principe : on fait le tour d'un plateau de 40 cases avec un dé. Les cases « exercice »
 // s'achètent en répétitions ; les autres joueurs qui y tombent font des répétitions.

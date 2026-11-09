@@ -10,7 +10,7 @@ import { IconBattleship, IconGoose, IconMemo, IconMilestone, IconProperty, IconR
 export const GAMES: { id: string; label: string; color: string; Icon: ComponentType<{ size?: number }> }[] = [
   { id: 'bataille-navale', label: 'Bataille navale', color: '#9BD3F5', Icon: IconBattleship },
   { id: 'jeu-de-l-oie', label: 'Jeu de l’oie', color: '#B5D98A', Icon: IconGoose },
-  { id: 'pulse-party', label: 'Pulse Party', color: '#FFBE98', Icon: IconProperty },
+  { id: 'pulse-party', label: 'Pulse Poly', color: '#FFBE98', Icon: IconProperty },
   { id: '1000-bornes', label: '1000 Bornes', color: '#FFC93C', Icon: IconMilestone },
   { id: 'roulette-russe', label: 'Roulette russe', color: '#F5A8C8', Icon: IconRoulette },
   { id: 'memo', label: 'Mémo', color: '#B9A6FF', Icon: IconMemo },
