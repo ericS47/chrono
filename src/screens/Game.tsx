@@ -130,7 +130,7 @@ function Setup({ onStart }: { onStart: (s: GameState) => void }) {
         </div>
         <button className="btn secondary block" onClick={() => setCardio([...cardio, { exId: 'squat', label: 'Squat', reps: 10 }])}>Ajouter un exercice</button>
         <p className="hint" style={{ margin: 0 }}>
-          4 cartes cardio sur le plateau, toujours au prix indiqué : on fait ces exercices une fois pour l’acheter, et une fois chez un autre joueur.
+          4 cartes cardio sur le plateau. On l’achète au prix indiqué (ces exercices une fois). Chez un autre joueur, on les fait majorés selon ses cartes cardio : +20 % à 2, +50 % à 3, +100 % à 4 (arrondi au-dessus).
         </p>
       </section>
 
