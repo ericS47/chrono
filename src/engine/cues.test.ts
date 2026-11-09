@@ -74,4 +74,15 @@ describe('signaux programmés', () => {
     const says = computeCues(ph, 0, 0, DEFAULT_SOUND, true).filter((c) => c.say && !/^\d|secondes|un$|deux$|trois$/.test(c.say)).map((c) => c.say);
     expect(says).toEqual(['Préparation', 'Go', 'Mi-temps', 'On change. Squats', 'Mi-temps', 'Repos', 'Go', 'Mi-temps', 'Séance terminée']);
   });
+
+  it('mi-temps au repos : le bip seul, sans la voix', () => {
+    const ph = buildPhases({ blocks: [{ ...defaultBlock('custom'), params: { timeline: [
+      { id: 'a', type: 'effort', duration: 40 }, { id: 'b', type: 'rest', duration: 30 }, { id: 'c', type: 'effort', duration: 40 },
+    ] } }] }, 0);
+    const cues = computeCues(ph, 0, 0, DEFAULT_SOUND, true);
+    const half = cues.filter((c) => c.event === 'halfway');
+    expect(half.map((c) => c.at)).toEqual([20, 55, 90]);
+    expect(half.map((c) => c.say)).toEqual(['Mi-temps', undefined, 'Mi-temps']);
+  });
 });
+

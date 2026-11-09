@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  abandon, applyCard, BOARD, CARDIO_SQUARES, cardioRent, decide, DEFAULT_CARDIO, done, EXERCISE_SQUARES, GYM,
-  newGame, ownedBy, randomExercises, ranking, roll, roundUp, RULES, type GameConfig, type GameState,
+  abandon, applyCard, BOARD, CARDIO_SQUARES, decide, DEFAULT_CARDIO, done, EXERCISE_SQUARES, GYM,
+  newGame, ownedBy, randomExercises, ranking, roll, RULES, type GameConfig, type GameState,
 } from './game';
 
 const rng = () => 0.42;
@@ -50,23 +50,16 @@ describe('cases exercice', () => {
 });
 
 describe('cartes cardio', () => {
-  it('bonus +20 %, +50 %, +100 %, arrondi au-dessus', () => {
-    expect(cardioRent(DEFAULT_CARDIO, 1).map((t) => t.reps)).toEqual([15, 10, 5]);
-    expect(cardioRent(DEFAULT_CARDIO, 2).map((t) => t.reps)).toEqual([18, 12, 6]);
-    expect(cardioRent(DEFAULT_CARDIO, 3).map((t) => t.reps)).toEqual([23, 15, 8]);
-    expect(cardioRent(DEFAULT_CARDIO, 4).map((t) => t.reps)).toEqual([30, 20, 10]);
-    expect(roundUp(7, 1.2)).toBe(9);
-  });
-  it('achat d’une carte cardio : deux fois son contenu ; loyer selon le nombre détenu', () => {
+  it('carte cardio : achat et loyer au prix indiqué, quel que soit le nombre détenu', () => {
     let s = at(start(), 0);
     s = { ...s, owner: { [CARDIO_SQUARES[1]]: 'p0' } };
     s = roll(s, 4); // case 4 : carte cardio libre
     expect(s.pending.kind).toBe('buy');
     s = decide(s, true);
-    expect(s.pending).toMatchObject({ kind: 'tasks', tasks: [{ reps: 30 }, { reps: 20 }, { reps: 10 }] });
+    expect(s.pending).toMatchObject({ kind: 'tasks', tasks: [{ reps: 15 }, { reps: 10 }, { reps: 5 }] });
     s = done(s);
     s = roll(at(s, 0), 4); // J2 chez J1 (2 cartes)
-    expect(s.pending).toMatchObject({ kind: 'tasks', tasks: [{ reps: 18 }, { reps: 12 }, { reps: 6 }] });
+    expect(s.pending).toMatchObject({ kind: 'tasks', tasks: [{ reps: 15 }, { reps: 10 }, { reps: 5 }] });
   });
 });
 

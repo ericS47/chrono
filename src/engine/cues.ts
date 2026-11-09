@@ -78,9 +78,10 @@ export function computeCues(
     const d = ph.duration;
     const end = t0 + d;
 
-    // Mi-temps : au milieu de chaque effort et de chaque repos d'au moins 20 s.
+    // Mi-temps : bip au milieu de chaque effort et de chaque repos d'au moins 20 s ;
+    // la voix ne l'annonce que pendant l'effort (au repos, le bip suffit).
     if (ph.kind !== 'prep' && d >= HALFWAY_MIN && ev('halfway')) {
-      cues.push({ at: t0 + d / 2, event: 'halfway', say: s.voice ? 'Mi-temps' : undefined });
+      cues.push({ at: t0 + d / 2, event: 'halfway', say: s.voice && ph.kind === 'work' ? 'Mi-temps' : undefined });
     }
     if (s.voice && s.announceRemaining && !s.silent) {
       if (d >= 180) cues.push({ at: end - 60, say: 'Plus qu’une minute' });

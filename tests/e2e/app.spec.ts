@@ -460,7 +460,7 @@ test('Pulse Poly : sur une carte cardio libre, les 3 exercices sont détaillés'
   await page.goto('./#/jeu/pulse-party');
   await page.getByRole('button', { name: 'Commencer la partie' }).click();
   await page.getByRole('button', { name: 'Lancer le dé' }).click();
-  await expect(page.getByRole('button', { name: /^Acheter : 60 rép\. 30 Tipping · 20 Jumping jack · 10 Burpee/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Acheter : 30 rép\. 15 Tipping · 10 Jumping jack · 5 Burpee/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^Passer : 30 rép\. 15 Tipping · 10 Jumping jack · 5 Burpee/ })).toBeVisible();
 });
 

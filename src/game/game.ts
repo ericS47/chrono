@@ -41,10 +41,6 @@ export const RULES = {
   buy: 30,
   /** Loyer : un autre joueur tombe chez le propriétaire. */
   rent: 20,
-  /** Bonus des cartes cardio selon le nombre détenu (1 à 4). */
-  cardioBonus: [0, 0, 0.2, 0.5, 1],
-  /** Une carte cardio s'achète en faisant deux fois son contenu. */
-  cardioBuyFactor: 2,
   /** Tours maximum en salle de sport. */
   gymTurns: 3,
   /** Défi / culture : répétitions données. */
@@ -178,15 +174,6 @@ export function randomExercises(pool: { exId?: string; label: string }[], rng: R
   return out;
 }
 
-/** Répétitions × coefficient, arrondies à l'entier supérieur. */
-export const roundUp = (reps: number, factor: number): number => Math.ceil(reps * factor - 1e-9);
-
-/** Contenu d'une carte cardio à faire par un visiteur, selon le nombre de cartes du propriétaire. */
-export function cardioRent(cardio: Task[], owned: number): Task[] {
-  const k = 1 + (RULES.cardioBonus[Math.min(4, Math.max(0, owned))] ?? 0);
-  return cardio.map((t) => ({ ...t, reps: roundUp(t.reps, k) }));
-}
-
 const squareTask = (s: GameState, sq: number, reps: number): Task => {
   const e = s.config.exercises[sq] ?? { label: 'Exercice' };
   return { exId: e.exId, label: e.label, reps };
@@ -294,14 +281,14 @@ function land(s: GameState, id: string): GameState {
           ...s,
           pending: {
             kind: 'buy', square: p.pos,
-            cost: s.config.cardio.map((t) => ({ ...t, reps: t.reps * RULES.cardioBuyFactor })),
+            // Carte cardio : toujours au prix indiqué, pour l'acheter comme chez un autre joueur.
+            cost: s.config.cardio,
             pass: s.config.cardio,
           },
         };
       }
       if (owner === id) return endTurn(say(s, `${p.name} a cette carte cardio : rien à faire.`));
-      const n = ownedBy(s, owner).filter((k) => BOARD[k].kind === 'cardio').length;
-      return { ...s, pending: { kind: 'tasks', title: `Carte cardio de ${playerById(s, owner).name}`, tasks: cardioRent(s.config.cardio, n), who: withGym(s, id) } };
+      return { ...s, pending: { kind: 'tasks', title: `Carte cardio de ${playerById(s, owner).name}`, tasks: s.config.cardio, who: withGym(s, id) } };
     }
     case 'defi':
     case 'culture':
