@@ -3,7 +3,8 @@
 
 import type { SoundName, SoundSettings } from '../data/types';
 import type { Cue } from '../engine/cues';
-import { buildTrack, encodeWav8 } from './wav';
+import { buildTrack, encodeWav8, type TrackSound } from './wav';
+import { clipKeys, clipOffsets, queueSpeeches, VOICE_FILE, VOICE_INDEX } from './voiceClips';
 
 type Ctx = AudioContext;
 
@@ -61,6 +62,13 @@ interface Beep {
   volume: number;
 }
 
+/** Annonce enregistrée à jouer : ses morceaux (clés de VOICE_INDEX). */
+interface Speech {
+  at: number;
+  keys: string[];
+  volume: number;
+}
+
 class AudioEngine {
   private ctx: Ctx | null = null;
   /** Entrée de la chaîne de sortie : amplification puis limiteur, pour des bips plus forts sans saturer. */
@@ -80,6 +88,55 @@ class AudioEngine {
   /** Réglage « Son en arrière-plan ». Coupé tant que les réglages ne sont pas lus : on ne coupe jamais la musique par défaut. */
   private background = false;
   private voice: SpeechSynthesisVoice | null = null;
+  /** Annonces enregistrées, décodées pour le direct et pour la piste (null : pas encore prêtes). */
+  private voiceLive: AudioBuffer | null = null;
+  private voiceTrack: Float32Array | null = null;
+  private voiceLoading: Promise<void> | null = null;
+
+  /**
+   * Charge les annonces enregistrées (une fois). Tant qu'elles ne sont pas prêtes,
+   * la voix de synthèse du téléphone sert de secours.
+   */
+  preloadVoice(): void {
+    if (this.voiceLoading || typeof fetch === 'undefined' || typeof OfflineAudioContext === 'undefined') return;
+    this.voiceLoading = (async () => {
+      const data = await (await fetch(VOICE_FILE)).arrayBuffer();
+      this.voiceLive = await new OfflineAudioContext(1, 1, 44100).decodeAudioData(data.slice(0));
+      this.voiceTrack = (await new OfflineAudioContext(1, 1, TRACK_RATE).decodeAudioData(data.slice(0))).getChannelData(0);
+    })().catch(() => {
+      this.voiceLoading = null;
+    });
+  }
+
+  /** Joue une annonce enregistrée en direct, ses morceaux enchaînés. */
+  private playVoice(keys: string[], when: number, volume: number): AudioScheduledSourceNode[] {
+    const ctx = this.ctx;
+    const buf = this.voiceLive;
+    if (!ctx || !buf || volume <= 0 || !keys.length) return [];
+    const g = ctx.createGain();
+    g.gain.value = volume;
+    g.connect(this.out ?? ctx.destination);
+    const offs = clipOffsets(keys);
+    return keys.map((k, i) => {
+      const [start, dur] = VOICE_INDEX[k];
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(g);
+      src.start(when + offs[i], start, dur);
+      return src;
+    });
+  }
+
+  /** Morceaux d'une annonce, pour la piste. */
+  private voiceSounds(v: Speech): TrackSound[] {
+    const data = this.voiceTrack;
+    if (!data) return [];
+    const offs = clipOffsets(v.keys);
+    return v.keys.map((k, i) => {
+      const [start, dur] = VOICE_INDEX[k];
+      return { at: v.at + offs[i], volume: v.volume, samples: data.subarray(Math.round(start * TRACK_RATE), Math.round((start + dur) * TRACK_RATE)) };
+    });
+  }
 
   /** Applique le réglage « Son en arrière-plan » (à appeler dès que les réglages sont connus). */
   setBackground(on: boolean): void {
@@ -194,6 +251,7 @@ class AudioEngine {
   private context(): Ctx | null {
     if (typeof window === 'undefined') return null;
     this.pickVoice();
+    this.preloadVoice();
     const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AC) return null;
     // Mode changé alors qu'un contexte existe : on le recrée, l'ancien garderait l'ancien mode.
@@ -288,12 +346,16 @@ class AudioEngine {
 
   /** Fait dire une phrase d'essai (bouton « Tester » de la voix). */
   testVoice(text: string, s: SoundSettings): boolean {
+    const ctx = this.context();
+    const vol = s.master * s.voiceVolume > 0 ? s.master * s.voiceVolume : 0.5;
+    if (ctx && this.voiceLive) {
+      this.playVoice(clipKeys(text), ctx.currentTime + 0.05, Math.min(1, vol));
+      return true;
+    }
     if (typeof speechSynthesis === 'undefined') return false;
-    this.context();
     speechSynthesis.cancel();
     this.voice = null;
     this.pickVoice();
-    const vol = s.master * s.voiceVolume > 0 ? s.master * s.voiceVolume : 0.5;
     this.say(text, { ...s, silent: false, voice: true, master: 1, voiceVolume: Math.min(1, vol) });
     return true;
   }
@@ -318,22 +380,37 @@ class AudioEngine {
     const t0 = performance.now();
     this.anchor = ctx ? { ctx: ctx.currentTime, perf: t0 } : null;
     const beeps: Beep[] = [];
+    let speeches: Speech[] = [];
     for (const c of cues) {
       if (c.event && !s.silent) {
         const ev = s.events[c.event];
         if (ev.enabled) beeps.push({ at: Math.max(0, c.at), sound: ev.sound, volume: s.master * s.beepVolume });
       }
-      if (c.say) {
-        const text = c.say;
-        this.scheduled.timers.push(window.setTimeout(() => this.say(text, s), Math.max(0, c.at) * 1000));
+      if (c.say && s.voice && !s.silent) {
+        if (this.voiceLive) {
+          // Annonce enregistrée : elle se mélange à la musique au lieu de la couper.
+          const keys = clipKeys(c.say);
+          if (keys.length) speeches.push({ at: Math.max(0, c.at), keys, volume: Math.min(1, s.master * s.voiceVolume) });
+        } else {
+          const text = c.say;
+          this.scheduled.timers.push(window.setTimeout(() => this.say(text, s), Math.max(0, c.at) * 1000));
+        }
       }
     }
-    const withTrack = s.background && !!this.player && beeps.some((b) => b.at >= TRACK_LEAD_S);
+    speeches = queueSpeeches(speeches);
+    const inTrack = (at: number) => at >= TRACK_LEAD_S;
+    const withTrack = s.background && !!this.player && (beeps.some((b) => inTrack(b.at)) || speeches.some((v) => inTrack(v.at)));
     for (const b of beeps) {
-      if (withTrack && b.at >= TRACK_LEAD_S) continue;
+      if (withTrack && inTrack(b.at)) continue;
       if (ctx) this.scheduled.nodes.push(...this.play(b.sound, ctx.currentTime + b.at, b.volume));
     }
-    if (withTrack) void this.startTrack(beeps.filter((b) => b.at >= TRACK_LEAD_S), t0, ++this.trackGen);
+    for (const v of speeches) {
+      if (withTrack && inTrack(v.at) && this.voiceTrack) continue;
+      if (ctx) this.scheduled.nodes.push(...this.playVoice(v.keys, ctx.currentTime + v.at, v.volume));
+    }
+    if (withTrack) {
+      void this.startTrack(beeps.filter((b) => inTrack(b.at)), t0, ++this.trackGen, this.voiceTrack ? speeches.filter((v) => inTrack(v.at)) : []);
+    }
   }
 
   private soundCache = new Map<SoundName, Float32Array>();
@@ -354,12 +431,16 @@ class AudioEngine {
   }
 
   /** Fabrique la piste des bips à venir puis la lance, calée sur l'instant t0 de la programmation. */
-  private async startTrack(beeps: Beep[], t0: number, gen: number): Promise<void> {
+  private async startTrack(beeps: Beep[], t0: number, gen: number, speeches: Speech[] = []): Promise<void> {
     const kept = beeps.filter((b) => b.at < TRACK_MAX_S);
-    if (!kept.length || !this.player) return;
-    const length = Math.min(TRACK_MAX_S, Math.max(...kept.map((b) => b.at)) + 3);
+    const said = speeches.filter((v) => v.at < TRACK_MAX_S);
+    if ((!kept.length && !said.length) || !this.player) return;
+    const length = Math.min(TRACK_MAX_S, Math.max(0, ...kept.map((b) => b.at), ...said.map((v) => v.at)) + 5);
     try {
-      const sounds = await Promise.all(kept.map(async (b) => ({ at: b.at, volume: b.volume, samples: await this.soundSamples(b.sound) })));
+      const sounds = [
+        ...(await Promise.all(kept.map(async (b) => ({ at: b.at, volume: b.volume, samples: await this.soundSamples(b.sound) })))),
+        ...said.flatMap((v) => this.voiceSounds(v)),
+      ];
       if (gen !== this.trackGen) return;
       const url = URL.createObjectURL(new Blob([buildTrack(length, TRACK_RATE, sounds)], { type: 'audio/wav' }));
       this.trackUrl = url;
@@ -386,6 +467,9 @@ class AudioEngine {
       const late = (performance.now() - t0) / 1000;
       for (const b of kept) {
         if (b.at >= late) this.scheduled.nodes.push(...this.play(b.sound, this.ctx.currentTime + b.at - late, b.volume));
+      }
+      for (const v of said) {
+        if (v.at >= late) this.scheduled.nodes.push(...this.playVoice(v.keys, this.ctx.currentTime + v.at - late, v.volume));
       }
     }
   }

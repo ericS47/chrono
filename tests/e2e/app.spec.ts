@@ -512,6 +512,28 @@ test('Pulse Poly : sur une carte cardio libre, les 3 exercices sont détaillés'
   await expect(page.getByRole('button', { name: /^Passer : 30 rép\. 15 Tipping · 10 Jumping jack · 5 Burpee/ })).toBeVisible();
 });
 
+test('annonces enregistrées : la voix du téléphone (qui coupe la musique) n’est plus utilisée', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __speak: number; __clips: number };
+    w.__speak = 0; w.__clips = 0;
+    speechSynthesis.speak = () => { w.__speak++; };
+    const start = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...a: [number?, number?, number?]) {
+      if (this.context instanceof AudioContext) w.__clips++;
+      return start.apply(this, a);
+    };
+  });
+  await page.goto('./#/rapide/tabata');
+  // Les annonces enregistrées se chargent à l'ouverture de l'app.
+  await page.waitForResponse((r) => r.url().endsWith('voix-fr.mp3'));
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  // « Préparation » tout de suite, puis « Go. Tour 1 sur 8 » au départ (programmés d'avance).
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __clips: number }).__clips)).toBeGreaterThan(3);
+  expect(await page.evaluate(() => (window as unknown as { __speak: number }).__speak)).toBe(0);
+});
+
 /** Active « Son en arrière-plan » (piste audio), désactivé par défaut. */
 async function backgroundSoundOn(page: import('@playwright/test').Page) {
   await page.goto('./#/reglages');

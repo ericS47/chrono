@@ -10,3 +10,4 @@ Le propriétaire de l'app est Eric ; il écrit en français : réponds en franç
 - Le temps est toujours calculé depuis l'heure de début de phase (jamais en comptant des ticks).
 - Textes de l'interface en français, typographie française (apostrophe ’, espaces).
 - Le CI (`.github/workflows/ci.yml`) lance les tests et le build à chaque push ; `pages.yml` publie la PWA sur GitHub Pages si le dépôt est public.
+- Annonces vocales enregistrées : après un ajout de phrase dans `src/engine/cues.ts` ou d'exercice, régénérer avec `scripts/voix/generer.py` (Piper + voix fr_FR-siwis-medium, ffmpeg).

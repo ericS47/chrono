@@ -58,6 +58,11 @@ export function App() {
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#14161B' : '#F7F6F3');
   }, [dark]);
 
+  // Annonces enregistrées chargées dès l'ouverture : prêtes pour la première séance.
+  useEffect(() => {
+    audio.preloadVoice();
+  }, []);
+
   // Son en arrière-plan ou mélangé à la musique des autres apps (réglage).
   useEffect(() => {
     audio.setBackground(settings.sound.background);

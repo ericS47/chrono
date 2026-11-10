@@ -106,6 +106,6 @@ Jeu de plateau sportif, 2 à 6 joueurs sur le même téléphone (Séances › Cr
 - Tests unitaires de `src/engine/session.ts` (la liaison moteur / son), aujourd'hui couverte seulement par les parcours Playwright.
 
 - **Tester sur le vrai téléphone** : une séance Tabata complète écran verrouillé (sons en arrière-plan), les rappels.
-- Voix : la synthèse vocale du téléphone est utilisée ; des fichiers voix enregistrés seraient plus fiables en arrière-plan.
+- Voix : annonces enregistrées (voix Piper « siwis », `scripts/voix/generer.py` → `public/voix-fr.mp3` + `src/audio/voix-fr.json`), jouées comme les bips : elles se mélangent à la musique et passent dans la piste en arrière-plan. Phrases fixes, nombres 1 à 60, « Tour / Série / Minute N sur M » composés, 89 noms d’exercices ; un commentaire libre n’est pas lu (le bip suffit). La voix du téléphone ne sert qu’en secours tant que le fichier n’est pas chargé. Régénérer après un ajout de phrase ou d’exercice.
 - Réordonner les blocs : boutons ↑ ↓ (le glisser-déposer tactile reste à faire).
 - Mettre la PWA en ligne : rendre le dépôt public (GitHub Pages) ou utiliser Netlify / Cloudflare Pages.
