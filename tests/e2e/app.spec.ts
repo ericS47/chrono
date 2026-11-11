@@ -85,6 +85,42 @@ test('AMRAP : compteur de tours repris dans le résultat', async ({ page }) => {
   await expect(page.locator('.stat', { hasText: 'tours' })).toContainText('2');
 });
 
+test('résultat prérempli conservé après rechargement de la page', async ({ page }) => {
+  // For Time : temps réalisé
+  await page.goto('./#/rapide/fortime');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(10_500);
+  await expect(page.locator('.timer.work')).toBeVisible();
+  await page.clock.runFor(3_000);
+  await page.getByRole('button', { name: 'Terminé' }).click();
+  await expect(page.getByText('Séance terminée')).toBeVisible();
+  await page.getByRole('button', { name: 'Enregistrer', exact: true }).click();
+  const time = page.getByLabel('Temps réalisé', { exact: true });
+  await expect(time).toBeVisible();
+  const before = await time.inputValue();
+  expect(before).not.toBe('0:00');
+  await page.reload();
+  await expect(page.getByText('Séance terminée')).toBeVisible();
+  await page.getByRole('button', { name: 'Enregistrer', exact: true }).click();
+  await expect(time).toHaveValue(before);
+
+  // AMRAP : tours complets
+  await page.getByRole('button', { name: 'Ne pas enregistrer' }).click();
+  await page.goto('./#/rapide/amrap');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(11_000);
+  await page.getByRole('button', { name: 'Ajouter un tour' }).click();
+  await page.getByRole('button', { name: 'Ajouter un tour' }).click();
+  await page.getByRole('button', { name: 'Arrêter' }).click();
+  await page.getByRole('button', { name: 'Terminer maintenant' }).click();
+  await page.reload();
+  await expect(page.locator('.stat', { hasText: 'tours' })).toContainText('2');
+  await page.getByRole('button', { name: 'Enregistrer', exact: true }).click();
+  await expect(page.locator('.row', { hasText: 'Tours complets' }).locator('output')).toHaveText('2');
+});
+
 test('créer, planifier et lancer une séance', async ({ page }) => {
   await page.goto('./#/editer/nouvelle');
   await page.getByLabel('Nom', { exact: true }).fill('Metcon jambes');

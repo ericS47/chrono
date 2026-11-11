@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import * as S from '../engine/session';
 import * as T from '../engine/timer';
 import { blockSummary } from '../engine/phases';
@@ -44,11 +44,27 @@ function ResultFields({ workout, results, setResults }: { workout: Workout; resu
 
 export function ResultScreen({ manual = false }: { manual?: boolean }) {
   const session = S.useSession();
-  const settings = useSettings();
-  const workouts = useWorkouts();
   const finished = session?.run.status === 'finished' ? session : null;
 
-  const initial = useMemo<BlockResult[]>(() => {
+  // Au rechargement, la séance est restaurée après le premier rendu (effet de App) :
+  // le formulaire n’est monté qu’une fois la séance disponible, pour que ses
+  // valeurs préremplies soient calculées à partir d’elle.
+  if (!manual && !finished) {
+    return (
+      <main className="screen no-nav">
+        <p className="empty">Pas de séance terminée à enregistrer.</p>
+        <button className="btn" onClick={() => go('/', true)}>Accueil</button>
+      </main>
+    );
+  }
+  return <ResultForm manual={manual} finished={finished} />;
+}
+
+function ResultForm({ manual, finished }: { manual: boolean; finished: S.Session | null }) {
+  const settings = useSettings();
+  const workouts = useWorkouts();
+
+  const [results, setResults] = useState<BlockResult[]>(() => {
     if (!finished) return [];
     return finished.workout.blocks.map((b, i) => {
       const r: BlockResult = { blockIndex: i };
@@ -57,9 +73,7 @@ export function ResultScreen({ manual = false }: { manual?: boolean }) {
       if (b.mode === 'strength') r.loads = (b.params.lifts ?? []).filter((l) => l.load).map((l) => `${l.name} ${l.load}`).join(', ') || undefined;
       return r;
     });
-  }, [finished]);
-
-  const [results, setResults] = useState<BlockResult[]>(initial);
+  });
   const [rpe, setRpe] = useState<number | undefined>();
   const [note, setNote] = useState('');
   const [wantSave, setWantSave] = useState<boolean | null>(null);
@@ -71,15 +85,6 @@ export function ResultScreen({ manual = false }: { manual?: boolean }) {
   const [duration, setDuration] = useState(30 * 60);
 
   const manualWorkout = workouts?.find((w) => w.id === workoutId);
-
-  if (!manual && !finished) {
-    return (
-      <main className="screen no-nav">
-        <p className="empty">Pas de séance terminée à enregistrer.</p>
-        <button className="btn" onClick={() => go('/', true)}>Accueil</button>
-      </main>
-    );
-  }
 
   const durationSec = finished ? Math.round(T.activeTime(finished.run) / 1000) : duration;
   const mode = manual ? 'always' : settings.saveMode;
