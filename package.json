@@ -1,7 +1,7 @@
 {
   "name": "chrono",
   "version": "1.0.0",
-  "description": "Chrono — chrono de séance sportive (PWA)",
+  "description": "Pulse — chrono de séance sportive (PWA)",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

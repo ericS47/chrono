@@ -1,21 +1,24 @@
-# Plan de Chrono (validé le 21/10/2026)
+# Plan de Pulse
 
-Résumé du plan fonctionnel validé avant le développement. Il remplace le document de travail d'origine.
+Ce que fait l’app, les décisions prises et ce qui reste à faire. Le design est décrit dans [DESIGN.md](DESIGN.md).
 
 ## Vision
 
-Une PWA installable sur le téléphone (Android) qui sert de chrono de séance : on prépare ses séances à l'avance, on les lance d'un tap, et l'app guide à la voix et au bip, même téléphone posé au sol. Inspirée de Smart WOD Timer, centrée sur trois choses : construire une séance, la planifier, garder une trace.
+Une PWA installable sur le téléphone (iPhone ou Android) qui sert de chrono de séance : on prépare ses séances à l’avance, on les lance d’un tap, et l’app guide à la voix et au bip, même téléphone posé au sol. Trois piliers : construire une séance, la planifier, garder une trace. S’y ajoutent des jeux de société sportifs.
 
-**Décisions fermes**
+## Décisions fermes
 
-- 100 % local : aucun compte, aucun cloud ni synchro, pas de suivi cardio, pas de Google Fit / Health Connect, pas de montre, pas de partage social (le partage par lien/QR ne passe par aucun serveur).
-- Écran maintenu allumé tant que l'app est ouverte (les sons écran verrouillé sont un bonus).
-- En fin de séance : enregistrer ou non (réglage : toujours demander / toujours / jamais), plus nettoyage de l'historique ancien.
-- Tous les types d'entraînement : CrossFit/HIIT, musculation, course (sans GPS), mobilité (mode Personnalisé).
-- Préparation réglable de 0 à 60 s (défaut 10 s dans les réglages, modifiable par séance et juste avant de lancer).
-- Contrôle complet du son.
-- Rappels : notifications du navigateur, sans serveur ; elles ne s'affichent que si l'app est ouverte.
-- PWA uniquement : l'APK Capacitor a été abandonné (décision du 21/10/2026).
+- 100 % local : aucun compte, aucun cloud ni synchro, pas de suivi cardio, pas de Google Fit / Health Connect, pas de montre, pas de partage social (le partage par lien / QR ne passe par aucun serveur).
+- PWA uniquement, publiée sur GitHub Pages. Pas d’app native.
+- Tous les types d’entraînement : CrossFit / HIIT, musculation, course (sans GPS), mobilité.
+- Préparation réglable de 0 à 60 s (défaut 10 s, modifiable par séance et juste avant de lancer).
+- En fin de séance : enregistrer ou non (réglage : toujours demander / toujours / jamais).
+- Rappels : notifications du navigateur, sans serveur ; elles ne s’affichent que si l’app est ouverte.
+
+**Écarté** (ne pas reproposer sans élément nouveau)
+
+- APK Capacitor : abandonné le 21/10/2026.
+- Mini-fenêtre (image dans l’image) : essayée puis retirée en novembre 2026. Safari sur iPhone refuse une vidéo générée en direct ; seule une app native le permettrait.
 
 ## Modes de chrono (10)
 
@@ -28,84 +31,110 @@ Une PWA installable sur le téléphone (Android) qui sert de chrono de séance :
 | Intervalles | Travail / repos sur mesure | Idem Tabata |
 | Chrono | Chronomètre libre | Tours intermédiaires (laps) |
 | Compte à rebours | Minuteur | Durée |
-| Personnalisé | Suite libre d'étapes nommées | Étapes (nom, durée, effort/repos), répétitions |
+| Personnalisé | Suite libre d’étapes nommées | Étapes (nom, durée, effort / repos), répétitions |
 | Musculation | Séries × reps, repos chronométré | Exercices, séries, reps, charge, repos ; bouton « Série terminée » |
 | Course | Segments en durée | Segments (nom, durée, allure), répétitions |
 
-Options communes : préparation, bips des dernières secondes (0 à 5), sons de début/fin de phase, mi-temps, annonces vocales (« Repos », « Tour 3 sur 8 », « 30 secondes »), vibration, pause / passer / revenir, grand affichage, mode paysage.
-
 ## Fonctionnalités
 
-1. **Constructeur de séance** : une séance = suite de blocs (un mode + ses paramètres + des exercices détaillés nom/reps/charge), repos optionnel entre blocs, durée estimée, dupliquer / réordonner / supprimer un bloc.
-2. **Bibliothèque** : mes séances (recherche, favoris, étiquettes), WOD connus pré-remplis (Cindy, Fran, Murph, Helen…), chrono rapide sans créer de séance, partage par lien ou QR code.
-3. **Planification** : vue semaine/mois, séance à une date et une heure, récurrence hebdomadaire (jours + date de fin), écran Accueil avec la séance du jour (Démarrer, Décaler), rappel X minutes avant.
-4. **Historique** : écran Résultat (temps For Time, tours + reps AMRAP, charges, RPE 1-10, note), saisie manuelle, historique par mois et par séance (comparer ses résultats), stats (séances/semaine, temps total, semaines actives de suite).
-5. **Réglages** : sons (volumes général / bips / voix, son et activation par événement, bouton Tester, nombre de bips, mode silencieux), voix (phase, tour, temps restant), préparation par défaut, vibration, écran allumé, thème clair/sombre/système, mode d'enregistrement, export/import JSON, espace occupé, suppression auto de l'historique.
+1. **Créateur de séance** (bouton « Créer » › Séance de sport) : timeline de blocs Effort et Repos, regroupés en Séries (répétées) et en Blocs de travail (nommés, répétables). Détail dans DESIGN.md. La séance est enregistrée comme un bloc « Personnalisé » portant la timeline.
+2. **Éditeur par blocs** (pour les autres séances) : une séance = suite de blocs (un mode + ses paramètres + des exercices nom / reps / charge), repos optionnel entre blocs, durée estimée, dupliquer / monter / descendre / supprimer un bloc.
+3. **Bibliothèque** : mes séances (recherche, favoris, étiquettes), WOD connus pré-remplis (Cindy, Fran, Murph, Helen…), chrono rapide sans créer de séance, partage par lien ou QR code.
+4. **Chrono** : pause / passer / revenir, affichage agrandi (temps restant de la séance, compteur « 3/5 », raccourcis, bouton « + » pour ajouter une étape oubliée en cours de séance), mode paysage, reprise de la séance si le téléphone a fermé l’app.
+5. **Planification** : vue semaine / mois, séance à une date et une heure, récurrence hebdomadaire (jours + date de fin), séance du jour sur l’accueil (Démarrer, Décaler), rappel X minutes avant.
+6. **Historique** : écran Résultat (temps For Time, tours + reps AMRAP, charges, RPE 1-10, note), saisie manuelle, historique par mois et par séance, stats (séances / semaine, temps total, semaines actives de suite), suppression automatique de l’historique ancien.
+7. **Réglages** : son (mode silencieux, volumes général / bips / voix, son en arrière-plan, bips du décompte final, annonces vocales : nom de la phase, numéro du tour, temps restant ; boutons Tester), préparation par défaut, vibration, écran toujours allumé, animation des exercices, thème, rappels, données (export / import JSON, espace occupé).
+8. **Jeux de société sportifs** (bouton « Créer » › Jeu de société) : voir plus bas.
+
+## Son
+
+- **Bips** : programmés à l’avance dans Web Audio (`src/engine/cues.ts`). Décompte final (0 à 5 bips), début et fin de phase, bip à la moitié de chaque effort et de chaque repos d’au moins 20 s.
+- **Annonces vocales** : « Go », « Repos », « Tour 3 sur 8 », « 30 secondes »… « Mi-temps » n’est dit que pendant un effort (un simple bip pendant un repos). « On change » est dit quand un effort suit directement un autre effort.
+- **Voix enregistrée** : les annonces sont des extraits enregistrés (voix Piper « siwis ») réunis dans `public/voix-fr.mp3`, avec leur index dans `src/audio/voix-fr.json`. Ils sont joués comme les bips, donc ils ne coupent pas la musique. Phrases fixes, nombres 1 à 60, « Tour / Série / Minute N sur M » composés, noms des exercices. Un commentaire libre n’est pas lu. La voix du téléphone ne sert qu’en secours tant que le fichier n’est pas chargé. Régénération : `scripts/voix/generer.py`.
+- **Réglage « Son en arrière-plan »** :
+  - coupé : le son se mélange à la musique d’une autre app (Spotify…), app ouverte ; sur iPhone, le bouton silencieux le coupe ;
+  - activé : bips et annonces sont rendus dans une piste audio (60 min au plus) qui continue app en arrière-plan ou écran verrouillé, mais la musique des autres apps se met en pause.
+
+## Contraintes du téléphone
+
+| Sujet | Solution |
+|---|---|
+| Installation | PWA (manifeste + service worker) ; mise à jour appliquée seulement hors séance |
+| Hors-ligne | Tout est pré-caché, voix comprise |
+| Écran qui s’éteint | Wake Lock, redemandé à chaque tap et à chaque retour ; vidéo en secours sans l’API |
+| Précision | Temps calculé depuis l’heure de début de phase, jamais en comptant des ticks |
+| Son coupé par le téléphone | Surveillance de l’horloge audio : le son est reprogrammé s’il dérive ou si la piste s’arrête |
+| Séance en cours | Enregistrée à chaque changement (localStorage, heure réelle) et reprise à la réouverture |
+| Rappels | Seulement app ouverte (limite du navigateur) |
+| Données | Stockage persistant demandé + export JSON conseillé |
 
 ## Modèle de données (IndexedDB, voir `src/data/types.ts`)
 
 - **Workout** : séance modèle (blocs, étiquettes, favori, préparation et son propres).
 - **Block** : mode, paramètres, exercices, repos après.
 - **ScheduledSession** : séance planifiée (date, heure, jours de récurrence, fin, rappel, statut par occurrence : faite / sautée).
-- **SessionLog** : séance réalisée, avec une **copie** de la séance pour que modifier un modèle ne fausse pas l'historique.
+- **SessionLog** : séance réalisée, avec une **copie** de la séance pour que modifier un modèle ne fausse pas l’historique.
 - **Settings** : réglages.
 
-Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), et un seul moteur pur (`src/engine/timer.ts`) les enchaîne. Le temps est toujours calculé depuis l'heure de début de phase, jamais en comptant des ticks : aucune dérive. Tous les bips à venir sont programmés à l'avance dans Web Audio (`src/engine/cues.ts`).
-
-## Contraintes Android
-
-| Sujet | Solution |
-|---|---|
-| Installation | PWA (manifeste + service worker) |
-| Hors-ligne | Tout est pré-caché |
-| Écran qui s'éteint | Wake Lock, redemandé à chaque tap tant qu'il n'est pas accordé et à chaque retour ; vidéo en secours sans l'API |
-| Précision | Temps calculé depuis l'heure de départ |
-| Sons en arrière-plan | Bips rendus en piste audio (fichier WAV) lue par un lecteur audio : continue app en arrière-plan / écran verrouillé (réglage « Son en arrière-plan », met en pause la musique des autres apps) ; la voix reste au premier plan. À valider sur le téléphone |
-| Rappels | Seulement app ouverte (limite du navigateur) |
-| Séance en cours | Enregistrée à chaque changement (localStorage, heure réelle) et reprise à la réouverture si le téléphone a fermé l'app |
-| Données | Stockage persistant demandé + export JSON conseillé |
-
-## Feuille de route
-
-1. ✅ Socle et chrono (tous les modes, sons, voix, vibration, wake lock)
-2. ✅ Séances et bibliothèque (éditeur multi-blocs, Personnalisé, exercices, favoris, étiquettes, WOD connus, partage)
-3. ✅ Enregistrement et historique (Résultat, saisie manuelle, comparaison, stats)
-4. ✅ Planification (calendrier, récurrence, Aujourd'hui, rappels app ouverte)
-5. ✅ Finitions (export/import, thèmes, réglages audio fins)
+Chaque bloc est converti en une liste plate de phases (`src/engine/phases.ts`), et un seul moteur pur (`src/engine/timer.ts`) les enchaîne.
 
 ## Animation des exercices
 
-Pendant l'effort, un avatar animé montre l'exercice à côté du chrono ; il disparaît au repos et revient à l'effort suivant, et se fige en pause. Activée par défaut ; elle se coupe dans Réglages › Animation des exercices.
+Pendant l’effort, un avatar animé montre l’exercice à côté du chrono ; il disparaît au repos et se fige en pause. Activée par défaut ; elle se coupe dans Réglages › Animation des exercices.
 
-- L'avatar est **dessiné par l'app** (SVG, `src/anim/`), pas un GIF : il se règle (sexe, carnation, morphologie, âge, taille, cheveux, tenue) et reste 100 % local.
-- Exercices animés (63 écrits à la main + 135 variantes générées, soit 198), en 4 catégories (un exercice peut être dans deux). MI (membres inférieurs) : squat, fente, mollets, pont fessier, squat sauté, montées de genoux et talons-fesses (aussi en cardio). MS (membres supérieurs) : pompe, pompe sur les genoux. Tronc (abdos compris) : gainage, gainage latéral, superman, bird dog, abdos, relevés de jambes, mountain climber. Cardio : burpee, jumping jack, tipping, pas chassés, montées de genoux, talons-fesses. Avec matériel : kettlebell (swing, goblet squat), élastique (curl, élévations latérales), haltères (curl, développé épaules, rowing), anneau de Pilates (compression bras, pont fessier avec anneau) ; sur chaise : assis-debout, extension de genou, montée de genou, dips, curl et développé épaules assis (haltères), rowing assis (élastique), élévation frontale assis (kettlebell). Le nom reconnu le plus précis l'emporte. Ajoutés sans matériel : MI — squat bulgare (pied arrière sur la chaise, visible en Debout et en Chaise), relevé de la pointe des pieds, abduction et adduction de la jambe, extension de la jambe vers l'arrière ; MS — poussée des épaules vers le haut et vers l'avant, biceps, triceps, haussement des épaules, tirage menton, élévations latérales, élévation frontale, pectoraux (coudes à 90°, de profil : serrés devant puis écartés sur les côtés), développé Arnold (coudes à 90° écartés, poussée, retour, coudes qui se rejoignent devant puis se réécartent ; aussi aux haltères) ; tronc — sit-up (en V, jambes tendues vers les bras), obliques (buste fixe, rotation vers la cheville droite puis gauche, bras tendus), shoulder tap, gainage dynamique, bûcheron, good morning, superman frontal et latéral (buste à 90°). Les noms courts (« Curl biceps », « Élévations latérales », « Élévation frontale ») désignent la version sans matériel. Variantes (`src/anim/variants.ts`, identifiants stables « base-c », « base-db », « base-db-c »…) : chaque exercice sans matériel a sa version sur chaise (assis ; pompe, gainage, mountain climber et shoulder tap mains sur l'assise ; extension de la jambe vers l'arrière mains sur le dossier ; sit-up remplacé par « genou poitrine assis »), et le plus possible ont leurs versions haltères, kettlebell, élastique (tenu sous les pieds, ou en mini-bande aux genoux / chevilles) et anneau de Pilates (entre les mains, ou entre les genoux / chevilles), debout et sur chaise. Parmi les exercices sans matériel, seul le gainage dynamique n'a pas de version chaise ; parmi les plus anciens, ont aussi leur version chaise les mollets, la pompe, le gainage, le mountain climber et le jumping jack.
-- Créateur de séance : dans la fiche d'un effort, sous le commentaire, un sélecteur « Exercice animé » (bouton « Exercices », seulement si l'animation est activée) : choix en deux temps : position (debout par défaut, ou chaise) puis matériel (sans matériel par défaut, kettlebell, élastique, haltères, anneau de Pilates), deux colonnes, catégories en bandeaux de couleur, miniatures ; choisit l'exercice à la main, avec un aperçu ; il passe avant la reconnaissance par le nom, et nomme le bloc s'il n'a pas de commentaire.
-- L'avatar : style « flat design » sans contour (ombres ton sur ton, cheveux fixés à la tête, chaussettes, visage simple).
-- Suite prévue : plus d'exercices avec matériel ; exercices sur chaise pour les seniors ; variantes (fente grand pas / petit pas, mains sur les hanches) ; liste aussi dans l'éditeur par blocs ; plus d'exercices (mobilité, assis, élastique, kettlebell…) ; animation dans l'affichage agrandi ; joindre sa propre photo / GIF à un exercice.
-- Piste à plus long terme : offres payantes par mode et deux profils (coach qui programme, pratiquant qui réalise). Un vrai partage coach → pratiquant demanderait un serveur et des comptes, contraire au « 100 % local » actuel : à décider le moment venu.
+- L’avatar est **dessiné par l’app** (SVG, `src/anim/`), pas un GIF : style « flat design » sans contour, réglable (sexe, carnation, morphologie, âge, taille, cheveux, tenue), 100 % local.
+- 198 exercices : 63 écrits à la main (`src/anim/exercises.ts`) et 135 variantes générées (`src/anim/variants.ts`, identifiants stables « base-c », « base-db », « base-db-c »…). La liste complète est dans ces deux fichiers, pas ici.
+- 4 catégories : membres inférieurs, membres supérieurs, tronc, cardio (un exercice peut être dans deux).
+- Variantes : position (debout ou sur chaise) et matériel (sans, haltères, kettlebell, élastique, anneau de Pilates). Chaque exercice sans matériel a sa version sur chaise, sauf le gainage dynamique ; le sit-up y devient « genou poitrine assis ».
+- Les noms courts (« Curl biceps », « Élévations latérales », « Élévation frontale ») désignent la version sans matériel. Quand plusieurs noms sont reconnus, le plus précis l’emporte.
+- Créateur de séance : dans la fiche d’un effort, un sélecteur « Exercice animé » (seulement si l’animation est activée) : position, puis matériel, puis exercice, avec miniatures et aperçu. Ce choix passe avant la reconnaissance par le nom, et nomme le bloc s’il n’a pas de commentaire.
 
-## Pulse Poly
+## Jeux de société sportifs
 
-Jeu de plateau sportif, 2 à 6 joueurs sur le même téléphone (Séances › Créer › Jeu de société › Pulse Poly). Plateau original de 40 cases (pas celui d'un jeu existant) : Départ, Salle de sport, Récup, « Direction la salle de sport » ; 22 cases exercice en 8 groupes de couleur ; 4 cartes cardio ; cases Défi et Culture AP. Règles, toutes en répétitions faites pour de vrai (avatar animé) :
-- Case exercice libre : la passer = 15 rép., l'acheter = 30 rép. ; ensuite le propriétaire ne fait plus rien chez lui ; les autres y font 20 rép.
-- Carte cardio (de base 15 tipping + 10 jumping jacks + 5 burpees, modifiable) : passer ou acheter = son contenu une fois (prix indiqué) ; chez un autre joueur, son contenu majoré de +20 % s'il en a 2, +50 % à 3, +100 % à 4 (arrondi à l'entier supérieur).
+Les exercices se font pour de vrai, avec l’avatar animé. Le plateau occupe tout l’écran ; en paysage, les informations passent à droite. Logique pure et testée dans `src/games/` (Pulse Poly : `src/game/game.ts`).
+
+| Jeu | Principe |
+|---|---|
+| Bataille navale | Contre l’ordinateur ; placement des bateaux à la main, marques « rien ici » |
+| Jeu de l’oie | Un dé, ascenseurs, 1 à 6 joueurs ; seul, contre l’ordinateur |
+| Mémo | 4 niveaux, 1 à 6 joueurs, points ; seul, contre l’ordinateur (qui retient 3 cartes sur 4) |
+| La roue de la santé | Roue animée, exercices en répétitions ou en temps avec décompte, cases repos |
+| Pulse Poly | Voir ci-dessous |
+| 1000 Bornes | À faire |
+
+Seule la partie de Pulse Poly est sauvegardée ; les autres jeux ne reprennent pas une partie si l’app est fermée.
+
+### Pulse Poly
+
+2 à 6 joueurs sur le même téléphone. Plateau original de 40 cases (pas celui d’un jeu existant) : Départ, Salle de sport, Récup, « Direction la salle de sport » ; 22 cases exercice en 8 groupes de couleur ; 4 cartes cardio ; cases Défi et Culture AP.
+
+- Case exercice libre : la passer = 15 rép., l’acheter = 30 rép. ; ensuite le propriétaire ne fait plus rien chez lui ; les autres y font 20 rép.
+- Carte cardio (de base 15 tipping + 10 jumping jacks + 5 burpees, modifiable) : passer ou acheter = son contenu une fois (prix indiqué). Chez un autre joueur : son contenu majoré de +20 % s’il en a 2, +50 % à 3, +100 % à 4 (arrondi à l’entier supérieur).
 - Un dé ; un 6 fait rejouer ; trois 6 de suite, la case « Direction… » ou une carte Défi envoient en salle de sport. Là, on fait aussi tous les exercices des autres joueurs ; on en sort sur un 6 ou après 3 tours.
-- Fin : course en N tours de plateau (4 par défaut ; un tour = un passage par le Départ, y compris par une carte ; la salle de sport ne compte pas) : le premier qui les termine gagne et la partie s’arrête. Ou illimitée (« Terminer la partie » dans le menu), ou abandon (ses cases se libèrent). Sans course, gagnant : le plus de cases ; à égalité, le moins de répétitions.
-- Exercices du plateau : aléatoires (debout, sans matériel) ou choisis case par case. Partie sauvegardée sur le téléphone.
-- Cartes Défi et Culture AP provisoires (dont le don d'exercice à un autre joueur) : à retravailler.
-- Moteur pur et testé : `src/game/game.ts`.
+- Fin : course en N tours de plateau (4 par défaut ; un tour = un passage par le Départ, y compris par une carte ; la salle de sport ne compte pas) : le premier qui les termine gagne et la partie s’arrête. Ou partie illimitée (« Terminer la partie » dans le menu), ou abandon (ses cases se libèrent). Sans course, gagnant : le plus de cases ; à égalité, le moins de répétitions.
+- Exercices du plateau : aléatoires (debout, sans matériel) ou choisis case par case.
 
 ## Reste à faire / idées
 
-- Jeux de société sportifs (« Créer » → jeu de société) : bataille navale contre l’ordinateur (placement des bateaux à la main, marques « rien ici ») et jeu de l’oie (un dé, ascenseurs, 1 à 6 joueurs, seul contre l’ordinateur) faits, logique dans `src/games/` (testée). Mémo fait (4 niveaux, 1 à 6 joueurs, points ; seul contre l’ordinateur, qui retient 3 cartes sur 4). La roue de la santé faite (roue animée, exercices en répétitions ou en temps avec décompte, cases repos). Reste : 1000 Bornes. Une partie en cours n’est pas reprise si l’app est fermée.
+**Jeux**
+- 1000 Bornes.
+- Pulse Poly : cartes Défi et Culture AP provisoires (dont le don d’exercice à un autre joueur), à retravailler.
+- Reprendre une partie en cours après fermeture de l’app (autres jeux que Pulse Poly).
 
-- Mini-fenêtre (image dans l'image, comme YouTube) : essayée puis retirée (nov. 2026). Safari sur iPhone refuse de mettre en mini-fenêtre une vidéo générée en direct (« non pris en charge ») ; seule une app native le permettrait. Alternative possible sur iPhone : la séance sur l'écran verrouillé / la Dynamic Island (avec « Son en arrière-plan »), avec barre de temps de la phase.
+**Créateur de séance et éditeur**
+- Modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche.
+- Glisser un bloc d’une série à une autre.
+- Éditeur par blocs : glisser-déposer tactile (aujourd’hui boutons monter / descendre) et sélecteur d’exercice animé.
 
-- Créateur de séance : modèles tout prêts (Tabata, EMOM, 30/30) dans la colonne de gauche ; glisser un bloc d'une série à une autre.
+**Animation**
+- Plus d’exercices (mobilité, matériel) et de variantes (fente grand pas / petit pas, mains sur les hanches).
+- Animation dans l’affichage agrandi.
+- Joindre sa propre photo / GIF à un exercice.
 
-- Tests unitaires de `src/engine/session.ts` (la liaison moteur / son), aujourd'hui couverte seulement par les parcours Playwright.
+**Technique**
+- Tests unitaires de `src/engine/session.ts` (liaison moteur / son), couverte seulement par les parcours Playwright.
+- Vérifier les rappels sur le vrai téléphone.
+- iPhone : afficher la séance sur l’écran verrouillé / la Dynamic Island avec une barre de temps de la phase (avec « Son en arrière-plan »).
 
-- **Tester sur le vrai téléphone** : une séance Tabata complète écran verrouillé (sons en arrière-plan), les rappels.
-- Voix : annonces enregistrées (voix Piper « siwis », `scripts/voix/generer.py` → `public/voix-fr.mp3` + `src/audio/voix-fr.json`), jouées comme les bips : elles se mélangent à la musique et passent dans la piste en arrière-plan. Phrases fixes, nombres 1 à 60, « Tour / Série / Minute N sur M » composés, 89 noms d’exercices ; un commentaire libre n’est pas lu (le bip suffit). La voix du téléphone ne sert qu’en secours tant que le fichier n’est pas chargé. Régénérer après un ajout de phrase ou d’exercice.
-- Réordonner les blocs : boutons ↑ ↓ (le glisser-déposer tactile reste à faire).
-- Mettre la PWA en ligne : rendre le dépôt public (GitHub Pages) ou utiliser Netlify / Cloudflare Pages.
+**À plus long terme**
+- Offres payantes par mode et deux profils (coach qui programme, pratiquant qui réalise). Un vrai partage coach → pratiquant demanderait un serveur et des comptes, contraire au « 100 % local » : à décider le moment venu.

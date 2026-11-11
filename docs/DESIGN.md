@@ -1,4 +1,6 @@
-# Design de Chrono (validé le 21/10/2026)
+# Design de Pulse
+
+Validé le 21/10/2026, complété depuis. Les fonctionnalités sont décrites dans [PLAN.md](PLAN.md).
 
 Direction retenue : **« E · Synthèse »** = le style « Clair », la mise en page « A », et les couleurs de phase plein écran « C ».
 
@@ -17,9 +19,15 @@ Thème sombre disponible en option (jetons dans `src/styles.css`, `:root[data-th
 
 ## Mise en page
 
-- **Accueil** : titre, carte « Séance du jour » pleine couleur accent (Démarrer, Décaler), deux grandes tuiles avec icône : « Ma séance » (à gauche, ouvre l'onglet Séances › Mes séances : bouton « Créer », 2 favoris au plus, la dernière séance faite, puis « Toutes mes séances » repliées) et « Types de séances » (à droite, ouvre l'écran des 10 modes + « WOD connus », tuiles **remplies de la couleur du mode**, 2 par ligne), dernière séance, barre d'onglets en bas (Accueil / Planning / Séances / Réglages).
+- **Barre d’onglets** en bas : Accueil / Planning / Séances / Réglages.
+- **Accueil** : salutation et slogan, carte « Séance du jour » pleine couleur accent (Démarrer, Décaler ; ou « Rien de prévu »), deux grandes tuiles centrées avec icône, puis la dernière séance faite.
+  - « Ma séance » (à gauche) ouvre Séances › Mes séances : bouton rond « Créer », 2 favoris au plus, la dernière séance faite, puis « Toutes mes séances » repliées.
+  - « Types de séances » (à droite) ouvre les 10 modes + « WOD connus » : tuiles **remplies de la couleur du mode**, 2 par ligne, titre centré, sans description.
+- **Créer** : deux gros boutons, « Séance de sport » (créateur de séance) et « Jeu de société ».
 - **Planning** : bandeau de la semaine (ou grille du mois), séances du jour sous forme de créneaux horaires, stats de la semaine, bouton flottant « Planifier ».
-- **Chrono** : anneau de progression, nom de phase + très grand chiffre, deux cartes (Tour, Restant), liste des prochaines phases, boutons Revenir / Pause / action principale. En paysage, l'anneau passe à gauche.
+- **Chrono** : anneau de progression, nom de phase + très grand chiffre, deux cartes (Tour, Restant), liste des prochaines phases, boutons Revenir / Pause / action principale. En paysage, l’anneau passe à gauche.
+- **Affichage agrandi** : le chiffre en plein écran sur la couleur de la phase, avec le temps restant de la séance, le compteur de tours ou de séries en « 3/5 », les raccourcis Revenir / Pause / Étape suivante et un bouton « + » sur le côté pour ajouter une étape oubliée. En paysage, le chiffre est réduit pour laisser la place aux raccourcis.
+- **Jeux** : le plateau s’adapte à l’écran entier, sans défilement ; en paysage, les informations complémentaires passent à droite. La fiche d’exercice est centrée et tient à l’écran avec son bouton « C’est fait ».
 
 ## Couleurs pendant le chrono (plein écran)
 
@@ -37,10 +45,9 @@ AMRAP `#FFBE98` · EMOM `#3DD6C6` · For Time `#FFC93C` · Tabata `#B9A6FF` · I
 
 ## Créateur de séance
 
-Ouvert par le bouton rond « Créer » (Séances › Mes séances). Colonne de blocs à gauche (Effort, Repos, Série, Bloc de travail), timeline à droite, durée totale et bande colorée du déroulé en haut, « Lancer la séance » en bas.
+Ouvert par « Créer » › Séance de sport. Colonne de blocs à gauche (Effort, Repos, Série, Bloc de travail), timeline à droite, durée totale et bande colorée du déroulé en haut (toujours visibles), vue calée sur les derniers blocs ajoutés, « Lancer la séance » en bas.
 - Préparation toujours en tête, réglable (0 à 60 s), la séance démarre vide.
 - Toucher un bloc : durée et commentaire ; appui long : copier ; toucher l'en-tête d'un bloc de travail : même menu que l'appui long (Copier, Régler, Supprimer) ; poignée ⋮⋮ : glisser pour déplacer.
 - Série : blocs qui se suivent, répétés ; son dernier repos sert de récupération entre deux séries et disparaît après la dernière.
 - Bloc de travail : regroupe blocs et séries, avec un nom, répétable (pas de bloc de travail dans un autre).
 - Enregistrée comme un bloc « Personnalisé » portant la timeline ; « Modifier » rouvre le créateur. Les autres séances gardent l'éditeur par blocs.
-
