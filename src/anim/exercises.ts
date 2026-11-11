@@ -19,7 +19,9 @@ export type BaseExerciseId =
   | 'bulgarian' | 'toeraise' | 'legabduction' | 'legadduction' | 'kickback'
   | 'pressup' | 'pressforward' | 'curlbw' | 'tricepsbw' | 'shrug' | 'uprightrow' | 'lateralbw' | 'frontbw' | 'pecfly'
   | 'arnold' | 'dbarnold'
-  | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside';
+  | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside'
+  // MS avec matériel
+  | 'dbkickback' | 'dbhammer' | 'dbpullover' | 'dbfloorpress' | 'ringoverhead' | 'ringbehind' | 'ringside' | 'ringopen';
 /** Exercice écrit à la main, ou une de ses variantes générées (chaise, matériel) : « curlbw-db-c »… */
 export type ExerciseId = BaseExerciseId | `${BaseExerciseId}-${VariantKey}`;
 
@@ -66,7 +68,10 @@ export interface ExerciseAnim {
  * Prise du matériel : `one` un seul objet tenu à deux mains, `each` un par main,
  * `hands` anneau entre les mains, `knees` / `ankles` anneau ou élastique autour des genoux / des chevilles.
  */
-export type Grip = 'one' | 'each' | 'hands' | 'knees' | 'ankles';
+export type Grip = 'one' | 'each' | 'hands' | 'knees' | 'ankles'
+  // MS : `hammer` haltère en prise neutre (curl marteau), `back` élastique passé dans le dos,
+  // `side` anneau serré entre le bras et la hanche, `inside` anneau écarté de l'intérieur (mains dedans).
+  | 'hammer' | 'back' | 'side' | 'inside';
 
 /** Matériel : sans matériel, kettlebell, élastique, haltères, anneau de Pilates. */
 export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell' | 'ring';
@@ -663,6 +668,82 @@ const BASE: ExerciseAnim[] = [
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.8 },
       // Les coudes se rejoignent devant, bras toujours à 90°, puis se réécartent.
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.8 },
+    ],
+  },
+  // ---------- MS avec matériel ----------
+  {
+    id: 'dbkickback', label: 'Kickback triceps (haltères)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet', equipment: 'dumbbell',
+    words: ['kickback triceps', 'kick back triceps', 'extension triceps buste penche'],
+    // Buste penché, haut des bras collé au buste : l'avant-bras pend, puis se tend vers l'arrière.
+    frames: [
+      { pose: { torso: 62, head: -22, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: -72, foreN: 6, armF: -70, foreF: 4 } },
+      { pose: { torso: 62, head: -22, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: -74, foreN: -76, armF: -72, foreF: -74 }, w: 0.5 },
+      { pose: { torso: 62, head: -22, thighN: 22, shinN: -10, thighF: 20, shinF: -10, armN: -74, foreN: -76, armF: -72, foreF: -74 } },
+    ],
+  },
+  {
+    id: 'dbhammer', label: 'Curl marteau (haltères)', group: 'ms', view: 'side', period: 2.2, anchor: 'feet', equipment: 'dumbbell', grip: 'hammer',
+    words: ['curl marteau', 'hammer curl'],
+    frames: [
+      { pose: { ...STAND, armN: 4, foreN: 10, armF: 2, foreF: 8 } },
+      { pose: { ...STAND, armN: 8, foreN: 150, armF: 6, foreF: 148 } },
+    ],
+  },
+  {
+    id: 'dbpullover', label: 'Pull-over (haltère)', group: 'ms', view: 'side', period: 2.8, anchor: 'feet', equipment: 'dumbbell', grip: 'one',
+    words: ['pull over', 'pullover'],
+    // Allongé sur le dos, genoux pliés : un haltère à deux mains, de la verticale jusque derrière la tête.
+    frames: [
+      { pose: { torso: -88, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 178, foreN: 186, armF: 176, foreF: 184 } },
+      { pose: { torso: -88, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 248, foreN: 256, armF: 246, foreF: 254 } },
+    ],
+  },
+  {
+    id: 'dbfloorpress', label: 'Développé couché au sol (haltères)', group: 'ms', view: 'side', period: 2.4, anchor: 'feet', equipment: 'dumbbell',
+    words: ['developpe couche au sol', 'developpe au sol', 'floor press'],
+    // Allongé sur le dos : coudes posés au sol sur les côtés (le haut du bras pivote vers nous), puis bras tendus vers le plafond.
+    frames: [
+      { pose: { torso: -88, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 180, foreN: 178, armF: 178, foreF: 176, reachUpper: 0.12 } },
+      { pose: { torso: -88, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 180, foreN: 178, armF: 178, foreF: 176 } },
+    ],
+  },
+  {
+    id: 'ringoverhead', label: 'Compression anneau au-dessus de la tête', group: 'ms', view: 'front', period: 2.2, anchor: 'hip', equipment: 'ring',
+    words: ['compression anneau au dessus de la tete', 'anneau au dessus de la tete', 'compression au dessus de la tete'],
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 160, foreN: -150, armF: 160, foreF: -150 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 158, foreN: -136, armF: 158, foreF: -136 }, w: 0.5 },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 158, foreN: -136, armF: 158, foreF: -136 } },
+    ],
+  },
+  {
+    id: 'ringbehind', label: 'Compression anneau derrière le dos', group: 'ms', view: 'side', period: 2.2, anchor: 'feet', equipment: 'ring', grip: 'hands',
+    words: ['compression anneau derriere le dos', 'anneau derriere le dos', 'anneau dans le dos'],
+    // Bras tendus derrière les fesses, anneau entre les paumes : on serre en remontant un peu les bras.
+    frames: [
+      { pose: { ...STAND, armN: -20, foreN: -20, armF: -22, foreF: -22 } },
+      { pose: { ...STAND, armN: -32, foreN: -32, armF: -34, foreF: -34 }, w: 0.5 },
+      { pose: { ...STAND, armN: -32, foreN: -32, armF: -34, foreF: -34 } },
+    ],
+  },
+  {
+    id: 'ringside', label: 'Compression anneau contre la hanche', group: 'ms', view: 'front', period: 2.2, anchor: 'hip', equipment: 'ring', grip: 'side',
+    words: ['compression anneau contre la hanche', 'anneau contre la hanche', 'anneau sous le bras', 'compression coude hanche'],
+    // Anneau entre l'intérieur du bras et la hanche : le bras le serre contre le corps ; l'autre main sur la hanche.
+    frames: [
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 36, foreN: 18, armF: 35, foreF: -60 } },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 27, foreN: 10, armF: 35, foreF: -60 }, w: 0.5 },
+      { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 27, foreN: 10, armF: 35, foreF: -60 } },
+    ],
+  },
+  {
+    id: 'ringopen', label: 'Écartement de l’anneau', group: 'ms', view: 'front', period: 2.2, anchor: 'hip', equipment: 'ring', grip: 'inside',
+    words: ['ecartement de l anneau', 'ecartement anneau', 'ouverture de l anneau', 'ouverture anneau'],
+    // Mains à l'intérieur de l'anneau, devant la poitrine : on pousse vers l'extérieur (arrière des épaules).
+    frames: [
+      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 44, foreN: -100, armF: 44, foreF: -100 } },
+      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 54, foreN: -94, armF: 54, foreF: -94 }, w: 0.5 },
+      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 54, foreN: -94, armF: 54, foreF: -94 } },
     ],
   },
 ];
