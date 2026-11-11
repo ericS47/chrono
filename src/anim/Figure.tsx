@@ -1,6 +1,6 @@
 // Dessin animé de l'avatar qui fait un exercice (SVG généré, sans image téléchargée).
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { Avatar } from './avatar';
 import { DEFAULT_AVATAR } from './avatar';
 import { mix, SKIN_TONES } from './avatar';
@@ -8,7 +8,7 @@ import type { ChairPos, ExerciseAnim, ExerciseId } from './exercises';
 import { CHAIR_BACK, CHAIR_DEPTH, CHAIR_HALF, chairPos, EXERCISE_BY_ID, frameAt, frameBox, GROUND, place, VIEW_W } from './exercises';
 import { dims } from './pose';
 import type { Colors } from './Body';
-import { FrontBody, SideBody } from './Body';
+import { FrontBody, GlowDefs, SideBody } from './Body';
 import type { Joints, Pt } from './pose';
 
 const SHOE = '#6E7891';
@@ -196,21 +196,31 @@ function Equipment({ ex, j }: { ex: ExerciseAnim; j: Joints }) {
 const REF = dims({ ...DEFAULT_AVATAR, sex: 'm', build: 'forte', height: 'grande' });
 
 /** Image fixe de l'avatar à l'instant `sec` du mouvement. */
-export function FigureFrame({ exercise, avatar, sec, title }: { exercise: ExerciseId; avatar: Avatar; sec: number; title?: string }) {
+/** `life` : temps écoulé de l'animation en cours (clignement des yeux) ; absent sur une image fixe. */
+export function FigureFrame({ exercise, avatar, sec, title, life }: { exercise: ExerciseId; avatar: Avatar; sec: number; title?: string; life?: number }) {
   const placed = useMemo(() => place(EXERCISE_BY_ID[exercise], dims(avatar)), [exercise, avatar]);
   const c = useMemo(() => colors(avatar), [avatar]);
-  const { j, flat, roll } = frameAt(placed, sec);
+  const { j, flat, roll, effort } = frameAt(placed, sec);
   // Chaise : fixe au sol, placée d'après la première posture (sous la hanche, ou sous les mains).
   const chair = useMemo(() => chairPos(placed), [placed]);
   const b = frameBox(placed.ex, REF);
   const ex = placed.ex;
+  // Ombre au sol vivante : plus large et plus dense quand le corps descend, plus légère quand il se redresse ou saute.
+  const d = placed.d;
+  const high = Math.min(1.3, Math.max(0, (GROUND - j.hip[1]) / (d.thigh + d.shin)));
+  const rx = Math.min(ex.view === 'front' ? 26 : 48, b.w / 2 - 3) * (1.05 - 0.13 * high);
+  // Muscles éclairés : seulement sur l'animation (pas sur les miniatures fixes).
+  const gid = `glow${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  const glow = ex.muscles && life !== undefined ? { quads: ex.muscles.includes('quads'), glutes: ex.muscles.includes('glutes'), k: effort, id: gid } : undefined;
   return (
     <svg viewBox={`${b.x} ${b.y} ${b.w} ${b.h}`} className={`figure ${b.w > b.h * 1.25 ? 'wide' : ''}`} role="img" aria-label={title ?? `Animation : ${ex.label}`}>
-      <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={Math.min(ex.view === 'front' ? 26 : 48, b.w / 2 - 3)} ry={3.2} fill="rgba(20,24,58,0.12)" />
+      <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={rx} ry={3.2} fill="rgb(20,24,58)" opacity={0.085 - 0.02 * high} />
+      <ellipse cx={VIEW_W / 2} cy={GROUND + 2} rx={rx * 0.62} ry={2.1} fill="rgb(20,24,58)" opacity={0.085 - 0.03 * high} />
+      {glow && <GlowDefs id={gid} />}
       {chair && <Chair {...chair} />}
       {ex.view === 'front'
-        ? <g transform={roll ? `rotate(${roll} ${flat.hip[0]} ${flat.hip[1]})` : undefined}><FrontBody j={flat} d={placed.d} av={avatar} c={c} /></g>
-        : <SideBody j={j} d={placed.d} av={avatar} c={c} />}
+        ? <g transform={roll ? `rotate(${roll} ${flat.hip[0]} ${flat.hip[1]})` : undefined}><FrontBody j={flat} d={placed.d} av={avatar} c={c} life={life} /></g>
+        : <SideBody j={j} d={placed.d} av={avatar} c={c} glow={glow} life={life} />}
       {ex.equipment && ex.equipment !== 'none' && <Equipment ex={ex} j={j} />}
     </svg>
   );
@@ -241,5 +251,5 @@ export function ExerciseFigure({ exercise, avatar, playing = true }: { exercise:
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [playing]);
-  return <FigureFrame exercise={exercise} avatar={avatar} sec={sec} />;
+  return <FigureFrame exercise={exercise} avatar={avatar} sec={sec} life={sec} />;
 }

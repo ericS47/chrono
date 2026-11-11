@@ -33,7 +33,18 @@ export interface Frame {
   w?: number;
   /** Déplacement latéral imposé (position de la hanche), pour les pas chassés. */
   x?: number;
+  /**
+   * Allure du passage vers la posture suivante : `inout` (par défaut, départ et arrivée en douceur),
+   * `in` (accélère, sans s'arrêter à l'arrivée), `out` (arrive lancé, puis ralentit).
+   * `in` puis `out` enchaînent deux passages sans temps mort (posture de passage).
+   */
+  ease?: 'inout' | 'in' | 'out';
+  /** Intensité de l'effort à cette posture (0 à 1), pour éclairer les muscles qui travaillent. */
+  effort?: number;
 }
+
+/** Muscles éclairés pendant l'effort (de profil). */
+export type Muscle = 'quads' | 'glutes';
 
 /** Catégories : membres inférieurs, membres supérieurs, tronc (abdos compris), cardio. */
 export type ExerciseGroup = 'mi' | 'ms' | 'tronc' | 'cardio';
@@ -60,6 +71,8 @@ export interface ExerciseAnim {
   chairUnder?: ChairUnder;
   /** Où se tient le matériel (par défaut selon le matériel et la vue). */
   grip?: Grip;
+  /** Muscles qui travaillent, éclairés selon l'effort de chaque posture. */
+  muscles?: Muscle[];
 }
 
 /**
@@ -90,6 +103,17 @@ export const inGroup = (e: ExerciseAnim, g: ExerciseGroup): boolean => e.group =
 const STAND: Pose = { torso: 0, thighN: 0, shinN: 0, thighF: -1, shinF: -1, armN: 8, foreN: 14, armF: -5, foreF: 3 };
 const HIGH_PLANK: Pose = { torso: 68, head: -6, thighN: -68, shinN: -68, thighF: -68, shinF: -68, armN: 0, foreN: 0, armF: 3, foreF: 3 };
 const BURPEE_LOW: Pose = { torso: 60, head: -30, thighN: 100, shinN: -35, thighF: 98, shinF: -35, armN: 35, foreN: 35, armF: 33, foreF: 33 };
+
+// ---------- Squat ----------
+
+/** Jambes de squat : pieds à plat quel que soit l'angle du tibia, jambe éloignée à peine décalée. */
+const sqLegs = (thigh: number, shin: number) => ({ thighN: thigh, shinN: shin, thighF: thigh - 4, shinF: shin - 1, heel: shin * 0.85 });
+const SQ_UP: Pose = { torso: 2, head: 0, ...sqLegs(0, 0), armN: 10, foreN: 22, armF: 4, foreF: 14 };
+/** Descente : les hanches reculent d'abord, le buste s'incline avant que les genoux ne plient à fond. */
+const SQ_DOWN_MID: Pose = { torso: 27, head: -19, ...sqLegs(46, -11), armN: 52, foreN: 70, armF: 47, foreF: 64 };
+const SQ_LOW: Pose = { torso: 40, head: -31, ...sqLegs(97, -30), armN: 82, foreN: 97, armF: 77, foreF: 91 };
+/** Remontée : les jambes poussent, le buste se redresse un peu après. */
+const SQ_UP_MID: Pose = { torso: 30, head: -22, ...sqLegs(50, -15), armN: 60, foreN: 76, armF: 55, foreF: 70 };
 
 // ---------- Pas chassés (vue de face, comme dans un miroir) ----------
 
@@ -127,10 +151,17 @@ function shuffleAlt(): Frame[] {
 
 const BASE: ExerciseAnim[] = [
   {
-    id: 'squat', label: 'Squat', group: 'mi', view: 'side', period: 2.4, anchor: 'feet', words: ['squat', 'flexion de jambe', 'flexions de jambe'],
+    // Descente contrôlée (les hanches partent en arrière), temps d'arrêt en bas, remontée plus vive, pause debout.
+    // Pieds à plat (`heel` compense l'inclinaison du tibia), regard droit devant, bras en contrepoids.
+    id: 'squat', label: 'Squat', group: 'mi', view: 'side', period: 3, anchor: 'feet', words: ['squat', 'flexion de jambe', 'flexions de jambe'],
+    muscles: ['quads', 'glutes'],
     frames: [
-      { pose: { ...STAND, torso: 4, armN: 10, foreN: 20, armF: 5, foreF: 12 } },
-      { pose: { torso: 38, head: -22, thighN: 95, shinN: -28, thighF: 92, shinF: -30, armN: 88, foreN: 90, armF: 84, foreF: 88 } },
+      { pose: SQ_UP, ease: 'in', w: 0.62, effort: 0 },
+      { pose: SQ_DOWN_MID, ease: 'out', w: 0.72, effort: 0.6 },
+      { pose: SQ_LOW, w: 0.28, effort: 1 },
+      { pose: SQ_LOW, ease: 'in', w: 0.4, effort: 1 },
+      { pose: SQ_UP_MID, ease: 'out', w: 0.5, effort: 0.75 },
+      { pose: SQ_UP, w: 0.48, effort: 0 },
     ],
   },
   {
@@ -720,6 +751,8 @@ export interface Placed {
   tx: number[];
   /** Temps cumulé (0 à 1) du début de chaque passage. */
   starts: number[];
+  /** Articulations de chaque posture clé (hanche à l'origine), pour garder le point d'appui immobile. */
+  keys: Joints[];
 }
 
 /** Prépare un exercice pour un avatar : décalages horizontaux et centrage. */
@@ -749,10 +782,14 @@ export function place(ex: ExerciseAnim, d: Dims): Placed {
   const total = ws.reduce((a, b) => a + b, 0);
   const starts: number[] = [];
   ws.reduce((acc, w) => (starts.push(acc / total), acc + w), 0);
-  return { ex, d, tx: tx.map((x) => x + c), starts };
+  return { ex, d, tx: tx.map((x) => x + c), starts, keys: js };
 }
 
-const ease = (t: number) => t * t * (3 - 2 * t);
+const EASE = {
+  inout: (t: number) => t * t * (3 - 2 * t),
+  in: (t: number) => t * t,
+  out: (t: number) => 1 - (1 - t) * (1 - t),
+};
 
 /** Articulations à l'instant `sec`, posées sur le sol du dessin. */
 /**
@@ -760,22 +797,31 @@ const ease = (t: number) => t * t * (3 - 2 * t);
  * `flat` et `roll` : les mêmes avant bascule, et l'angle de bascule, pour le dessin
  * (le corps est dessiné droit puis tourné d'un bloc autour de la hanche).
  */
-export function frameAt(p: Placed, sec: number): { j: Joints; flat: Joints; roll: number; pose: Pose } {
+export function frameAt(p: Placed, sec: number): { j: Joints; flat: Joints; roll: number; pose: Pose; effort: number } {
   const n = p.ex.frames.length;
   const ph = (((sec / p.ex.period) % 1) + 1) % 1;
   let i = n - 1;
   while (i > 0 && p.starts[i] > ph) i--;
   const end = i + 1 < n ? p.starts[i + 1] : 1;
-  const t = ease((ph - p.starts[i]) / (end - p.starts[i]));
   const a = p.ex.frames[i];
-  const b = p.ex.frames[(i + 1) % n];
+  const k = (i + 1) % n;
+  const b = p.ex.frames[k];
+  const t = EASE[a.ease ?? 'inout']((ph - p.starts[i]) / (end - p.starts[i]));
   const pose = lerpPose(a.pose, b.pose, t);
-  const dx = p.tx[i] + (p.tx[(i + 1) % n] - p.tx[i]) * t;
   const roll = pose.roll ?? 0;
   const flat0 = solve(pose, p.d, p.ex.view);
   const j0 = rotate(flat0, roll);
+  let dx = p.tx[i] + (p.tx[k] - p.tx[i]) * t;
+  if (a.x === undefined && b.x === undefined) {
+    // Le point d'appui (pieds, mains) reste exactement à sa place pendant le passage : il ne glisse pas au sol.
+    const an = b.anchor ?? p.ex.anchor;
+    const from = anchorX(p.keys[i], an) + p.tx[i];
+    const to = anchorX(p.keys[k], an) + p.tx[k];
+    dx = from + (to - from) * t - anchorX(j0, an);
+  }
   const dy = GROUND - (pose.lift ?? 0) - lowest(j0, p.d);
-  return { j: translate(j0, dx, dy), flat: translate(flat0, dx, dy), roll, pose };
+  const effort = (a.effort ?? 0) + ((b.effort ?? 0) - (a.effort ?? 0)) * t;
+  return { j: translate(j0, dx, dy), flat: translate(flat0, dx, dy), roll, pose, effort };
 }
 
 /**

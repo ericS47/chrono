@@ -111,10 +111,42 @@ function local(o: Pt, fwd: Pt, up: Pt, r: number, pts: [number, number][]): Pt[]
   return pts.map(([f, u]) => [o[0] + (fwd[0] * f + up[0] * u) * r, o[1] + (fwd[1] * f + up[1] * u) * r]);
 }
 
+const mixPt = (a: Pt, b: Pt, t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+
 // ---------- Membres ----------
 
-function Leg({ hip, knee, ankle, toe, d, av, skin, bottom, shoe }: {
-  hip: Pt; knee: Pt; ankle: Pt; toe: Pt; d: Dims; av: Avatar; skin: string; bottom: string; shoe: string;
+/**
+ * Muscles éclairés pendant l'effort : halo chaud (abricot de l'effort) qui s'allume et s'éteint avec `k` (0 à 1).
+ * `id` : identifiant du dégradé défini par la figure (voir `GlowDefs`).
+ */
+export interface Glow { quads?: boolean; glutes?: boolean; k: number; id: string }
+
+/** Dégradé du halo, à placer une fois dans le SVG de la figure. */
+export function GlowDefs({ id }: { id: string }) {
+  return (
+    <defs>
+      <radialGradient id={id}>
+        <stop offset="0" stopColor="#FFC896" stopOpacity={0.95} />
+        <stop offset="0.5" stopColor="#FF9A5C" stopOpacity={0.6} />
+        <stop offset="1" stopColor="#FF8A4C" stopOpacity={0} />
+      </radialGradient>
+    </defs>
+  );
+}
+
+/** Halo doux, allongé de `a` vers `b`. */
+function Halo({ a, b, w, glow, k = 1 }: { a: Pt; b: Pt; w: number; glow: Glow; k?: number }) {
+  const o = glow.k * k;
+  if (o <= 0.02) return null;
+  const cx = (a[0] + b[0]) / 2;
+  const cy = (a[1] + b[1]) / 2;
+  const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const deg = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
+  return <ellipse cx={cx} cy={cy} rx={len / 2} ry={w} fill={`url(#${glow.id})`} opacity={o} transform={`rotate(${deg} ${cx} ${cy})`} />;
+}
+
+function Leg({ hip, knee, ankle, toe, d, av, skin, bottom, shoe, glow, far }: {
+  hip: Pt; knee: Pt; ankle: Pt; toe: Pt; d: Dims; av: Avatar; skin: string; bottom: string; shoe: string; glow?: Glow; far?: boolean;
 }) {
   const legging = av.bottomType === 'legging';
   const fl = Math.hypot(toe[0] - ankle[0], toe[1] - ankle[1]) || 1;
@@ -139,6 +171,7 @@ function Leg({ hip, knee, ankle, toe, d, av, skin, bottom, shoe }: {
       ) : (
         <Shape d={limb(hip, knee, THIGH, d.wThigh, { grow: 0.6, t1: 0.58, cap0: 0.15, cap1: 0.25 })} fill={bottom} edge shadow={limb(hip, knee, THIGH, d.wThigh, { band: 0.35, grow: 0.6, t1: 0.58 })} />
       )}
+      {glow?.quads && <Halo a={mixPt(hip, knee, 0.1)} b={mixPt(hip, knee, 0.95)} w={d.wThigh * 0.7} glow={glow} k={far ? 0.5 : 1} />}
     </Layer>
   );
 }
@@ -181,7 +214,14 @@ function backHair(o: Pt, fwd: Pt, up: Pt, r: number, len: number): string {
   ]));
 }
 
-function SideHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }) {
+/** Clignement : ouverture de l'œil (1 ouvert, 0 fermé) à l'instant `life` ; toujours ouvert sur une image fixe. */
+function eyeOpen(life: number | undefined): number {
+  if (life === undefined) return 1;
+  const t = (life + 1.2) % 3.6;
+  return t < 0.16 ? Math.max(0.12, Math.abs(t - 0.08) / 0.08) : 1;
+}
+
+function SideHead({ j, d, av, c, life }: { j: Joints; d: Dims; av: Avatar; c: Colors; life?: number }) {
   const ux = j.headC[0] - j.neck[0];
   const uy = j.headC[1] - j.neck[1];
   const l = Math.hypot(ux, uy) || 1;
@@ -206,13 +246,13 @@ function SideHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }
       {kind !== 'short' && <Shape d={backHair(j.headC, fwd, up, r, kind === 'long' ? 2.3 : 0.8)} fill={c.hair} />}
       <Shape d={smooth(P(cap))} fill={c.hair} />
       {kind === 'short' && <Shape d={ellipse(ear, r * 0.19, r * 0.26, deg + 90)} fill={mix(c.skin, INK, 0.06)} />}
-      <ellipse cx={eye[0]} cy={eye[1]} rx={r * 0.09} ry={r * 0.14} transform={`rotate(${deg + 90} ${eye[0]} ${eye[1]})`} fill={INK} />
+      <ellipse cx={eye[0]} cy={eye[1]} rx={r * 0.09} ry={r * 0.14 * eyeOpen(life)} transform={`rotate(${deg + 90} ${eye[0]} ${eye[1]})`} fill={INK} />
       <path d={`M${brow[0][0]},${brow[0][1]} Q${brow[1][0]},${brow[1][1]} ${brow[2][0]},${brow[2][1]}`} stroke={line(c.hair)} strokeWidth={0.75} fill="none" strokeLinecap="round" />
     </>
   );
 }
 
-function FrontHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }) {
+function FrontHead({ j, d, av, c, life }: { j: Joints; d: Dims; av: Avatar; c: Colors; life?: number }) {
   const r = d.head;
   const o = j.headC;
   const P = (pts: [number, number][]) => local(o, [1, 0], [0, -1], r, pts);
@@ -237,8 +277,8 @@ function FrontHead({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors 
       <ellipse cx={bL[0]} cy={bL[1]} rx={r * 0.17} ry={r * 0.11} fill={mix(c.skin, '#E8737A', 0.32)} />
       <ellipse cx={bR[0]} cy={bR[1]} rx={r * 0.17} ry={r * 0.11} fill={mix(c.skin, '#E8737A', 0.32)} />
       <Shape d={smooth(P(cap))} fill={c.hair} />
-      <ellipse cx={eL[0]} cy={eL[1]} rx={r * 0.08} ry={r * 0.13} fill={INK} />
-      <ellipse cx={eR[0]} cy={eR[1]} rx={r * 0.08} ry={r * 0.13} fill={INK} />
+      <ellipse cx={eL[0]} cy={eL[1]} rx={r * 0.08} ry={r * 0.13 * eyeOpen(life)} fill={INK} />
+      <ellipse cx={eR[0]} cy={eR[1]} rx={r * 0.08} ry={r * 0.13 * eyeOpen(life)} fill={INK} />
       <path d={`M${mouth[0][0]},${mouth[0][1]} Q${mouth[1][0]},${mouth[1][1]} ${mouth[2][0]},${mouth[2][1]}`} stroke={line(c.skin)} strokeWidth={0.7} fill="none" strokeLinecap="round" />
     </>
   );
@@ -264,24 +304,27 @@ function torsoPath(j: Joints, d: Dims, prof: Prof, k0: number, k1: number, grow 
   return smooth([...back, ...front]);
 }
 
-export function SideBody({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }) {
+export function SideBody({ j, d, av, c, glow, life }: { j: Joints; d: Dims; av: Avatar; c: Colors; glow?: Glow; life?: number }) {
   const prof = sideTorsoProf(av, d);
+  // Fessier : à l'arrière du bassin.
+  const at = (f: number, u: number): Pt => [j.hip[0] + j.front[0] * f + j.up[0] * u, j.hip[1] + j.front[1] * f + j.up[1] * u];
   return (
     <g>
       <Arm shoulder={j.shoulderF} elbow={j.elbowF} hand={j.handF} d={d} skin={c.skinFar} top={c.topFar} />
-      <Leg hip={j.hipF} knee={j.kneeF} ankle={j.ankleF} toe={j.toeF} d={d} av={av} skin={c.skinFar} bottom={c.bottomFar} shoe={mix(c.shoe, INK, 0.25)} />
+      <Leg hip={j.hipF} knee={j.kneeF} ankle={j.ankleF} toe={j.toeF} d={d} av={av} skin={c.skinFar} bottom={c.bottomFar} shoe={mix(c.shoe, INK, 0.25)} glow={glow} far />
       <Layer>
         <Shape d={torsoPath(j, d, prof, -0.08, 1.05)} fill={c.top} shadow={torsoPath(j, d, prof, -0.08, 1.05, 0, 0.32)} />
         <Shape d={torsoPath(j, d, prof, -0.08, 0.22, 0.15)} fill={c.bottom} edge shadow={torsoPath(j, d, prof, -0.08, 0.22, 0.15, 0.32)} />
-        <SideHead j={j} d={d} av={av} c={c} />
+        <SideHead j={j} d={d} av={av} c={c} life={life} />
       </Layer>
-      <Leg hip={j.hipN} knee={j.kneeN} ankle={j.ankleN} toe={j.toeN} d={d} av={av} skin={c.skin} bottom={c.bottom} shoe={c.shoe} />
+      <Leg hip={j.hipN} knee={j.kneeN} ankle={j.ankleN} toe={j.toeN} d={d} av={av} skin={c.skin} bottom={c.bottom} shoe={c.shoe} glow={glow} />
+      {glow?.glutes && <Halo a={at(-d.wTorso * 0.3, -d.wTorso * 0.36)} b={at(d.wTorso * 0.06, d.wTorso * 0.4)} w={d.wTorso * 0.33} glow={glow} />}
       <Arm shoulder={j.shoulderN} elbow={j.elbowN} hand={j.handN} d={d} skin={c.skin} top={c.top} />
     </g>
   );
 }
 
-export function FrontBody({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: Colors }) {
+export function FrontBody({ j, d, av, c, life }: { j: Joints; d: Dims; av: Avatar; c: Colors; life?: number }) {
   const f = av.sex === 'f';
   const sh = d.shoulderHalf;
   const hh = d.hipHalf;
@@ -305,7 +348,7 @@ export function FrontBody({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: 
       <Layer>
         <Shape d={half(-0.06, 1)} fill={c.top} />
         <Shape d={half(-0.06, 0.18, 0.3)} fill={c.bottom} edge />
-        <FrontHead j={j} d={d} av={av} c={c} />
+        <FrontHead j={j} d={d} av={av} c={c} life={life} />
       </Layer>
     </g>
   );

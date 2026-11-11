@@ -166,6 +166,26 @@ describe('animation', () => {
   });
 });
 
+describe('squat', () => {
+  it('pieds immobiles et à plat pendant tout le mouvement, effort maximal en bas', async () => {
+    const { EXERCISE_BY_ID } = await import('./exercises');
+    const ex = EXERCISE_BY_ID.squat;
+    const p = place(ex, dims(DEFAULT_AVATAR));
+    const x0 = frameAt(p, 0).j.ankleN[0];
+    let top = 0;
+    for (let i = 0; i < 60; i++) {
+      const { j, effort } = frameAt(p, (ex.period * i) / 60);
+      expect(Math.abs(j.ankleN[0] - x0)).toBeLessThan(0.001);
+      expect(Math.abs(j.toeN[1] - j.ankleN[1])).toBeLessThan(0.05);
+      top = Math.max(top, effort);
+    }
+    expect(top).toBe(1);
+    expect(frameAt(p, 0).effort).toBe(0);
+    // La miniature (milieu du cycle) montre la position basse.
+    expect(frameAt(p, ex.period / 2).pose.thighN).toBeGreaterThan(90);
+  });
+});
+
 describe('catégories', () => {
   it('abdos dans le tronc ; montées de genoux et talons-fesses en MI et en cardio', async () => {
     const { EXERCISE_BY_ID, inGroup } = await import('./exercises');
