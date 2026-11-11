@@ -184,6 +184,11 @@ function Equipment({ ex, j }: { ex: ExerciseAnim; j: Joints }) {
     const [a, b] = [along(j.kneeN, j.ankleN, t), along(j.kneeF, j.ankleF, t)];
     return <LegLoop a={a} b={b} color={BAND} view={view} ry={grip === 'knees' ? 4.5 : 3.6} edge={j.ankleN} />;
   }
+  if (grip === 'foot') {
+    // Élastique sous le pied proche, une extrémité dans chaque main.
+    const foot = mid(j.ankleN, j.toeN);
+    return <g><Band foot={foot} hand={j.handF} /><Band foot={foot} hand={j.handN} /></g>;
+  }
   return (
     <g>
       <Band foot={mid(j.ankleF, j.toeF)} hand={j.handF} />

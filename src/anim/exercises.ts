@@ -5,7 +5,7 @@ import type { Pose, Dims, Joints, Pt } from './pose';
 import { lerpPose, lowest, rotate, solve, translate } from './pose';
 import { setExerciseLabels } from '../engine/timeline';
 import type { VariantKey } from './variants';
-import { variantsOf } from './variants';
+import { MI_HANDS_CHEST, deadliftFrames, sideLungeFrames, sumoFrames, variantsOf } from './variants';
 
 /** Exercices écrits à la main. */
 export type BaseExerciseId =
@@ -17,6 +17,7 @@ export type BaseExerciseId =
   | 'seatedmarch' | 'seateddbcurl' | 'seateddbpress' | 'seatedbandrow' | 'seatedkbraise'
   | 'ringpress' | 'ringbridge'
   | 'bulgarian' | 'toeraise' | 'legabduction' | 'legadduction' | 'kickback'
+  | 'sumosquat' | 'sidelunge' | 'deadlift' | 'bandwalk' // MI : squat sumo, fente latérale, soulevé de terre, marche latérale
   | 'pressup' | 'pressforward' | 'curlbw' | 'tricepsbw' | 'shrug' | 'uprightrow' | 'lateralbw' | 'frontbw' | 'pecfly'
   | 'arnold' | 'dbarnold'
   | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside';
@@ -64,9 +65,10 @@ export interface ExerciseAnim {
 
 /**
  * Prise du matériel : `one` un seul objet tenu à deux mains, `each` un par main,
- * `hands` anneau entre les mains, `knees` / `ankles` anneau ou élastique autour des genoux / des chevilles.
+ * `hands` anneau entre les mains, `knees` / `ankles` anneau ou élastique autour des genoux / des chevilles,
+ * `foot` élastique sous le pied proche (pied avant d'une fente), une extrémité dans chaque main.
  */
-export type Grip = 'one' | 'each' | 'hands' | 'knees' | 'ankles';
+export type Grip = 'one' | 'each' | 'hands' | 'knees' | 'ankles' | 'foot';
 
 /** Matériel : sans matériel, kettlebell, élastique, haltères, anneau de Pilates. */
 export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell' | 'ring';
@@ -123,6 +125,20 @@ function shuffleAlt(): Frame[] {
     out.push({ pose: shApart('f'), x: 12 - k * 8 - 5 });
   }
   return out;
+}
+
+// ---------- MI : marche latérale (les autres postures MI sont dans variants.ts) ----------
+
+/** Marche latérale, mini-bande aux genoux, en demi-squat : deux pas à droite, deux pas à gauche (pied d'appui fixe). */
+function bandWalkFrames(): Frame[] {
+  const arms = MI_HANDS_CHEST;
+  const joined: Pose = { torso: 0, thighN: 10, shinN: 4, thighF: 10, shinF: 4, legReach: 0.8, ...arms };
+  const apart: Pose = { torso: 0, thighN: 18, shinN: 12, thighF: 18, shinF: 12, legReach: 0.8, ...arms };
+  const d = 5.8;
+  return [
+    { pose: joined, x: -4 * d }, { pose: apart, x: -3 * d }, { pose: joined, x: -2 * d }, { pose: apart, x: -d },
+    { pose: joined, x: 0 }, { pose: apart, x: -d }, { pose: joined, x: -2 * d }, { pose: apart, x: -3 * d },
+  ].map((f) => ({ ...f, x: f.x + 2 * d, w: 0.5 }));
 }
 
 const BASE: ExerciseAnim[] = [
@@ -482,6 +498,28 @@ const BASE: ExerciseAnim[] = [
       { pose: { torso: 22, head: -10, thighN: -48, shinN: -55, thighF: -1, shinF: -1, armN: 30, foreN: -20, armF: 28, foreF: -22 }, w: 0.6 },
       { pose: { torso: 22, head: -10, thighN: -48, shinN: -55, thighF: -1, shinF: -1, armN: 30, foreN: -20, armF: 28, foreF: -22 } },
     ],
+  },
+  // ---------- MI : squat sumo, fente latérale, soulevé de terre, marche latérale ----------
+  {
+    id: 'sumosquat', label: 'Squat sumo', group: 'mi', view: 'front', period: 2.6, anchor: 'hip',
+    words: ['squat sumo', 'sumo squat', 'squat jambes ecartees', 'squat plie'],
+    frames: sumoFrames(MI_HANDS_CHEST),
+  },
+  {
+    id: 'sidelunge', label: 'Fente latérale', group: 'mi', view: 'front', period: 3.6, anchor: 'feet',
+    words: ['fente laterale', 'fentes laterale', 'side lunge', 'lateral lunge', 'fente sur le cote'],
+    frames: sideLungeFrames(MI_HANDS_CHEST),
+  },
+  {
+    id: 'deadlift', label: 'Soulevé de terre jambes tendues (haltères)', group: 'mi', view: 'side', period: 2.8, anchor: 'feet', equipment: 'dumbbell',
+    words: ['souleve de terre', 'souleve de terre jambes tendue', 'souleve de terre roumain', 'deadlift', 'romanian deadlift', 'rdl',
+      'souleve de terre haltere', 'souleve de terre jambes tendues haltere'],
+    frames: deadliftFrames({ armN: 3, foreN: 4, armF: 1, foreF: 2 }),
+  },
+  {
+    id: 'bandwalk', label: 'Marche latérale (élastique)', group: 'mi', view: 'front', period: 3.6, anchor: 'hip', equipment: 'band', grip: 'knees',
+    words: ['marche laterale', 'marche laterale elastique', 'pas lateral', 'pas lateral elastique', 'pas lateraux', 'monster walk', 'band walk', 'marche en crabe'],
+    frames: bandWalkFrames(),
   },
   // ---------- Sans matériel : MS ----------
   {
