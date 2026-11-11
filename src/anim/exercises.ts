@@ -19,7 +19,9 @@ export type BaseExerciseId =
   | 'bulgarian' | 'toeraise' | 'legabduction' | 'legadduction' | 'kickback'
   | 'pressup' | 'pressforward' | 'curlbw' | 'tricepsbw' | 'shrug' | 'uprightrow' | 'lateralbw' | 'frontbw' | 'pecfly'
   | 'arnold' | 'dbarnold'
-  | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside';
+  | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside'
+  // Cardio
+  | 'shadowbox' | 'jumprope' | 'thruster' | 'kbhighpull';
 /** Exercice écrit à la main, ou une de ses variantes générées (chaise, matériel) : « curlbw-db-c »… */
 export type ExerciseId = BaseExerciseId | `${BaseExerciseId}-${VariantKey}`;
 
@@ -124,6 +126,11 @@ function shuffleAlt(): Frame[] {
   }
   return out;
 }
+
+// ---------- Cardio : boxe dans le vide ----------
+/** Appui décalé, genoux fléchis, en garde. */
+const SHADOW_LEGS = { torso: 6, head: -4, thighN: 18, shinN: 2, thighF: -8, shinF: -18 };
+const GUARD = { armN: 24, foreN: 165, armF: 22, foreF: 163 };
 
 const BASE: ExerciseAnim[] = [
   {
@@ -245,7 +252,7 @@ const BASE: ExerciseAnim[] = [
     ],
   },
   {
-    id: 'jumpsquat', label: 'Squat sauté', group: 'mi', view: 'side', period: 1.5, anchor: 'feet',
+    id: 'jumpsquat', label: 'Squat sauté', group: 'mi', also: ['cardio'], view: 'side', period: 1.5, anchor: 'feet',
     words: ['squat saute', 'jump squat', 'squat jump', 'saut squat'],
     frames: [
       { pose: { torso: 38, head: -22, thighN: 95, shinN: -28, thighF: 92, shinF: -30, armN: -35, foreN: -25, armF: -38, foreF: -28 }, w: 0.55 },
@@ -294,7 +301,7 @@ const BASE: ExerciseAnim[] = [
     frames: shuffleAlt(),
   },
   {
-    id: 'kbswing', label: 'Kettlebell swing', group: 'mi', view: 'side', period: 1.7, anchor: 'feet', equipment: 'kettlebell',
+    id: 'kbswing', label: 'Kettlebell swing', group: 'mi', also: ['cardio'], view: 'side', period: 1.7, anchor: 'feet', equipment: 'kettlebell',
     words: ['kettlebell swing', 'swing kettlebell', 'swing', 'kb swing'],
     frames: [
       { pose: { torso: 68, head: -30, thighN: 28, shinN: -12, thighF: 26, shinF: -12, armN: -18, foreN: -22, armF: -16, foreF: -20 }, w: 0.8 },
@@ -663,6 +670,48 @@ const BASE: ExerciseAnim[] = [
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176, reachUpper: 0.15 }, w: 0.8 },
       // Les coudes se rejoignent devant, bras toujours à 90°, puis se réécartent.
       { pose: { ...STAND, armN: 90, foreN: 178, armF: 88, foreF: 176 }, w: 0.8 },
+    ],
+  },
+  // ---------- Cardio ----------
+  {
+    id: 'shadowbox', label: 'Boxe dans le vide', group: 'cardio', view: 'side', period: 1.2, anchor: 'feet',
+    words: ['boxe dans le vide', 'shadow boxing', 'shadowboxing', 'shadow box', 'boxe'],
+    frames: [
+      // En garde, poings au menton, jambes fléchies en appui décalé ; direct du bras avant, garde, direct du bras arrière.
+      { pose: { ...SHADOW_LEGS, ...GUARD }, w: 0.5 },
+      { pose: { ...SHADOW_LEGS, torso: 2, armN: 86, foreN: 90, armF: 24, foreF: 163 }, w: 0.5 },
+      { pose: { ...SHADOW_LEGS, ...GUARD }, w: 0.5 },
+      { pose: { ...SHADOW_LEGS, torso: 10, twist: -0.6, armN: 24, foreN: 165, armF: 84, foreF: 88 }, w: 0.5 },
+    ],
+  },
+  {
+    id: 'jumprope', label: 'Corde à sauter imaginaire', group: 'cardio', view: 'side', period: 0.5, anchor: 'feet',
+    words: ['corde a sauter', 'saut a la corde', 'saute a la corde', 'jump rope', 'corde imaginaire'],
+    frames: [
+      // Petits sauts sur l'avant des pieds, mains à hauteur des hanches qui font tourner la corde.
+      { pose: { ...STAND, torso: 2, thighN: 3, shinN: 0, thighF: 1, shinF: -1, heel: 22, armN: 14, foreN: 72, armF: 12, foreF: 70 } },
+      { pose: { ...STAND, torso: 2, thighN: 1, shinN: 3, thighF: -1, shinF: 1, heel: 34, lift: 5, armN: 10, foreN: 34, armF: 8, foreF: 32 } },
+    ],
+  },
+  {
+    id: 'thruster', label: 'Thruster (haltères)', group: 'cardio', view: 'side', period: 2.6, anchor: 'feet', equipment: 'dumbbell',
+    words: ['thruster', 'squat developpe', 'squat poussee'],
+    frames: [
+      // Haltères aux épaules, squat, puis on remonte en poussant les haltères au-dessus de la tête.
+      { pose: { ...STAND, torso: 2, armN: 24, foreN: 172, armF: 22, foreF: 170 } },
+      { pose: { torso: 34, head: -18, thighN: 95, shinN: -28, thighF: 92, shinF: -30, armN: 56, foreN: 194, armF: 54, foreF: 192 }, w: 0.7 },
+      { pose: { ...STAND, armN: 172, foreN: 176, armF: 170, foreF: 174 }, w: 0.4 },
+      { pose: { ...STAND, armN: 172, foreN: 176, armF: 170, foreF: 174 }, w: 0.8 },
+    ],
+  },
+  {
+    id: 'kbhighpull', label: 'High pull (kettlebell)', group: 'cardio', view: 'side', period: 1.8, anchor: 'feet', equipment: 'kettlebell', grip: 'one',
+    words: ['high pull', 'tirage haut', 'tirage menton sumo', 'souleve tirage menton'],
+    frames: [
+      // Kettlebell entre les pieds, hanches en arrière ; on se relève d'un coup en tirant la kettlebell sous le menton, coudes hauts.
+      { pose: { torso: 58, head: -22, thighN: 34, shinN: -14, thighF: 32, shinF: -14, armN: 0, foreN: 0, armF: -2, foreF: -2 }, w: 0.8 },
+      { pose: { ...STAND, torso: -2, armN: 160, foreN: 50, armF: 158, foreF: 48, reach: 0.5 }, w: 0.5 },
+      { pose: { ...STAND, torso: -2, armN: 160, foreN: 50, armF: 158, foreF: 48, reach: 0.5 } },
     ],
   },
 ];

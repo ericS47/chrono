@@ -136,6 +136,85 @@ const seatedCalf = (arms: Arms): Frame[] => [
 /** Mains posées sur les genoux, assis. */
 const HANDS_ON_KNEES = { armN: 42, foreN: 78, armF: 40, foreF: 76 };
 
+// ---------- Cardio : aides de posture ----------
+
+/** Charge poussée au-dessus de la tête, bras tendus (de profil). */
+const ARMS_OVER: Arms = { armN: 172, foreN: 176, armF: 170, foreF: 174 };
+/** Anneau serré entre les paumes devant la poitrine (de profil), suivant l'inclinaison du buste. */
+const ringChest = (torso: number): Arms => ({ armN: 40 + torso, foreN: 120 + torso, armF: 38 + torso, foreF: 118 + torso });
+
+/** Thruster debout : charge à la poitrine, squat, puis poussée au-dessus de la tête en remontant. */
+const thrusterWith = (rack: (torso: number) => Arms, over: Arms = ARMS_OVER): Frame[] => [
+  { pose: { ...STAND, torso: 2, ...rack(2) } },
+  { pose: { torso: 34, head: -18, thighN: 95, shinN: -28, thighF: 92, shinF: -30, ...rack(34) }, w: 0.7 },
+  { pose: { ...STAND, ...over }, w: 0.4 },
+  { pose: { ...STAND, ...over }, w: 0.8 },
+];
+/** Thruster depuis la chaise : on se lève en poussant la charge au-dessus de la tête, on la ramène, on se rassoit. */
+const thrusterSeated = (rack: (torso: number) => Arms, over: Arms = ARMS_OVER): Frame[] => [
+  { pose: { torso: 0, ...SEAT, ...rack(0) }, w: 0.5 },
+  { pose: { torso: 42, head: -15, thighN: 62, shinN: -12, thighF: 60, shinF: -12, ...rack(42) }, w: 0.6 },
+  { pose: { ...STAND, ...over }, w: 0.4 },
+  { pose: { ...STAND, ...over }, w: 0.6 },
+  { pose: { ...STAND, ...rack(0) }, w: 0.5 },
+  { pose: { torso: 42, head: -15, thighN: 62, shinN: -12, thighF: 60, shinF: -12, ...rack(42) }, w: 0.7 },
+];
+
+/** Squat sauté avec une prise fixe des bras (en bas, en l'air). */
+const jumpSquatWith = (low: Arms, high: Arms): Frame[] => [
+  { pose: { torso: 38, head: -22, thighN: 95, shinN: -28, thighF: 92, shinF: -30, ...low }, w: 0.55 },
+  { pose: { torso: 0, thighN: 2, shinN: 2, thighF: 0, shinF: 0, ...high, lift: 12, heel: 30 } },
+];
+
+/** Burpee les mains sur les haltères : on se relève et on saute haltères le long du corps. */
+const BURPEE_LOW_C: Pose = { torso: 60, head: -30, thighN: 100, shinN: -35, thighF: 98, shinF: -35, armN: 35, foreN: 35, armF: 33, foreF: 33 };
+const HIGH_PLANK_C: Pose = { torso: 68, head: -6, thighN: -68, shinN: -68, thighF: -68, shinF: -68, armN: 0, foreN: 0, armF: 3, foreF: 3 };
+const BURPEE_HOLD: Frame[] = [
+  { pose: { ...STAND, ...ARMS_DOWN }, anchor: 'feet' },
+  { pose: BURPEE_LOW_C, anchor: 'feet', w: 0.7 },
+  { pose: HIGH_PLANK_C, anchor: 'hands', w: 0.7 },
+  { pose: BURPEE_LOW_C, anchor: 'hands' },
+  { pose: { torso: 0, thighN: 2, shinN: 4, thighF: 0, shinF: 3, ...ARMS_DOWN, lift: 10 }, anchor: 'feet', w: 0.8 },
+];
+
+/** Jumping jack de face, anneau tenu au-dessus de la tête et serré à chaque écart des jambes. */
+const jackRingOver = (seated: boolean): Frame[] => {
+  const closed = seated ? FRONT_SEAT_LEGS : { thighN: 3, shinN: 2, thighF: 3, shinF: 2 };
+  const open = seated
+    ? { ...FRONT_SEAT_LEGS, thighN: 40, shinN: 30, thighF: 40, shinF: 30 }
+    : { thighN: 20, shinN: 18, thighF: 20, shinF: 18 };
+  const mid = seated ? { ...FRONT_SEAT_LEGS, thighN: 31, shinN: 20, thighF: 31, shinF: 20 } : { thighN: 11, shinN: 10, thighF: 11, shinF: 10 };
+  return [
+    { pose: { torso: 0, ...closed, armN: 158, foreN: -148, armF: 158, foreF: -148 } },
+    { pose: { torso: 0, ...mid, armN: 160, foreN: -144, armF: 160, foreF: -144, lift: seated ? 0 : 6 } },
+    { pose: { torso: 0, ...open, armN: 162, foreN: -140, armF: 162, foreF: -140 } },
+    { pose: { torso: 0, ...mid, armN: 160, foreN: -144, armF: 160, foreF: -144, lift: seated ? 0 : 6 } },
+  ];
+};
+
+/** Montées de genoux avec une mini-bande autour des pieds : genou un peu moins haut. */
+const KNEES_BAND: Frame[] = [
+  { pose: { torso: -2, thighN: 78, shinN: 0, thighF: 2, shinF: 2, armN: -35, foreN: 30, armF: 45, foreF: 120, lift: 2 } },
+  { pose: { torso: -2, thighN: 2, shinN: 2, thighF: 78, shinF: 0, armN: 45, foreN: 120, armF: -35, foreF: 30, lift: 2 } },
+];
+
+/** Montées de genoux : le genou vient toucher l'anneau tenu à deux mains devant les hanches. */
+const KNEES_TO_RING: Frame[] = [
+  { pose: { torso: -2, thighN: 95, shinN: 5, thighF: 2, shinF: 2, armN: 30, foreN: 80, armF: 28, foreF: 78, lift: 2 } },
+  { pose: { torso: -2, thighN: 2, shinN: 2, thighF: 95, shinF: 5, armN: 30, foreN: 80, armF: 28, foreF: 78, lift: 2 } },
+];
+
+/** Tipping assis : pieds qui frappent le sol à toute vitesse, sur l'avant du pied, bras qui accompagnent. */
+const SEATED_TAP: Frame[] = [
+  { pose: { ...SEATED, torso: 8, thighN: 100, shinN: 8, heel: 30, armN: 25, foreN: 105, armF: -15, foreF: 75 } },
+  { pose: { ...SEATED, torso: 8, thighF: 98, shinF: 8, heel: 30, armN: -15, foreN: 75, armF: 25, foreF: 105 } },
+];
+/** Corde à sauter assis : talons qui rebondissent, mains qui font tourner la corde au niveau des hanches. */
+const SEATED_ROPE: Frame[] = [
+  { pose: { ...SEATED, armN: 10, foreN: 108, armF: 8, foreF: 106 } },
+  { pose: { ...SEATED, thighN: 96, shinN: 5, thighF: 94, shinF: 5, heel: 35, armN: 8, foreN: 86, armF: 6, foreF: 84 } },
+];
+
 // ---------- Les variantes ----------
 
 const SPECS: Spec[] = [
@@ -415,6 +494,70 @@ const SPECS: Spec[] = [
         { pose: { torso: 0, ...FRONT_SEAT_LEGS, thighN: 40, shinN: 30, thighF: 40, shinF: 30, armN: 165, foreN: 172, armF: 165, foreF: 172 } },
       ],
     },
+    eq: {
+      // Haltères légers : un par main, debout et assis (postures du jumping jack assis).
+      db: { s: true, c: true },
+      // Mini-bande aux chevilles debout, au-dessus des genoux assis.
+      band: { s: { grip: 'ankles' }, c: { grip: 'knees' } },
+      // Anneau tenu au-dessus de la tête, serré à chaque écart.
+      ring: { s: { frames: jackRingOver(false) }, c: { frames: jackRingOver(true) } },
+    },
+  },
+  {
+    base: 'shadowbox', short: 'Boxe dans le vide', words: ['boxe dans le vide', 'shadow boxing', 'boxe'],
+    chair: true,
+    eq: { db: { s: true, c: true } },
+  },
+  {
+    base: 'jumprope', short: 'Corde à sauter imaginaire', words: ['corde a sauter', 'saut a la corde', 'jump rope'],
+    chair: { frames: SEATED_ROPE },
+  },
+  {
+    base: 'tapping', short: 'Tipping', words: ['tipping', 'tapping', 'fast feet', 'pietinement'],
+    chair: { frames: SEATED_TAP },
+  },
+  {
+    base: 'thruster', short: 'Thruster', words: ['thruster', 'squat developpe', 'squat poussee'],
+    eq: {
+      db: { c: { frames: thrusterSeated(chest), anchor: 'feet', label: 'Thruster assis-debout (haltères)' } },
+      kb: {
+        s: { frames: thrusterWith(chest), grip: 'one' },
+        c: { frames: thrusterSeated(chest), anchor: 'feet', grip: 'one', label: 'Thruster assis-debout (kettlebell)' },
+      },
+      // Élastique sous les pieds, une poignée dans chaque main.
+      band: {
+        s: { frames: thrusterWith(chest) },
+        c: { frames: thrusterSeated(chest), anchor: 'feet', label: 'Thruster assis-debout (élastique)' },
+      },
+      ring: {
+        s: { frames: thrusterWith(ringChest), grip: 'hands' },
+        c: { frames: thrusterSeated(ringChest), anchor: 'feet', grip: 'hands', label: 'Thruster assis-debout (anneau)' },
+      },
+    },
+  },
+  {
+    base: 'jumpsquat', short: 'Squat sauté', words: ['squat saute', 'jump squat', 'squat jump'],
+    eq: {
+      db: { s: { frames: jumpSquatWith(ARMS_DOWN, ARMS_DOWN) } },
+      kb: { s: { frames: jumpSquatWith(chest(38), chest(0)), grip: 'one' } },
+      band: { s: { grip: 'knees' } },
+      ring: { s: { frames: jumpSquatWith(ringChest(38), ringChest(0)), grip: 'hands' } },
+    },
+  },
+  {
+    base: 'highknees', short: 'Montées de genoux', words: ['montee de genoux', 'montee de genou', 'high knee'],
+    eq: {
+      band: { s: { frames: KNEES_BAND, grip: 'ankles' } },
+      ring: { s: { frames: KNEES_TO_RING, grip: 'hands' } },
+    },
+  },
+  {
+    base: 'shufflealt', short: 'Pas chassé', words: ['pas chasse alterne', 'pas chasse', 'shuffle'],
+    eq: { band: { s: { grip: 'knees', label: 'Pas chassé alterné (élastique)' } } },
+  },
+  {
+    base: 'burpee', short: 'Burpee', words: ['burpee'],
+    eq: { db: { s: { frames: BURPEE_HOLD } } },
   },
 ];
 
