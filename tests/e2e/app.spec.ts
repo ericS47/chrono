@@ -186,6 +186,23 @@ test('séance reprise au même point après fermeture de l’app', async ({ page
   await expect(page.locator('.timer-stats')).toContainText('/ 8');
 });
 
+test('séance en pause reprise après fermeture de l’app : le chrono repart', async ({ page }) => {
+  await page.goto('./#/rapide/tabata');
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.clock.runFor(1_500);
+  await page.getByRole('button', { name: 'Pause' }).click();
+  await expect(page.getByText('EN PAUSE')).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('EN PAUSE')).toBeVisible();
+  await page.getByRole('button', { name: 'Reprendre', exact: true }).click();
+  await expect(page.locator('.ring-phase')).toHaveText('PRÊT ?');
+  // Reste ~8,5 s de préparation : le chrono doit passer à l’effort.
+  await page.clock.runFor(10_000);
+  await expect(page.locator('.ring-phase')).toHaveText('EFFORT');
+  await expect(page.locator('.timer-stats')).toContainText('1 / 8');
+});
+
 test('séance : les bips sont joués par une piste audio (arrière-plan)', async ({ page }) => {
   await page.addInitScript(() => {
     const w = window as unknown as { __tracks: number };

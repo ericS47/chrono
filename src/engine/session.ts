@@ -231,7 +231,11 @@ export function toggle(): void {
   const st = current.run.status;
   if (st === 'idle') return begin();
   if (st === 'running') update((r, t) => T.pause(r, t), false);
-  else if (st === 'paused') update((r, t) => T.resume(r, t), false);
+  else if (st === 'paused') {
+    update((r, t) => T.resume(r, t), false);
+    // Séance restaurée en pause (app rouverte) : la boucle n'a jamais été lancée.
+    loop();
+  }
 }
 
 export function skip(): void {
