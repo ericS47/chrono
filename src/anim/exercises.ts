@@ -6,6 +6,7 @@ import { lerpPose, lowest, rotate, solve, translate } from './pose';
 import { setExerciseLabels } from '../engine/timeline';
 import type { VariantKey } from './variants';
 import { MI_HANDS_CHEST, deadliftFrames, sideLungeFrames, sumoFrames, variantsOf } from './variants';
+import { DEADBUG, haloFrames, RENEGADE, sideBend } from './variants';
 
 /** Exercices écrits à la main. */
 export type BaseExerciseId =
@@ -24,7 +25,9 @@ export type BaseExerciseId =
   // MS avec matériel
   | 'dbkickback' | 'dbhammer' | 'dbpullover' | 'dbfloorpress' | 'ringoverhead' | 'ringbehind' | 'ringside' | 'ringopen'
   // Cardio
-  | 'shadowbox' | 'jumprope' | 'thruster' | 'kbhighpull';
+  | 'shadowbox' | 'jumprope' | 'thruster' | 'kbhighpull'
+  // Tronc : exercices ajoutés pour les variantes avec matériel.
+  | 'deadbug' | 'sidebend' | 'renegaderow' | 'halo';
 /** Exercice écrit à la main, ou une de ses variantes générées (chaise, matériel) : « curlbw-db-c »… */
 export type ExerciseId = BaseExerciseId | `${BaseExerciseId}-${VariantKey}`;
 
@@ -70,14 +73,18 @@ export interface ExerciseAnim {
 /**
  * Prise du matériel : `one` un seul objet tenu à deux mains, `each` un par main,
  * `hands` anneau entre les mains, `knees` / `ankles` anneau ou élastique autour des genoux / des chevilles,
- * `foot` élastique sous le pied proche (pied avant d'une fente), une extrémité dans chaque main.
+ * `foot` élastique sous le pied proche (pied avant d'une fente), une extrémité dans chaque main,
+ * `near` une seule charge dans la main proche (élastique : du pied à la main proches) ;
+ * haltère avec `ankles` : serré entre les pieds.
  */
 export type Grip = 'one' | 'each' | 'hands' | 'knees' | 'ankles'
   // MS : `hammer` haltère en prise neutre (curl marteau), `back` élastique passé dans le dos,
   // `side` anneau serré entre le bras et la hanche, `inside` anneau écarté de l'intérieur (mains dedans).
   | 'hammer' | 'back' | 'side' | 'inside'
   // MI
-  | 'foot';
+  | 'foot'
+  // Tronc
+  | 'near';
 
 /** Matériel : sans matériel, kettlebell, élastique, haltères, anneau de Pilates. */
 export type Equipment = 'none' | 'kettlebell' | 'band' | 'dumbbell' | 'ring';
@@ -834,6 +841,47 @@ const BASE: ExerciseAnim[] = [
       { pose: { ...STAND, torso: -2, armN: 160, foreN: 50, armF: 158, foreF: 48, reach: 0.5 }, w: 0.5 },
       { pose: { ...STAND, torso: -2, armN: 160, foreN: 50, armF: 158, foreF: 48, reach: 0.5 } },
     ],
+  },
+  // ---------- Tronc : bases des variantes avec matériel ----------
+  {
+    // Sur le dos, bras tendus vers le plafond, genoux à 90° ; bras et jambe opposés s'allongent vers le sol.
+    id: 'deadbug', label: 'Dead bug', group: 'tronc', view: 'side', period: 3.6, anchor: 'hip',
+    words: ['dead bug', 'deadbug', 'insecte mort'],
+    frames: [
+      { pose: DEADBUG, w: 0.5 },
+      { pose: { ...DEADBUG, armN: 262, foreN: 262, thighF: 100, shinF: 100 } },
+      { pose: DEADBUG, w: 0.5 },
+      { pose: { ...DEADBUG, armF: 260, foreF: 260, thighN: 100, shinN: 100 } },
+    ],
+  },
+  {
+    // De face : le buste s'incline d'un côté puis de l'autre, la main glisse le long de la cuisse.
+    id: 'sidebend', label: 'Flexion latérale du buste', group: 'tronc', view: 'front', period: 3.2, anchor: 'hip',
+    words: ['flexion laterale du buste', 'flexion laterale', 'inclinaison laterale', 'inclinaison du buste', 'side bend'],
+    frames: [
+      { pose: sideBend(0), w: 0.5 },
+      { pose: sideBend(24) },
+      { pose: sideBend(0), w: 0.5 },
+      { pose: sideBend(-24) },
+    ],
+  },
+  {
+    // Gainage bras tendus sur deux haltères, tirage d'un bras puis de l'autre.
+    id: 'renegaderow', label: 'Renegade row (haltères)', group: 'tronc', view: 'side', period: 3.2, anchor: 'feet', equipment: 'dumbbell',
+    words: ['renegade row', 'rowing renegade', 'rowing en gainage', 'rowing en planche', 'gainage rowing'],
+    frames: [
+      { pose: RENEGADE, w: 0.5 },
+      { pose: { ...RENEGADE, armN: -112, foreN: -8 } },
+      { pose: RENEGADE, w: 0.5 },
+      { pose: { ...RENEGADE, armF: -110, foreF: -6 } },
+    ],
+  },
+  {
+    // De face : la charge tourne autour de la tête (devant le menton, oreille droite, derrière la tête, oreille gauche).
+    // Les bras font un tour complet : la dernière posture (durée nulle) reprend la première, angles décalés de 360°.
+    id: 'halo', label: 'Halo (kettlebell)', group: 'tronc', view: 'front', period: 3.6, anchor: 'hip', equipment: 'kettlebell', grip: 'one',
+    words: ['halo', 'kettlebell halo', 'halo kettlebell'],
+    frames: haloFrames({ thighN: 6, shinN: 5, thighF: 6, shinF: 5 }),
   },
 ];
 

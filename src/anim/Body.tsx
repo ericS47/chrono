@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import type { Avatar } from './avatar';
 import { mix } from './avatar';
 import type { Dims, Joints, Pt } from './pose';
+import { WAIST } from './pose';
 
 export interface Colors { skin: string; skinFar: string; hair: string; top: string; topFar: string; bottom: string; bottomFar: string; shoe: string }
 
@@ -289,6 +290,17 @@ export function FrontBody({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: 
     ? [[-0.06, hh + 2.2], [0.1, hh + 3.0], [0.42, sh * 0.68 + d.belly * 0.8], [0.7, sh * 0.95], [0.9, sh + 1], [1, 3.6]]
     : [[-0.06, hh + 2.0], [0.1, hh + 2.6], [0.42, sh * 0.76 + d.belly * 0.8], [0.7, sh * 0.98], [0.9, sh + 1.8], [1, 4]]
   ).map(([k, w]) => [k, w, w] as [number, number, number]);
+  // Flexion latérale (`lean`) : le haut du corps et la tête sont dessinés droits puis tournés d'un bloc autour
+  // de la taille ; le bassin (short) reste droit.
+  const lean = (Math.atan2(j.up[0], -j.up[1]) * 180) / Math.PI;
+  const leaning = Math.abs(lean) > 0.01;
+  const waist: Pt = [j.hip[0], j.hip[1] - d.torso * WAIST];
+  const back = (q: Pt): Pt => {
+    const r = (-lean * Math.PI) / 180;
+    const [x, y] = [q[0] - waist[0], q[1] - waist[1]];
+    return [waist[0] + x * Math.cos(r) - y * Math.sin(r), waist[1] + x * Math.sin(r) + y * Math.cos(r)];
+  };
+  const jt: Joints = leaning ? { ...j, neck: back(j.neck), headC: back(j.headC) } : j;
   const half = (k0: number, k1: number, grow = 0): string => {
     const ks = [k0, ...prof.map((p) => p[0]).filter((k) => k > k0 && k < k1), k1];
     const at = (k: number, x: number): Pt => [j.hip[0] + x, j.hip[1] - d.torso * k];
@@ -302,11 +314,21 @@ export function FrontBody({ j, d, av, c }: { j: Joints; d: Dims; av: Avatar; c: 
       <Leg hip={j.hipN} knee={j.kneeN} ankle={j.ankleN} toe={j.toeN} d={d} av={av} skin={c.skin} bottom={c.bottom} shoe={c.shoe} />
       <Arm shoulder={j.shoulderF} elbow={j.elbowF} hand={j.handF} d={d} skin={c.skin} top={c.top} />
       <Arm shoulder={j.shoulderN} elbow={j.elbowN} hand={j.handN} d={d} skin={c.skin} top={c.top} />
-      <Layer>
-        <Shape d={half(-0.06, 1)} fill={c.top} />
-        <Shape d={half(-0.06, 0.18, 0.3)} fill={c.bottom} edge />
-        <FrontHead j={j} d={d} av={av} c={c} />
-      </Layer>
+      {leaning ? (
+        <Layer>
+          <g transform={`rotate(${lean} ${waist[0]} ${waist[1]})`}>
+            <Shape d={half(0.08, 1)} fill={c.top} />
+            <FrontHead j={jt} d={d} av={av} c={c} />
+          </g>
+          <Shape d={half(-0.06, 0.18, 0.3)} fill={c.bottom} edge />
+        </Layer>
+      ) : (
+        <Layer>
+          <Shape d={half(-0.06, 1)} fill={c.top} />
+          <Shape d={half(-0.06, 0.18, 0.3)} fill={c.bottom} edge />
+          <FrontHead j={j} d={d} av={av} c={c} />
+        </Layer>
+      )}
     </g>
   );
 }
