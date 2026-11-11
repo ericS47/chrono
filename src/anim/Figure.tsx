@@ -41,6 +41,8 @@ function Band({ foot, hand }: { foot: Pt; hand: Pt }) {
 
 /** Point à la fraction `t` du segment a → b. */
 const along = (a: Pt, b: Pt, t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+/** Point p + u·k + v·l. */
+const add2 = (p: Pt, u: Pt, k: number, v: Pt, l: number): Pt => [p[0] + u[0] * k + v[0] * l, p[1] + u[1] * k + v[1] * l];
 
 /** Mini-bande ou anneau autour des deux jambes (genoux ou chevilles) : de face, tendu entre les jambes ; de profil, vu par la tranche. */
 function LegLoop({ a, b, color, view, ry, edge }: { a: Pt; b: Pt; color: string; view: 'side' | 'front'; ry: number; edge: Pt }) {
@@ -64,8 +66,18 @@ function LegLoop({ a, b, color, view, ry, edge }: { a: Pt; b: Pt; color: string;
 const IRON = '#2B2F3A';
 
 /** Haltère tenu en main : de profil, vu de bout (un disque) ; de face, à plat. */
-function Dumbbell({ hand, view }: { hand: Pt; view: 'side' | 'front' }) {
+function Dumbbell({ hand, view, angle }: { hand: Pt; view: 'side' | 'front'; angle?: number }) {
   const [x, y] = hand;
+  if (angle !== undefined) {
+    // Prise neutre (curl marteau) : de profil, la barre se voit en long, perpendiculaire à l'avant-bras.
+    return (
+      <g transform={`rotate(${angle} ${x} ${y})`}>
+        <rect x={x - 4.5} y={y - 0.9} width={9} height={1.8} rx={0.9} fill="#6B6F76" />
+        <rect x={x - 6.5} y={y - 3.2} width={2.8} height={6.4} rx={1.1} fill={IRON} />
+        <rect x={x + 3.7} y={y - 3.2} width={2.8} height={6.4} rx={1.1} fill={IRON} />
+      </g>
+    );
+  }
   if (view === 'side') {
     return (
       <g>
@@ -120,6 +132,28 @@ function Chair({ seatY, x0, back }: ChairPos) {
 const RING = '#3DB8AD';
 /** Anneau de Pilates : de face, tenu entre les mains ; de profil, serré entre les genoux (ou tenu à deux mains, `hands`). */
 function Ring({ j, view, grip }: { j: Joints; view: 'side' | 'front'; grip?: string }) {
+  if (grip === 'side') {
+    // Anneau serré entre l'intérieur du bras (côté droit de l'écran) et la hanche : il s'aplatit quand le bras serre.
+    const m = along(j.elbowN, j.handN, 0.3);
+    const inner = j.shoulderN[0] - 2.5;
+    const rx = Math.max(2.5, (m[0] - inner) / 2);
+    return <ellipse cx={(m[0] + inner) / 2} cy={m[1] + 1} rx={rx} ry={7.5} fill="none" stroke={RING} strokeWidth={1.9} />;
+  }
+  if (grip === 'inside' && view === 'front') {
+    // Mains à l'intérieur de l'anneau, contre les poignées : l'anneau déborde de chaque côté.
+    const [ax, ay] = j.handF;
+    const [bx, by] = j.handN;
+    const cx = (ax + bx) / 2;
+    const cy = (ay + by) / 2;
+    const rx = Math.abs(bx - ax) / 2 + 3.6;
+    return (
+      <g>
+        <ellipse cx={cx} cy={cy} rx={rx} ry={8} fill="none" stroke={RING} strokeWidth={1.9} />
+        <rect x={cx - rx - 1.6} y={cy - 2.8} width={3.2} height={5.6} rx={1.3} fill="#2B2F3A" opacity={0.85} />
+        <rect x={cx + rx - 1.6} y={cy - 2.8} width={3.2} height={5.6} rx={1.3} fill="#2B2F3A" opacity={0.85} />
+      </g>
+    );
+  }
   if (grip === 'knees' || grip === 'ankles') {
     const [a, b] = grip === 'knees' ? [j.kneeN, j.kneeF] : [along(j.kneeN, j.ankleN, 0.8), along(j.kneeF, j.ankleF, 0.8)];
     if (view === 'front') return <LegLoop a={a} b={b} color={RING} view={view} ry={6} edge={a} />;
@@ -172,6 +206,15 @@ function Equipment({ ex, j }: { ex: ExerciseAnim; j: Joints }) {
   if (kind === 'ring') return <Ring j={j} view={view} grip={grip} />;
   if (kind === 'dumbbell') {
     if (grip === 'one') return <Dumbbell hand={mid(j.handN, j.handF)} view={view} />;
+    if (grip === 'hammer') {
+      const ang = (e: Pt, h: Pt) => (Math.atan2(h[1] - e[1], h[0] - e[0]) * 180) / Math.PI + 90;
+      return (
+        <g>
+          <Dumbbell hand={j.handF} view={view} angle={ang(j.elbowF, j.handF)} />
+          <Dumbbell hand={j.handN} view={view} angle={ang(j.elbowN, j.handN)} />
+        </g>
+      );
+    }
     return (
       <g>
         <Dumbbell hand={j.handF} view={view} />
@@ -183,6 +226,16 @@ function Equipment({ ex, j }: { ex: ExerciseAnim; j: Joints }) {
     const t = grip === 'knees' ? 0.12 : 0.8;
     const [a, b] = [along(j.kneeN, j.ankleN, t), along(j.kneeF, j.ankleF, t)];
     return <LegLoop a={a} b={b} color={BAND} view={view} ry={grip === 'knees' ? 4.5 : 3.6} edge={j.ankleN} />;
+  }
+  if (grip === 'back') {
+    // Élastique passé dans le dos, sous les omoplates, une extrémité dans chaque main.
+    const back = add2(mid(j.shoulderN, j.shoulderF), j.front, -5.5, j.up, -4);
+    return (
+      <g>
+        <Band foot={back} hand={j.handF} />
+        <Band foot={back} hand={j.handN} />
+      </g>
+    );
   }
   return (
     <g>

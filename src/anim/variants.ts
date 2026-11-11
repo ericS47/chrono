@@ -136,6 +136,22 @@ const seatedCalf = (arms: Arms): Frame[] => [
 /** Mains posées sur les genoux, assis. */
 const HANDS_ON_KNEES = { armN: 42, foreN: 78, armF: 40, foreF: 76 };
 
+// ---------- Postures MS ----------
+
+/** Assis au bord de la chaise, buste penché sur les cuisses (rowing, kickback assis). */
+const SEATED_BENT: Pose = { torso: 55, head: -14, ...SEAT, armN: 0, foreN: 0, armF: -2, foreF: -2 };
+/** Rowing buste penché assis : bras qui pendent le long des mollets, puis coudes tirés vers l'arrière. */
+const seatedRow: Frame[] = [
+  { pose: { ...SEATED_BENT, armN: -6, foreN: 20, armF: -8, foreF: 18 } },
+  { pose: { ...SEATED_BENT, armN: -58, foreN: 10, armF: -56, foreF: 8 } },
+];
+/** Kickback triceps assis, buste penché : haut du bras le long du buste, avant-bras qui se tend vers l'arrière. */
+const seatedKick: Frame[] = [
+  { pose: { ...SEATED_BENT, armN: -66, foreN: 8, armF: -64, foreF: 6 } },
+  { pose: { ...SEATED_BENT, armN: -68, foreN: -70, armF: -66, foreF: -68 }, w: 0.5 },
+  { pose: { ...SEATED_BENT, armN: -68, foreN: -70, armF: -66, foreF: -68 } },
+];
+
 // ---------- Les variantes ----------
 
 const SPECS: Spec[] = [
@@ -258,6 +274,8 @@ const SPECS: Spec[] = [
       db: { s: true, c: true },
       kb: { s: true, c: true },
       ring: { s: { grip: 'hands' }, c: { grip: 'hands' } },
+      // Élastique passé dans le dos, poussé devant soi (développé couché debout).
+      band: { s: { grip: 'back' }, c: { grip: 'back' } },
     },
   },
   {
@@ -306,7 +324,7 @@ const SPECS: Spec[] = [
     eq: { db: { c: true }, kb: { s: true, c: true }, band: { s: true, c: true } },
   },
   {
-    base: 'pushup', short: 'Pompe', words: ['pompe', 'push up'],
+    base: 'pushup', short: 'Pompe', words: ['pompe', 'push up', 'pompe sur'],
     chair: {
       label: 'Pompe inclinée sur chaise', chairUnder: 'incline', anchor: 'hands',
       frames: [
@@ -314,6 +332,59 @@ const SPECS: Spec[] = [
         { pose: { torso: 56, head: -6, thighN: -56, shinN: -56, thighF: -56, shinF: -56, armN: -74, foreN: 12.5, armF: -72, foreF: 14 } },
       ],
     },
+    eq: {
+      // Mains sur les haltères (poignets droits, plus d'amplitude).
+      db: { s: true },
+      // Élastique tendu dans le dos, une extrémité sous chaque main.
+      band: { s: { grip: 'back' }, c: { grip: 'back' } },
+    },
+  },
+  {
+    base: 'dbrow', short: 'Rowing buste penché', words: ['rowing buste penche', 'rowing penche'],
+    eq: {
+      db: { c: { frames: seatedRow } },
+      kb: { s: true, c: { frames: seatedRow } },
+      // Élastique sous les pieds.
+      band: { s: true, c: { frames: seatedRow } },
+      // Anneau serré entre les paumes pendant le tirage.
+      ring: { s: { grip: 'hands' }, c: { frames: seatedRow, grip: 'hands' } },
+    },
+  },
+  {
+    base: 'dbkickback', short: 'Kickback triceps', words: ['kickback triceps', 'kick back triceps'],
+    eq: {
+      db: { c: { frames: seatedKick } },
+      // Élastique sous les pieds.
+      band: { s: true, c: { frames: seatedKick } },
+    },
+  },
+  {
+    base: 'dbhammer', short: 'Curl marteau', words: ['curl marteau', 'hammer curl'],
+    eq: { db: { c: { grip: 'hammer' } }, kb: { s: true, c: true } },
+  },
+  {
+    base: 'dbpullover', short: 'Pull-over', words: ['pull over', 'pullover'],
+    eq: { kb: { s: { grip: 'one' } } },
+  },
+  {
+    base: 'dbfloorpress', short: 'Développé couché au sol', words: ['developpe couche au sol', 'floor press'],
+    eq: { kb: { s: true } },
+  },
+  {
+    base: 'ringpress', short: 'Compression anneau', words: ['compression anneau', 'presse anneau'],
+    chair: { label: 'Compression anneau assis (bras)' },
+  },
+  {
+    base: 'ringoverhead', short: 'Compression anneau au-dessus de la tête', words: ['compression anneau au dessus de la tete', 'anneau au dessus de la tete'],
+    chair: { label: 'Compression anneau au-dessus de la tête assis' },
+  },
+  {
+    base: 'ringside', short: 'Compression anneau contre la hanche', words: ['compression anneau contre la hanche', 'anneau contre la hanche', 'anneau sous le bras'],
+    chair: { label: 'Compression anneau contre la hanche assis', grip: 'side' },
+  },
+  {
+    base: 'ringopen', short: 'Écartement de l’anneau', words: ['ecartement de l anneau', 'ecartement anneau', 'ouverture anneau'],
+    chair: { label: 'Écartement de l’anneau assis', grip: 'inside' },
   },
 
   // ----- Tronc -----
