@@ -22,6 +22,8 @@ interface Over {
   frames?: Frame[];
   grip?: Grip;
   label?: string;
+  /** Mots de reconnaissance supplémentaires (nom naturel d'une variante). */
+  words?: string[];
   chairUnder?: ChairUnder;
   anchor?: Anchor;
   period?: number;
@@ -231,6 +233,83 @@ const SEATED_ROPE: Frame[] = [
   { pose: { ...SEATED, thighN: 96, shinN: 5, thighF: 94, shinF: 5, heel: 35, armN: 8, foreN: 86, armF: 6, foreF: 84 } },
 ];
 
+// ---------- MI : postures des variantes avec matériel ----------
+// (exportées aussi pour les exercices de base MI de exercises.ts : squat sumo, fente latérale, soulevé de terre)
+
+/** De face : mains jointes devant la poitrine (ou une charge tenue contre la poitrine). */
+export const MI_HANDS_CHEST: Arms = { armN: 22, foreN: -112, armF: 22, foreF: -112 };
+/** De face : anneau serré entre les mains devant la poitrine. */
+const MI_RING_CHEST_FRONT: Arms = { armN: 48, foreN: -98, armF: 48, foreF: -98 };
+/** De face : bras tendus vers le bas, les deux mains jointes entre les jambes (une charge tenue à deux mains). */
+const MI_HANG_FRONT: Arms = { armN: -15, foreN: -14, armF: -15, foreF: -14 };
+/** De profil : anneau serré entre les mains devant la poitrine. */
+const MI_RING_CHEST_SIDE: Arms = { armN: 6, foreN: 131, armF: 4, foreF: 129 };
+/** De profil : mains sur les hanches. */
+const MI_HANDS_ON_HIPS: Arms = { armN: -28, foreN: 62, armF: -30, foreF: 60 };
+
+/** Squat sumo de face : pieds larges, genoux qui s'ouvrent au-dessus des pointes de pied. */
+export function sumoFrames(arms: Arms): Frame[] {
+  return [
+    { pose: { torso: 0, thighN: 25, shinN: 24, thighF: 25, shinF: 24, ...arms } },
+    { pose: { torso: 0, thighN: 72, shinN: 5, thighF: 72, shinF: 5, legReach: 0.8, ...arms }, w: 0.8 },
+  ];
+}
+/** Squat sumo sur chaise (de face) : assis pieds larges, debout, puis on se rassoit. */
+function miSumoChair(arms: Arms): Frame[] {
+  const seated: Pose = { torso: 0, thighN: 50, shinN: 22, thighF: 50, shinF: 22, legReach: 0.45, ...arms };
+  const up: Pose = { torso: 0, thighN: 24, shinN: 23, thighF: 24, shinF: 23, ...arms };
+  return [{ pose: seated, w: 0.5 }, { pose: seated, w: 0.9 }, { pose: up, w: 0.6 }, { pose: up, w: 0.9 }];
+}
+/** Fente latérale alternée depuis l'écart (de face) : à droite, retour, à gauche. Pieds fixes. */
+export function sideLungeFrames(arms: Arms): Frame[] {
+  const wide: Pose = { torso: 0, thighN: 37.7, shinN: 37.7, thighF: 37.7, shinF: 37.7, ...arms };
+  const right: Pose = { torso: 0, thighN: 70, shinN: 5, legReach: 0.85, thighF: 50.5, shinF: 50.5, ...arms };
+  const left: Pose = { torso: 0, thighF: 70, shinF: 5, legReach: 0.85, thighN: 50.5, shinN: 50.5, ...arms };
+  return [
+    { pose: wide, w: 0.7 }, { pose: right, w: 0.5 }, { pose: right, w: 0.7 },
+    { pose: wide, w: 0.7 }, { pose: left, w: 0.5 }, { pose: left, w: 0.7 },
+  ];
+}
+/** Soulevé de terre jambes tendues (de profil) : charnière de hanche, genoux à peine fléchis, bras pendants. */
+export function deadliftFrames(arms: Arms): Frame[] {
+  return [
+    { pose: { torso: 0, thighN: 0, shinN: 0, thighF: -1, shinF: -1, ...arms }, w: 0.8 },
+    { pose: { torso: 76, head: -16, thighN: 28, shinN: 18, thighF: 27, shinF: 18, ...arms } },
+  ];
+}
+/** Pont fessier, une charge posée sur le bassin et tenue à deux mains (coudes au sol pour l'haltère). */
+const miBridgeLoaded = (kb: boolean): Frame[] => {
+  const down = kb ? { armN: 116, foreN: 127, armF: 114, foreF: 125 } : { armN: 80, foreN: 136, armF: 78, foreF: 134 };
+  const up = kb ? { armN: 140, foreN: 151, armF: 138, foreF: 149 } : { armN: 104, foreN: 160, armF: 102, foreF: 158 };
+  return [
+    { pose: { torso: -88, head: 6, thighN: 130, shinN: 25, thighF: 128, shinF: 25, ...down } },
+    { pose: { torso: -112, head: 14, thighN: 100, shinN: -5, thighF: 98, shinF: -5, ...up }, w: 0.5 },
+    { pose: { torso: -112, head: 14, thighN: 100, shinN: -5, thighF: 98, shinF: -5, ...up } },
+  ];
+};
+/** Montée de genou assis, un haltère posé sur chaque cuisse près du genou (la main suit la cuisse). */
+const MI_DB_THIGH_FLAT = { arm: 8, fore: 80 };
+const MI_DB_THIGH_UP = { arm: -17, fore: 111 };
+const miMarchDb = (): Frame[] => {
+  const flatN = { armN: MI_DB_THIGH_FLAT.arm, foreN: MI_DB_THIGH_FLAT.fore };
+  const flatF = { armF: MI_DB_THIGH_FLAT.arm - 1, foreF: MI_DB_THIGH_FLAT.fore - 1 };
+  return [
+    { pose: { ...SEATED, ...flatN, ...flatF } },
+    { pose: { ...SEATED, thighN: 125, shinN: 20, armN: MI_DB_THIGH_UP.arm, foreN: MI_DB_THIGH_UP.fore, ...flatF } },
+    { pose: { ...SEATED, ...flatN, ...flatF } },
+    { pose: { ...SEATED, thighF: 123, shinF: 20, ...flatN, armF: MI_DB_THIGH_UP.arm - 1, foreF: MI_DB_THIGH_UP.fore - 1 } },
+  ];
+};
+/** Mollets assis à l'élastique : jambe tendue, élastique sous l'avant du pied tenu à deux mains ; pointe tendue puis relâchée. */
+const MI_CALF_BAND_SEATED: Frame[] = (() => {
+  const base: Pose = { ...SEATED, thighN: 76, shinN: 52, armN: 30, foreN: 75, armF: 28, foreF: 73 };
+  return [
+    { pose: { ...base, heel: 0 } },
+    { pose: { ...base, heel: 45 }, w: 0.6 },
+    { pose: { ...base, heel: 45 } },
+  ];
+})();
+
 // ---------- Les variantes ----------
 
 const SPECS: Spec[] = [
@@ -248,6 +327,10 @@ const SPECS: Spec[] = [
     eq: {
       db: { s: { frames: lungeWith(ARMS_DOWN) } },
       kb: { s: { frames: lungeWith(chest(0)) } },
+      // Élastique sous le pied avant, une extrémité dans chaque main.
+      band: { s: { frames: lungeWith(ARMS_DOWN), grip: 'foot' } },
+      // Anneau serré entre les mains devant la poitrine.
+      ring: { s: { frames: lungeWith(MI_RING_CHEST_SIDE), grip: 'hands' } },
     },
   },
   {
@@ -259,12 +342,33 @@ const SPECS: Spec[] = [
         { pose: { ...STAND, ...ARMS_DOWN, heel: 45 }, w: 0.6 },
         { pose: { ...STAND, ...ARMS_DOWN, heel: 45 } },
       ] }, c: { frames: seatedCalf(HANDS_ON_KNEES), anchor: 'hip' } },
-      kb: { c: { frames: seatedCalf(HANDS_ON_KNEES), anchor: 'hip', grip: 'one' } },
+      kb: {
+        s: { frames: [
+          { pose: { ...STAND, ...chest(0) } },
+          { pose: { ...STAND, ...chest(0), heel: 45 }, w: 0.6 },
+          { pose: { ...STAND, ...chest(0), heel: 45 } },
+        ] },
+        c: { frames: seatedCalf(HANDS_ON_KNEES), anchor: 'hip', grip: 'one' },
+      },
+      band: { c: { frames: MI_CALF_BAND_SEATED, anchor: 'hip', grip: 'foot' } },
+      // Anneau serré entre les chevilles (debout) ou entre les genoux (assis).
+      ring: {
+        s: { grip: 'ankles', frames: [
+          { pose: { ...STAND, ...MI_HANDS_ON_HIPS } },
+          { pose: { ...STAND, ...MI_HANDS_ON_HIPS, heel: 45 }, w: 0.6 },
+          { pose: { ...STAND, ...MI_HANDS_ON_HIPS, heel: 45 } },
+        ] },
+        c: { frames: seatedCalf({ armN: 20, foreN: 60, armF: 18, foreF: 58 }), anchor: 'hip', grip: 'knees' },
+      },
     },
   },
   {
     base: 'bridge', short: 'Pont fessier', words: ['pont fessier', 'glute bridge', 'hip thrust'],
-    eq: { band: { s: { grip: 'knees' } } },
+    eq: {
+      band: { s: { grip: 'knees' } },
+      db: { s: { frames: miBridgeLoaded(false), grip: 'one' } },
+      kb: { s: { frames: miBridgeLoaded(true), grip: 'one' } },
+    },
   },
   {
     base: 'legraise', short: 'Relevés de jambes', words: ['releve de jambe', 'leg raise'],
@@ -285,7 +389,10 @@ const SPECS: Spec[] = [
   },
   {
     base: 'seatedmarch', short: 'Montée de genou', words: ['montee de genou assis', 'marche assis'],
-    eq: { band: { c: { grip: 'knees', label: 'Montée de genou assis (élastique)' } } },
+    eq: {
+      band: { c: { grip: 'knees', label: 'Montée de genou assis (élastique)' } },
+      db: { c: { frames: miMarchDb(), words: ['montee de genou assis haltere', 'montee de genou haltere assis', 'montee de genou assis avec haltere'] } },
+    },
   },
   {
     base: 'bulgarian', short: 'Squat bulgare', words: ['squat bulgare', 'fente bulgare', 'squat sur une jambe', 'split squat'],
@@ -334,6 +441,46 @@ const SPECS: Spec[] = [
       ],
     },
     eq: { band: { s: { grip: 'ankles' }, c: { grip: 'ankles' } } },
+  },
+  // MI : squat sumo, fente latérale, soulevé de terre jambes tendues (haltères dans l'exercice de base).
+  {
+    base: 'sumosquat', short: 'Squat sumo', words: ['squat sumo', 'sumo squat', 'squat plie'],
+    chair: { label: 'Squat sumo sur chaise', frames: miSumoChair(MI_HANDS_CHEST), anchor: 'hip' },
+    eq: {
+      // Un haltère ou une kettlebell tenu à deux mains entre les jambes.
+      db: {
+        s: { frames: sumoFrames(MI_HANG_FRONT), grip: 'one' },
+        c: { frames: miSumoChair(MI_HANG_FRONT), grip: 'one', label: 'Squat sumo sur chaise (haltères)', words: ['squat sumo sur chaise haltere', 'squat sumo sur chaise avec haltere'] },
+      },
+      kb: {
+        s: { frames: sumoFrames(MI_HANG_FRONT), grip: 'one' },
+        c: { frames: miSumoChair(MI_HANG_FRONT), grip: 'one', label: 'Squat sumo sur chaise (kettlebell)', words: ['squat sumo sur chaise kettlebell', 'squat sumo sur chaise avec kettlebell'] },
+      },
+      // Mini-bande au-dessus des genoux : on pousse les genoux vers l'extérieur.
+      band: { s: { frames: sumoFrames(MI_HANDS_CHEST), grip: 'knees' } },
+      // Anneau serré entre les mains devant la poitrine (plié du Pilates).
+      ring: {
+        s: { frames: sumoFrames(MI_RING_CHEST_FRONT) },
+        c: { frames: miSumoChair(MI_RING_CHEST_FRONT), label: 'Squat sumo sur chaise (anneau)', words: ['squat sumo sur chaise anneau', 'squat sumo sur chaise avec anneau'] },
+      },
+    },
+  },
+  {
+    base: 'sidelunge', short: 'Fente latérale', words: ['fente laterale', 'side lunge', 'lateral lunge'],
+    eq: {
+      // Charge tenue contre la poitrine (goblet).
+      db: { s: { grip: 'one' } },
+      kb: { s: { grip: 'one' } },
+      ring: { s: { frames: sideLungeFrames(MI_RING_CHEST_FRONT) } },
+    },
+  },
+  {
+    base: 'deadlift', short: 'Soulevé de terre jambes tendues', words: ['souleve de terre', 'souleve de terre jambes tendue', 'deadlift'],
+    eq: {
+      kb: { s: { grip: 'one' } },
+      // Debout sur l'élastique, une extrémité dans chaque main.
+      band: { s: true },
+    },
   },
 
   // ----- MS -----
@@ -681,7 +828,7 @@ export function variantsOf(base: ExerciseAnim[]): ExerciseAnim[] {
           ...b, id: `${s.base}-${k}-c` as ExerciseId, equipment: EQ[k],
           label: o.label ?? `${eqChairLabel} (${EQ_NAME[k]})`,
           ...seated(o), positions: undefined, grip: o.grip ?? chairOver.grip,
-          words: words(s.words, EQ_WORDS[k].flatMap((e) => [[e, 'assis'], ['assis', e], ['assis', 'avec', e], [e, 'sur', 'chaise']])),
+          words: [...words(s.words, EQ_WORDS[k].flatMap((e) => [[e, 'assis'], ['assis', e], ['assis', 'avec', e], [e, 'sur', 'chaise']])), ...(o.words ?? [])],
         });
       }
     }
