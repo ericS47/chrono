@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { clipKeys, clipOffsets, normKey, queueSpeeches, VOICE_INDEX } from './voiceClips';
+import { EXERCISES } from '../anim/exercises';
 
 describe('annonces enregistrées', () => {
   it('toutes les phrases fixes de la séance sont enregistrées', () => {
@@ -32,5 +33,11 @@ describe('annonces enregistrées', () => {
     const o = clipOffsets(['tour', '3']);
     expect(o[0]).toBe(0);
     expect(o[1]).toBeCloseTo(VOICE_INDEX.tour[1] + 0.06);
+  });
+});
+
+describe('annonces des exercices animés', () => {
+  it('chaque exercice animé a son annonce enregistrée (sinon : régénérer avec scripts/voix/generer.py)', () => {
+    expect(EXERCISES.filter((e) => !clipKeys(e.label).length).map((e) => e.label)).toEqual([]);
   });
 });
