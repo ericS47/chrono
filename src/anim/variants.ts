@@ -136,6 +136,109 @@ const seatedCalf = (arms: Arms): Frame[] => [
 /** Mains posées sur les genoux, assis. */
 const HANDS_ON_KNEES = { armN: 42, foreN: 78, armF: 40, foreF: 76 };
 
+// ---------- Tronc : postures (exercices ajoutés et variantes avec matériel) ----------
+
+/** Dead bug : sur le dos, bras vers le plafond, cuisses verticales, tibias à l'horizontale. */
+export const DEADBUG: Pose = { torso: -88, head: 6, thighN: 178, shinN: 92, thighF: 176, shinF: 90, armN: 178, foreN: 178, armF: 176, foreF: 176 };
+/**
+ * Flexion latérale de face (`lean` degrés) : la main du côté qui descend pend le long de la cuisse,
+ * l'autre bras suit le buste.
+ */
+export function sideBend(lean: number): Pose {
+  const n = Math.max(0, lean);
+  const f = Math.max(0, -lean);
+  return { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, lean, armN: 4 + f, foreN: 4 + f, armF: 4 + n, foreF: 4 + n };
+}
+/** Gainage bras tendus, mains sur les haltères (un peu plus haut que les pieds). */
+export const RENEGADE: Pose = { torso: 72, head: -6, thighN: -72, shinN: -72, thighF: -72, shinF: -72, armN: 0, foreN: 0, armF: 3, foreF: 3 };
+/** Halo de face : un tour de la charge autour de la tête, jambes données. */
+export function haloFrames(legs: Pick<Pose, 'thighN' | 'shinN' | 'thighF' | 'shinF'> & Partial<Pose>): Frame[] {
+  const p = (armN: number, foreN: number, armF: number, foreF: number): Pose => ({ torso: 0, ...legs, armN, foreN, armF, foreF });
+  return [
+    { pose: p(-10, -162, 350, -162) },
+    { pose: p(108, -112, 190, -80) },
+    { pose: p(160, -150, 160, -150) },
+    { pose: p(190, -80, 108, -112) },
+    { pose: p(350, -162, -10, -162), w: 0 },
+  ];
+}
+
+/** Dead bug, charge (ou anneau) tenue à deux mains au-dessus de la poitrine : seules les jambes s'allongent. */
+const deadbugHold: Frame[] = [
+  { pose: DEADBUG, w: 0.5 },
+  { pose: { ...DEADBUG, thighF: 100, shinF: 100 } },
+  { pose: DEADBUG, w: 0.5 },
+  { pose: { ...DEADBUG, thighN: 100, shinN: 100 } },
+];
+/** Dead bug assis : buste un peu en arrière, un bras monte pendant que le genou opposé remonte. */
+const DEADBUG_SEATED: Pose = { ...SEATED, torso: -10, head: 6, armN: 88, foreN: 90, armF: 86, foreF: 88 };
+const deadbugSeated: Frame[] = [
+  { pose: DEADBUG_SEATED, w: 0.5 },
+  { pose: { ...DEADBUG_SEATED, armN: 172, foreN: 174, thighF: 124, shinF: 22 } },
+  { pose: DEADBUG_SEATED, w: 0.5 },
+  { pose: { ...DEADBUG_SEATED, armF: 170, foreF: 172, thighN: 126, shinN: 22 } },
+];
+
+/** Flexion latérale, une charge dans la main proche : on descend du côté chargé, puis on remonte un peu au-delà. */
+const sideBendNear: Frame[] = [
+  { pose: sideBend(0), w: 0.5 },
+  { pose: sideBend(24), w: 0.9 },
+  { pose: sideBend(0), w: 0.5 },
+  { pose: sideBend(-8), w: 0.6 },
+];
+/** Flexion latérale, anneau serré entre les mains au-dessus de la tête ; les bras suivent le buste. */
+const ringOverhead = (lean: number): Pose => ({
+  torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, lean, armN: 160 - lean, foreN: 200 - lean, armF: 160 + lean, foreF: 200 + lean,
+});
+const ringSideBend: Frame[] = [
+  { pose: ringOverhead(0), w: 0.5 },
+  { pose: ringOverhead(20) },
+  { pose: ringOverhead(0), w: 0.5 },
+  { pose: ringOverhead(-20) },
+];
+
+/** Crunch, charge tenue bras tendus au-dessus de la poitrine. */
+const crunchHold: Frame[] = [
+  { pose: { torso: -84, head: 8, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 178, foreN: 178, armF: 176, foreF: 176 } },
+  { pose: { torso: -48, head: 12, thighN: 130, shinN: 25, thighF: 128, shinF: 25, armN: 166, foreN: 166, armF: 164, foreF: 164 } },
+];
+/** Abdos assis : le buste part en arrière puis revient, bras croisés sur la poitrine (ou charge contre la poitrine). */
+const seatedCrunch: Frame[] = [
+  { pose: { ...SEATED, ...chest(0) }, w: 0.7 },
+  { pose: { ...SEATED, torso: -24, head: 14, ...chest(-24) }, w: 0.5 },
+  { pose: { ...SEATED, torso: -24, head: 14, ...chest(-24) } },
+];
+
+/** Superman frontal, élastique sous les pieds : bras de bas en avant, dans le prolongement du buste. */
+const supermanFrontBand: Frame[] = [
+  { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 2, foreN: 4, armF: 0, foreF: 2 } },
+  { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 92, foreN: 92, armF: 90, foreF: 90 }, w: 0.5 },
+  { pose: { torso: 88, head: -12, thighN: 22, shinN: -12, thighF: 20, shinF: -12, armN: 92, foreN: 92, armF: 90, foreF: 90 } },
+];
+
+/** Gainage latéral, mini-bande au-dessus des genoux : la jambe du dessus s'écarte. */
+const SIDE_PLANK: Pose = { torso: 0, roll: 70, thighN: 2, shinN: 1, thighF: 2, shinF: 1, armN: 70, foreN: 160, armF: 110, foreF: 110 };
+const sidePlankBand: Frame[] = [
+  { pose: SIDE_PLANK, w: 0.6 },
+  { pose: { ...SIDE_PLANK, thighF: 26, shinF: 25 }, w: 0.6 },
+  { pose: { ...SIDE_PLANK, thighF: 26, shinF: 25 } },
+];
+/** Gainage latéral, anneau serré entre les chevilles. */
+const sidePlankRing: Frame[] = [
+  { pose: { ...SIDE_PLANK, thighN: 6, shinN: 6, thighF: 6, shinF: 6 } },
+  { pose: { ...SIDE_PLANK, roll: 66, thighN: 4, shinN: 4, thighF: 4, shinF: 4, armN: 74, foreN: 156, armF: 112, foreF: 112 } },
+];
+
+/** Genou poitrine assis, anneau serré entre les mains devant la poitrine. */
+const RING_CHEST = { armN: 60, foreN: 120, armF: 58, foreF: 118 };
+const kneeChestRing: Frame[] = [
+  { pose: { ...SEATED, ...RING_CHEST } },
+  { pose: { ...SEATED, torso: -22, head: 14, thighN: 140, shinN: 40, ...RING_CHEST } },
+  { pose: { ...SEATED, ...RING_CHEST } },
+  { pose: { ...SEATED, torso: -22, head: 14, thighF: 138, shinF: 40, ...RING_CHEST } },
+];
+// ---------- Fin du bloc Tronc ----------
+
 // ---------- Les variantes ----------
 
 const SPECS: Spec[] = [
@@ -173,7 +276,7 @@ const SPECS: Spec[] = [
   },
   {
     base: 'legraise', short: 'Relevés de jambes', words: ['releve de jambe', 'leg raise'],
-    eq: { ring: { s: { grip: 'ankles' } } },
+    eq: { ring: { s: { grip: 'ankles' } }, db: { s: { grip: 'ankles' } } },
   },
   {
     base: 'sittostand', short: 'Assis-debout', words: ['assis debout', 'sit to stand'],
@@ -323,6 +426,7 @@ const SPECS: Spec[] = [
       label: 'Gainage incliné sur chaise', chairUnder: 'incline', anchor: 'hands',
       frames: [{ pose: INCLINE_FORE }, { pose: { ...INCLINE_FORE, head: -9 } }],
     },
+    eq: { ring: { s: { grip: 'ankles' }, c: { grip: 'ankles' } } },
   },
   {
     base: 'climber', short: 'Mountain climber', words: ['mountain climber', 'climber', 'grimpeur'],
@@ -333,6 +437,7 @@ const SPECS: Spec[] = [
         { pose: { ...INCLINE, thighF: 50, shinF: -70 } },
       ],
     },
+    eq: { band: { s: { grip: 'ankles' }, c: { grip: 'ankles' } } },
   },
   {
     base: 'shouldertap', short: 'Shoulder tap', words: ['shoulder tap', 'tap epaule', 'touche epaule'],
@@ -358,7 +463,10 @@ const SPECS: Spec[] = [
         { pose: { ...SEATED, torso: -22, head: 14, thighF: 138, shinF: 40, armN: 80, foreN: 85, armF: 78, foreF: 83 } },
       ],
     },
-    eq: { db: { s: { grip: 'one' } }, kb: { s: { grip: 'one' } }, ring: { s: { grip: 'hands' } } },
+    eq: {
+      db: { s: { grip: 'one' } }, kb: { s: { grip: 'one' } },
+      ring: { s: { grip: 'hands' }, c: { grip: 'hands', frames: kneeChestRing, label: 'Genou poitrine assis (anneau)' } },
+    },
   },
   {
     base: 'obliques', short: 'Obliques', words: ['oblique', 'rotation russe', 'russian twist'],
@@ -398,12 +506,60 @@ const SPECS: Spec[] = [
   {
     base: 'supermanfront', short: 'Superman frontal', words: ['superman frontal', 'superman debout', 'superman incline'],
     chair: true,
-    eq: { db: { s: true, c: true } },
+    eq: { db: { s: true, c: true }, band: { s: { frames: supermanFrontBand }, c: { frames: seatFrames(supermanFrontBand, 'side') } } },
   },
   {
     base: 'supermanside', short: 'Superman latéral', words: ['superman lateral', 'oiseau', 'reverse fly'],
     chair: true,
     eq: { db: { s: true, c: true }, band: { s: true, c: true } },
+  },
+  {
+    base: 'situp', short: 'Abdos', words: ['abdo', 'crunch', 'releve de buste'],
+    chair: { frames: seatedCrunch },
+    eq: {
+      db: { s: { frames: crunchHold, grip: 'one' }, c: { frames: seatedCrunch, grip: 'one' } },
+      kb: { s: { frames: crunchHold, grip: 'one' }, c: { frames: seatedCrunch, grip: 'one' } },
+      ring: { s: { grip: 'knees' }, c: { frames: seatedCrunch, grip: 'knees' } },
+    },
+  },
+  {
+    base: 'deadbug', short: 'Dead bug', words: ['dead bug', 'deadbug'],
+    chair: { frames: deadbugSeated },
+    eq: {
+      db: { s: { frames: deadbugHold, grip: 'one' } },
+      kb: { s: { frames: deadbugHold, grip: 'one' } },
+      ring: { s: { frames: deadbugHold, grip: 'hands' } },
+    },
+  },
+  {
+    base: 'sidebend', short: 'Flexion latérale du buste', words: ['flexion laterale du buste', 'flexion laterale', 'inclinaison laterale', 'side bend'],
+    chair: true,
+    eq: {
+      db: { s: { frames: sideBendNear, grip: 'near' }, c: { frames: seatFrames(sideBendNear, 'front'), grip: 'near' } },
+      kb: { s: { frames: sideBendNear, grip: 'near' }, c: { frames: seatFrames(sideBendNear, 'front'), grip: 'near' } },
+      band: { s: { frames: sideBendNear, grip: 'near' }, c: { frames: seatFrames(sideBendNear, 'front'), grip: 'near' } },
+      ring: { s: { frames: ringSideBend, grip: 'hands' }, c: { frames: seatFrames(ringSideBend, 'front'), grip: 'hands' } },
+    },
+  },
+  {
+    base: 'superman', short: 'Superman', words: ['superman'],
+    eq: { ring: { s: { grip: 'hands' } } },
+  },
+  {
+    base: 'birddog', short: 'Bird dog', words: ['bird dog', 'birddog'],
+    eq: { band: { s: { grip: 'knees' } } },
+  },
+  {
+    base: 'sideplank', short: 'Gainage latéral', words: ['gainage lateral', 'planche laterale', 'side plank'],
+    eq: { band: { s: { frames: sidePlankBand, grip: 'knees' } }, ring: { s: { frames: sidePlankRing, grip: 'ankles' } } },
+  },
+  {
+    base: 'renegaderow', short: 'Renegade row', words: ['renegade row', 'rowing en gainage', 'rowing en planche'],
+    eq: { kb: { s: { grip: 'each' } } },
+  },
+  {
+    base: 'halo', short: 'Halo', words: ['halo'],
+    eq: { db: { s: { grip: 'one' }, c: { grip: 'one' } }, kb: { c: { grip: 'one' } } },
   },
 
   // ----- Cardio -----

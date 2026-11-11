@@ -141,10 +141,13 @@ function Ring({ j, view, grip }: { j: Joints; view: 'side' | 'front'; grip?: str
     const [bx, by] = j.handN;
     const cx = (ax + bx) / 2;
     const cy = (ay + by) / 2;
-    const rx = Math.max(3, Math.abs(bx - ax) / 2 + 1);
+    // Mains à des hauteurs différentes (flexion latérale) : l'anneau suit la ligne des mains.
+    const tilt = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+    const tilted = Math.abs(tilt) > 0.5 && Math.abs(tilt) < 60;
+    const rx = tilted ? Math.hypot(bx - ax, by - ay) / 2 + 1 : Math.max(3, Math.abs(bx - ax) / 2 + 1);
     return (
       <g>
-        <ellipse cx={cx} cy={cy} rx={rx} ry={8} fill="none" stroke={RING} strokeWidth={1.9} />
+        <ellipse cx={cx} cy={cy} rx={rx} ry={8} fill="none" stroke={RING} strokeWidth={1.9} transform={tilted ? `rotate(${tilt} ${cx} ${cy})` : undefined} />
         <rect x={ax - 2.2} y={ay - 2.8} width={4.4} height={5.6} rx={1.5} fill="#2B2F3A" opacity={0.85} />
         <rect x={bx - 2.2} y={by - 2.8} width={4.4} height={5.6} rx={1.5} fill="#2B2F3A" opacity={0.85} />
       </g>
@@ -162,6 +165,16 @@ function Equipment({ ex, j }: { ex: ExerciseAnim; j: Joints }) {
   const kind = ex.equipment;
   const mid = (a: Pt, b: Pt): Pt => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
   const apart = Math.hypot(j.handN[0] - j.handF[0], j.handN[1] - j.handF[1]) > 8;
+  if (grip === 'near') {
+    // Une seule charge, dans la main proche (flexion latérale…).
+    if (kind === 'kettlebell') return <Kettlebell hand={j.handN} r={4.5} />;
+    if (kind === 'dumbbell') return <Dumbbell hand={j.handN} view={view} />;
+    if (kind === 'band') return <Band foot={mid(j.ankleN, j.toeN)} hand={j.handN} />;
+  }
+  if (kind === 'dumbbell' && grip === 'ankles') {
+    // Haltère serré entre les pieds (relevés de jambes).
+    return <Dumbbell hand={mid(mid(j.ankleN, j.toeN), mid(j.ankleF, j.toeF))} view={view} />;
+  }
   if (kind === 'kettlebell') {
     // Une kettlebell à deux mains si elles sont proches, sinon une par main.
     if (grip === 'each' || (grip !== 'one' && apart)) {
@@ -211,7 +224,10 @@ export function FigureFrame({ exercise, avatar, sec, title }: { exercise: Exerci
       {ex.view === 'front'
         ? <g transform={roll ? `rotate(${roll} ${flat.hip[0]} ${flat.hip[1]})` : undefined}><FrontBody j={flat} d={placed.d} av={avatar} c={c} /></g>
         : <SideBody j={j} d={placed.d} av={avatar} c={c} />}
-      {ex.equipment && ex.equipment !== 'none' && <Equipment ex={ex} j={j} />}
+      {ex.equipment && ex.equipment !== 'none' && (ex.view === 'front' && roll
+        // Corps basculé (gainage latéral) : le matériel est dessiné droit puis basculé avec le corps.
+        ? <g transform={`rotate(${roll} ${flat.hip[0]} ${flat.hip[1]})`}><Equipment ex={ex} j={flat} /></g>
+        : <Equipment ex={ex} j={j} />)}
     </svg>
   );
 }

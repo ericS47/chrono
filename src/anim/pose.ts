@@ -34,6 +34,11 @@ export interface Pose {
   roll?: number;
   /** Vue de face : longueur apparente des cuisses (1 = entière ; moins = cuisses vers nous, assis sur une chaise). */
   legReach?: number;
+  /**
+   * Vue de face : flexion latérale du buste (degrés) ; positif, le buste penche vers le côté n (droite de l'écran).
+   * Le buste, la tête et les épaules pivotent autour de la hanche ; les angles des bras restent absolus.
+   */
+  lean?: number;
 }
 
 export type Pt = [number, number];
@@ -62,6 +67,8 @@ const rad = (d: number) => (d * Math.PI) / 180;
 /** Vecteur unitaire d'un membre d'angle a. */
 const dir = (a: number): Pt => [Math.sin(rad(a)), Math.cos(rad(a))];
 const add = (p: Pt, v: Pt, k = 1): Pt => [p[0] + v[0] * k, p[1] + v[1] * k];
+/** Vue de face : hauteur de la taille (fraction du buste), pivot de la flexion latérale. */
+export const WAIST = 0.22;
 
 export function dims(av: Avatar): Dims {
   const s = { petite: 0.92, moyenne: 1, grande: 1.08 }[av.height] * (av.age === 'jeune' ? 0.96 : 1);
@@ -99,12 +106,18 @@ export function dims(av: Avatar): Dims {
 export function solve(p: Pose, d: Dims, view: 'side' | 'front'): Joints {
   const hip: Pt = [0, 0];
   if (view === 'front') {
-    const up: Pt = [0, -1];
-    const neck: Pt = [0, -d.torso];
+    // Flexion latérale : rotation (sens horaire à l'écran) du haut du corps autour de la taille.
+    const ln = rad(p.lean ?? 0);
+    const lc = Math.cos(ln);
+    const ls = Math.sin(ln);
+    const wy = -d.torso * WAIST;
+    const turn = (q: Pt): Pt => (ln ? [q[0] * lc - (q[1] - wy) * ls, wy + q[0] * ls + (q[1] - wy) * lc] : q);
+    const up: Pt = ln ? [ls, -lc] : [0, -1];
+    const neck: Pt = turn([0, -d.torso]);
     const headC = add(neck, up, d.neck + d.head);
     const sh = p.shrug ?? 0;
-    const sN: Pt = [d.shoulderHalf, -d.torso + 2 - sh];
-    const sF: Pt = [-d.shoulderHalf, -d.torso + 2 - sh];
+    const sN: Pt = turn([d.shoulderHalf, -d.torso + 2 - sh]);
+    const sF: Pt = turn([-d.shoulderHalf, -d.torso + 2 - sh]);
     const hN: Pt = [d.hipHalf * 0.75, 0];
     const hF: Pt = [-d.hipHalf * 0.75, 0];
     const mirror = (a: number): Pt => { const v = dir(a); return [-v[0], v[1]]; };
@@ -210,5 +223,6 @@ export function lerpPose(a: Pose, b: Pose, t: number): Pose {
     reachUpper: (a.reachUpper ?? 1) + ((b.reachUpper ?? 1) - (a.reachUpper ?? 1)) * t,
     twist: l(a.twist, b.twist),
     legReach: (a.legReach ?? 1) + ((b.legReach ?? 1) - (a.legReach ?? 1)) * t,
+    lean: l(a.lean, b.lean),
   };
 }
