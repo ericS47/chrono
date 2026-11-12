@@ -139,21 +139,6 @@ function Ring({ j, view, grip }: { j: Joints; view: 'side' | 'front'; grip?: str
     const rx = Math.max(2.5, (m[0] - inner) / 2);
     return <ellipse cx={(m[0] + inner) / 2} cy={m[1] + 1} rx={rx} ry={7.5} fill="none" stroke={RING} strokeWidth={1.9} />;
   }
-  if (grip === 'inside' && view === 'front') {
-    // Mains à l'intérieur de l'anneau, contre les poignées : l'anneau déborde de chaque côté.
-    const [ax, ay] = j.handF;
-    const [bx, by] = j.handN;
-    const cx = (ax + bx) / 2;
-    const cy = (ay + by) / 2;
-    const rx = Math.abs(bx - ax) / 2 + 3.6;
-    return (
-      <g>
-        <ellipse cx={cx} cy={cy} rx={rx} ry={8} fill="none" stroke={RING} strokeWidth={1.9} />
-        <rect x={cx - rx - 1.6} y={cy - 2.8} width={3.2} height={5.6} rx={1.3} fill="#2B2F3A" opacity={0.85} />
-        <rect x={cx + rx - 1.6} y={cy - 2.8} width={3.2} height={5.6} rx={1.3} fill="#2B2F3A" opacity={0.85} />
-      </g>
-    );
-  }
   if (grip === 'knees' || grip === 'ankles') {
     const [a, b] = grip === 'knees' ? [j.kneeN, j.kneeF] : [along(j.kneeN, j.ankleN, 0.8), along(j.kneeF, j.ankleF, 0.8)];
     if (view === 'front') return <LegLoop a={a} b={b} color={RING} view={view} ry={6} edge={a} />;

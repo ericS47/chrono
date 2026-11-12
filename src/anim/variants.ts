@@ -675,8 +675,6 @@ const SPECS: Spec[] = [
       kb: { s: true, c: { frames: seatedRow } },
       // Élastique sous les pieds.
       band: { s: true, c: { frames: seatedRow } },
-      // Anneau serré entre les paumes pendant le tirage.
-      ring: { s: { grip: 'hands' }, c: { frames: seatedRow, grip: 'hands' } },
     },
   },
   {
@@ -710,10 +708,6 @@ const SPECS: Spec[] = [
   {
     base: 'ringside', short: 'Compression anneau contre la hanche', words: ['compression anneau contre la hanche', 'anneau contre la hanche', 'anneau sous le bras'],
     chair: { label: 'Compression anneau contre la hanche assis', grip: 'side' },
-  },
-  {
-    base: 'ringopen', short: 'Écartement de l’anneau', words: ['ecartement de l anneau', 'ecartement anneau', 'ouverture anneau'],
-    chair: { label: 'Écartement de l’anneau assis', grip: 'inside' },
   },
 
   // ----- Tronc -----
@@ -915,7 +909,6 @@ const SPECS: Spec[] = [
       db: { s: { frames: jumpSquatWith(ARMS_DOWN, ARMS_DOWN) } },
       kb: { s: { frames: jumpSquatWith(chest(38), chest(0)), grip: 'one' } },
       band: { s: { grip: 'knees' } },
-      ring: { s: { frames: jumpSquatWith(ringChest(38), ringChest(0)), grip: 'hands' } },
     },
   },
   {

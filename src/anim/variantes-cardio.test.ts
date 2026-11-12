@@ -6,10 +6,10 @@ const cardio = (eq: Equipment, pos: Position) =>
   EXERCISES.filter((e) => inGroup(e, 'cardio') && equipmentOf(e) === eq && inPosition(e, pos));
 
 describe('cardio : exercices par matériel et par position', () => {
-  it('au moins 4 exercices debout avec chaque matériel, et des versions sur chaise', () => {
-    // Minimums (debout / chaise) : haltères 5 / 3, kettlebell 4 / 1, élastique 5 / 2, anneau 4 / 2.
+  it('au moins 3 exercices debout avec chaque matériel, et des versions sur chaise', () => {
+    // Minimums (debout / chaise) : haltères 5 / 3, kettlebell 4 / 1, élastique 5 / 2, anneau 3 / 2.
     const min: Record<Exclude<Equipment, 'none'>, [number, number]> = {
-      dumbbell: [5, 3], kettlebell: [4, 1], band: [5, 2], ring: [4, 2],
+      dumbbell: [5, 3], kettlebell: [4, 1], band: [5, 2], ring: [3, 2],
     };
     for (const [eq, [s, c]] of Object.entries(min) as [Exclude<Equipment, 'none'>, [number, number]][]) {
       expect(cardio(eq, 'standing').length, `${eq} debout`).toBeGreaterThanOrEqual(s);
@@ -96,7 +96,6 @@ describe('cardio : reconnaissance par le nom', () => {
     expect(matchExercise('Squat sauté haltères')).toBe('jumpsquat-db');
     expect(matchExercise('Squat sauté kettlebell')).toBe('jumpsquat-kb');
     expect(matchExercise('Jump squat élastique')).toBe('jumpsquat-band');
-    expect(matchExercise('Squats sautés anneau')).toBe('jumpsquat-ring');
     expect(matchExercise('Montées de genoux élastique')).toBe('highknees-band');
     expect(matchExercise('Montées de genoux anneau')).toBe('highknees-ring');
     expect(matchExercise('Pas chassés élastique')).toBe('shufflealt-band');

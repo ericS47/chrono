@@ -11,8 +11,8 @@ describe('MS : exercices avec matériel', () => {
       expect(count(eq, 'standing')).toBeGreaterThanOrEqual(12);
       expect(count(eq, 'chair')).toBeGreaterThanOrEqual(11);
     }
-    expect(count('ring', 'standing')).toBeGreaterThanOrEqual(10);
-    expect(count('ring', 'chair')).toBeGreaterThanOrEqual(9);
+    expect(count('ring', 'standing')).toBeGreaterThanOrEqual(8);
+    expect(count('ring', 'chair')).toBeGreaterThanOrEqual(7);
     expect(count('none', 'standing')).toBeGreaterThanOrEqual(12);
     expect(count('none', 'chair')).toBeGreaterThanOrEqual(12);
   });
@@ -24,8 +24,6 @@ describe('MS : exercices avec matériel', () => {
       ['dbrow-kb-c', 'kettlebell', 'chair'],
       ['dbrow-band', 'band', 'standing'],
       ['dbrow-band-c', 'band', 'chair'],
-      ['dbrow-ring', 'ring', 'standing'],
-      ['dbrow-ring-c', 'ring', 'chair'],
       ['dbkickback', 'dumbbell', 'standing'],
       ['dbkickback-db-c', 'dumbbell', 'chair'],
       ['dbkickback-band', 'band', 'standing'],
@@ -49,8 +47,6 @@ describe('MS : exercices avec matériel', () => {
       ['ringbehind', 'ring', 'standing'],
       ['ringside', 'ring', 'standing'],
       ['ringside-c', 'ring', 'chair'],
-      ['ringopen', 'ring', 'standing'],
-      ['ringopen-c', 'ring', 'chair'],
     ];
     for (const [id, eq, pos] of cases) {
       const e = EXERCISE_BY_ID[id];
@@ -64,8 +60,6 @@ describe('MS : exercices avec matériel', () => {
     expect(EXERCISE_BY_ID['pushup-band-c'].grip).toBe('back');
     expect(EXERCISE_BY_ID['pushup-band-c'].chairUnder).toBe('incline');
     expect(EXERCISE_BY_ID['ringside-c'].grip).toBe('side');
-    expect(EXERCISE_BY_ID['ringopen-c'].grip).toBe('inside');
-    expect(EXERCISE_BY_ID['dbrow-ring-c'].grip).toBe('hands');
   });
 
   it('libellés', () => {
@@ -74,14 +68,12 @@ describe('MS : exercices avec matériel', () => {
     expect(EXERCISE_BY_ID['dbkickback-band-c'].label).toBe('Kickback triceps assis (élastique)');
     expect(EXERCISE_BY_ID['pushup-band-c'].label).toBe('Pompe inclinée sur chaise (élastique)');
     expect(EXERCISE_BY_ID['pressforward-band'].label).toBe('Poussée vers l’avant (élastique)');
-    expect(EXERCISE_BY_ID['ringopen-c'].label).toBe('Écartement de l’anneau assis');
   });
 
   it('reconnaît les nouveaux exercices par leur nom', () => {
     expect(matchExercise('Rowing buste penché kettlebell')).toBe('dbrow-kb');
     expect(matchExercise('Rowing buste penché assis (haltères)')).toBe('dbrow-db-c');
     expect(matchExercise('Rowing penché élastique')).toBe('dbrow-band');
-    expect(matchExercise('Rowing buste penché anneau')).toBe('dbrow-ring');
     expect(matchExercise('Kickback triceps')).toBe('dbkickback');
     expect(matchExercise('Kickback triceps élastique assis')).toBe('dbkickback-band-c');
     expect(matchExercise('Curl marteau')).toBe('dbhammer');
@@ -98,7 +90,6 @@ describe('MS : exercices avec matériel', () => {
     expect(matchExercise('Compression anneau au-dessus de la tête')).toBe('ringoverhead');
     expect(matchExercise('Compression anneau derrière le dos')).toBe('ringbehind');
     expect(matchExercise('Anneau contre la hanche')).toBe('ringside');
-    expect(matchExercise('Écartement de l’anneau assis')).toBe('ringopen-c');
   });
 
   it('les noms MS déjà reconnus ne changent pas', () => {

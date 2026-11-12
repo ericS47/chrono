@@ -23,7 +23,7 @@ export type BaseExerciseId =
   | 'arnold' | 'dbarnold'
   | 'situpfull' | 'obliques' | 'shouldertap' | 'dynplank' | 'woodchop' | 'goodmorning' | 'supermanfront' | 'supermanside'
   // MS avec matériel
-  | 'dbkickback' | 'dbhammer' | 'dbpullover' | 'dbfloorpress' | 'ringoverhead' | 'ringbehind' | 'ringside' | 'ringopen'
+  | 'dbkickback' | 'dbhammer' | 'dbpullover' | 'dbfloorpress' | 'ringoverhead' | 'ringbehind' | 'ringside'
   // Cardio
   | 'shadowbox' | 'jumprope' | 'thruster' | 'kbhighpull'
   // Tronc : exercices ajoutés pour les variantes avec matériel.
@@ -79,8 +79,8 @@ export interface ExerciseAnim {
  */
 export type Grip = 'one' | 'each' | 'hands' | 'knees' | 'ankles'
   // MS : `hammer` haltère en prise neutre (curl marteau), `back` élastique passé dans le dos,
-  // `side` anneau serré entre le bras et la hanche, `inside` anneau écarté de l'intérieur (mains dedans).
-  | 'hammer' | 'back' | 'side' | 'inside'
+  // `side` anneau serré entre le bras et la hanche.
+  | 'hammer' | 'back' | 'side'
   // MI
   | 'foot'
   // Tronc
@@ -788,16 +788,6 @@ const BASE: ExerciseAnim[] = [
       { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 36, foreN: 18, armF: 35, foreF: -60 } },
       { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 27, foreN: 10, armF: 35, foreF: -60 }, w: 0.5 },
       { pose: { torso: 0, thighN: 6, shinN: 5, thighF: 6, shinF: 5, armN: 27, foreN: 10, armF: 35, foreF: -60 } },
-    ],
-  },
-  {
-    id: 'ringopen', label: 'Écartement de l’anneau', group: 'ms', view: 'front', period: 2.2, anchor: 'hip', equipment: 'ring', grip: 'inside',
-    words: ['ecartement de l anneau', 'ecartement anneau', 'ouverture de l anneau', 'ouverture anneau'],
-    // Mains à l'intérieur de l'anneau, devant la poitrine : on pousse vers l'extérieur (arrière des épaules).
-    frames: [
-      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 44, foreN: -100, armF: 44, foreF: -100 } },
-      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 54, foreN: -94, armF: 54, foreF: -94 }, w: 0.5 },
-      { pose: { torso: 0, thighN: 5, shinN: 4, thighF: 5, shinF: 4, armN: 54, foreN: -94, armF: 54, foreF: -94 } },
     ],
   },
   // ---------- Cardio ----------
