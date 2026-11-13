@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { encodeWorkout } from '../../src/data/share';
+import type { Workout } from '../../src/data/types';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: new Date('2026-10-21T17:00:00') });
@@ -840,4 +842,34 @@ test('Pulse Poly : préparer une partie, acheter une case, la partie est sauvega
   // La partie est reprise après rechargement.
   await page.reload();
   await expect(page.locator('.pp-panel')).toContainText('Chez Eric');
+});
+
+test('chrono agrandi : en haut à gauche, l’étape en cours du bloc de travail ; la série reste sous le temps', async ({ page }) => {
+  const w: Workout = {
+    id: 'w', name: 'Blocs', tags: [], favorite: false, prepSeconds: 0, createdAt: 0, updatedAt: 0,
+    blocks: [{
+      id: 'b', mode: 'custom', exercises: [], restAfter: 0,
+      params: { timeline: [{
+        id: 'g', type: 'group', name: 'Haut du corps', reps: 1, between: 0,
+        children: [
+          { id: 'e1', type: 'effort', duration: 30, note: 'Pompes' },
+          { id: 's', type: 'series', reps: 4, between: 0, children: [{ id: 'e2', type: 'effort', duration: 20, note: 'Curl' }, { id: 'r2', type: 'rest', duration: 10 }] },
+          { id: 'e3', type: 'effort', duration: 40, note: 'Gainage' },
+        ],
+      }] },
+    }],
+  };
+  await page.goto(`./#/partage/${encodeWorkout(w)}`);
+  await page.getByRole('button', { name: 'Ajouter à mes séances' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Agrandir le chrono' }).click();
+  await expect(page.getByTestId('zoom-count')).toHaveText('1/3');
+  // Deuxième étape : la série. Le coin indique l'étape du bloc, la série est rappelée sous le temps.
+  await page.clock.runFor(30_500);
+  await expect(page.getByTestId('zoom-count')).toHaveText('2/3');
+  await expect(page.locator('.zoom-info')).toContainText('Série 1 / 4');
+  await page.clock.runFor(30_000);
+  await expect(page.getByTestId('zoom-count')).toHaveText('2/3');
+  await expect(page.locator('.zoom-info')).toContainText('Série 2 / 4');
 });

@@ -44,6 +44,40 @@ describe('créateur de séance : timeline', () => {
   });
 });
 
+describe('créateur de séance : avancement dans le bloc de travail', () => {
+  const pos = (items: TimelineItem[]) => expandTimeline(items).map((x) => (x.items ? `${x.item}/${x.items}` : '-'));
+
+  it('numérote les étapes du bloc (efforts et séries) ; un repos garde le numéro de l’étape qui précède', () => {
+    const items: TimelineItem[] = [{
+      id: 'g', type: 'group', name: 'Haut du corps', reps: 1, between: 0,
+      children: [
+        e(30, 'Pompes') as never, r(15) as never,
+        { id: 's', type: 'series', reps: 2, between: 0, children: [e(20) as never, r(10) as never] },
+        r(15) as never, e(40, 'Gainage') as never,
+      ],
+    }];
+    // Pompes, repos | série : 20 10 20 | repos | Gainage
+    expect(pos(items)).toEqual(['1/3', '1/3', '2/3', '2/3', '2/3', '2/3', '3/3']);
+    // La série reste indiquée à part.
+    expect(expandTimeline(items)[2]).toMatchObject({ set: 1, sets: 2, item: 2, items: 3 });
+  });
+
+  it('repart de 1 à chaque passage d’un bloc répété, récupération comprise', () => {
+    const items: TimelineItem[] = [{ id: 'g', type: 'group', name: '', reps: 2, between: 60, children: [e(30) as never, e(40) as never] }];
+    expect(pos(items)).toEqual(['1/2', '2/2', '2/2', '1/2', '2/2']);
+  });
+
+  it('chaque bloc de travail a son propre compte', () => {
+    const g = (id: string, n: number): TimelineItem => ({ id, type: 'group', name: id, reps: 1, between: 0, children: Array.from({ length: n }, (_, i) => e(10 + i) as never) });
+    expect(pos([g('a', 2), r(30), g('b', 3)])).toEqual(['1/2', '2/2', '1/2', '1/3', '2/3', '3/3']);
+  });
+
+  it('hors bloc de travail : avancement dans la séance, rien s’il n’y a qu’une étape', () => {
+    expect(pos([e(30), r(10), e(30), r(10), e(30)])).toEqual(['1/3', '1/3', '2/3', '2/3', '3/3']);
+    expect(pos([{ id: 's', type: 'series', reps: 3, between: 0, children: [e(20) as never, r(10) as never] }])).toEqual(['-', '-', '-', '-', '-']);
+  });
+});
+
 describe('créateur de séance : exercice animé choisi', () => {
   it('garde l’exercice choisi, et le nomme quand il n’y a pas de commentaire', () => {
     setExerciseLabels((id) => (id === 'squat' ? 'Squat' : undefined));

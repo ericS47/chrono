@@ -26,7 +26,7 @@ Thème sombre disponible en option (jetons dans `src/styles.css`, `:root[data-th
 - **Créer** : deux gros boutons, « Séance de sport » (créateur de séance) et « Jeu de société ».
 - **Planning** : bandeau de la semaine (ou grille du mois), séances du jour sous forme de créneaux horaires, stats de la semaine, bouton flottant « Planifier ».
 - **Chrono** : anneau de progression, nom de phase + très grand chiffre, deux cartes (Tour, Restant), liste des prochaines phases, boutons Revenir / Pause / action principale. En paysage, l’anneau passe à gauche.
-- **Affichage agrandi** : le chiffre en plein écran sur la couleur de la phase, avec le temps restant de la séance, le compteur de tours ou de séries en « 3/5 », les raccourcis Revenir / Pause / Étape suivante et un bouton « + » sur le côté pour ajouter une étape oubliée. En paysage, le chiffre est réduit pour laisser la place aux raccourcis.
+- **Affichage agrandi** : le chiffre en plein écran sur la couleur de la phase, avec le temps restant de la séance, en haut à gauche un compteur « 3/5 » (séance du créateur : étape en cours du bloc de travail, efforts et séries comptés, repos non ; la série reste rappelée sous le temps ; autres modes : tour ou série), les raccourcis Revenir / Pause / Étape suivante et un bouton « + » sur le côté pour ajouter une étape oubliée. En paysage, le chiffre est réduit pour laisser la place aux raccourcis.
 - **Jeux** : le plateau s’adapte à l’écran entier, sans défilement ; en paysage, les informations complémentaires passent à droite. La fiche d’exercice est centrée et tient à l’écran avec son bouton « C’est fait ».
 
 ## Couleurs pendant le chrono (plein écran)

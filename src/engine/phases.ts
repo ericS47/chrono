@@ -23,6 +23,9 @@ export interface Phase {
   rounds?: number;
   set?: number;
   sets?: number;
+  /** Créateur de séance : étape en cours du bloc de travail (ou de la séance) et nombre d'étapes. */
+  step?: number;
+  steps?: number;
   /** Bouton principal attendu pour finir une phase ouverte. */
   action?: 'done' | 'setDone';
   /** Compteur de tours au tap (AMRAP, For Time). */
@@ -178,6 +181,7 @@ export function buildBlockPhases(block: Block, blockIndex: number): Phase[] {
           out.push({
             ...base, kind: st.kind, label: st.label, duration: st.duration, countUp: false,
             set: st.set, sets: st.sets, round: st.round, rounds: st.rounds, detail: st.group,
+            ...(st.items ? { step: st.item, steps: st.items } : {}),
             ...(st.exercise ? { exercise: st.exercise } : {}),
           });
         }

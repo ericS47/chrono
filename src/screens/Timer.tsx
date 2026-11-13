@@ -185,6 +185,10 @@ export function TimerScreen() {
   const anim = anims.length ? anims[Math.floor(el / 8000) % anims.length] : null;
 
   if (zoomed) {
+    // En haut à gauche : avancement dans le bloc de travail (créateur de séance), la série étant déjà
+    // rappelée sous le temps ; pour les autres modes, le tour en cours.
+    const zoomCount = ph.steps ? `${ph.step}/${ph.steps}`
+      : block?.params.timeline?.length || roundValue === '—' ? null : roundValue.replace(/ /g, '');
     const reps = [sub, sub2].filter(Boolean).join(' · ');
     // Reste de la séance : une ligne discrète en haut, avec une fine barre de progression.
     const total = phases.reduce((t, p) => t + (p.duration ?? 0), 0);
@@ -200,7 +204,7 @@ export function TimerScreen() {
             <span className="zoom-next">{nextText}</span>
           </div>
           {total > 0 && <div className="zoom-bar"><i style={{ width: `${done * 100}%` }} /></div>}
-          {roundValue !== '—' && <span className="zoom-count num" data-testid="zoom-count">{roundValue.replace(/ /g, '')}</span>}
+          {zoomCount && <span className="zoom-count num" data-testid="zoom-count">{zoomCount}</span>}
         </div>
         <span className="zoom-phase">{run.status === 'paused' ? 'EN PAUSE' : phaseWord(ph)}</span>
         <span className={`zoom-time num ${big.long ? 'long' : ''}`} data-testid="zoom-value">{big.text}</span>
