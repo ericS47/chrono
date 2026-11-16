@@ -864,12 +864,12 @@ test('chrono agrandi : en haut à gauche, l’étape en cours du bloc de travail
   await page.getByRole('button', { name: 'Démarrer' }).click();
   await page.getByRole('button', { name: 'Démarrer' }).click();
   await page.getByRole('button', { name: 'Agrandir le chrono' }).click();
-  await expect(page.getByTestId('zoom-count')).toHaveText('1/3');
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 1/3');
   // Deuxième étape : la série. Le coin indique l'étape du bloc, la série est rappelée sous le temps.
   await page.clock.runFor(30_500);
-  await expect(page.getByTestId('zoom-count')).toHaveText('2/3');
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 2/3');
   await expect(page.locator('.zoom-info')).toContainText('Série 1 / 4');
   await page.clock.runFor(30_000);
-  await expect(page.getByTestId('zoom-count')).toHaveText('2/3');
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 2/3');
   await expect(page.locator('.zoom-info')).toContainText('Série 2 / 4');
 });

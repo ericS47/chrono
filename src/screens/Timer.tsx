@@ -187,7 +187,7 @@ export function TimerScreen() {
   if (zoomed) {
     // En haut à gauche : avancement dans le bloc de travail (créateur de séance), la série étant déjà
     // rappelée sous le temps ; pour les autres modes, le tour en cours.
-    const zoomCount = ph.steps ? `${ph.step}/${ph.steps}`
+    const zoomCount = ph.steps ? `Bloc : ${ph.step}/${ph.steps}`
       : block?.params.timeline?.length || roundValue === '—' ? null : roundValue.replace(/ /g, '');
     const reps = [sub, sub2].filter(Boolean).join(' · ');
     // Reste de la séance : une ligne discrète en haut, avec une fine barre de progression.
