@@ -190,6 +190,9 @@ export function TimerScreen() {
     const zoomCount = ph.steps ? `Bloc : ${ph.step}/${ph.steps}`
       : block?.params.timeline?.length || roundValue === '—' ? null : roundValue.replace(/ /g, '');
     const reps = [sub, sub2].filter(Boolean).join(' · ');
+    // Bloc répété : le coin compte déjà les passages, on rappelle plutôt la série en cours sous le temps.
+    const byPass = !!ph.steps && !!ph.rounds && ph.steps === ph.rounds && ph.step === ph.round;
+    const zoomRound = byPass ? (ph.sets && ph.set ? `Série ${ph.set} / ${ph.sets}` : null) : roundValue !== '—' ? `${roundLabel} ${roundValue}` : null;
     // Reste de la séance : une ligne discrète en haut, avec une fine barre de progression.
     const total = phases.reduce((t, p) => t + (p.duration ?? 0), 0);
     const done = total > 0 ? Math.min(1, 1 - totalLeft / total) : 0;
@@ -211,7 +214,7 @@ export function TimerScreen() {
         <div className="zoom-info">
           {ph.roundCounter
             ? <b>{rounds} tour{rounds > 1 ? 's' : ''}</b>
-            : roundValue !== '—' && <b>{roundLabel} {roundValue}</b>}
+            : zoomRound && <b>{zoomRound}</b>}
           {reps && <span>{reps}</span>}
         </div>
         {/* Raccourcis : sans quitter l'affichage agrandi. */}

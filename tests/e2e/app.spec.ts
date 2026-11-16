@@ -864,12 +864,36 @@ test('chrono agrandi : en haut à gauche, l’étape en cours du bloc de travail
   await page.getByRole('button', { name: 'Démarrer' }).click();
   await page.getByRole('button', { name: 'Démarrer' }).click();
   await page.getByRole('button', { name: 'Agrandir le chrono' }).click();
-  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 1/3');
-  // Deuxième étape : la série. Le coin indique l'étape du bloc, la série est rappelée sous le temps.
+  // Pompes, série × 4, gainage : 6 étapes, une par répétition de la série.
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 1/6');
   await page.clock.runFor(30_500);
-  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 2/3');
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 2/6');
   await expect(page.locator('.zoom-info')).toContainText('Série 1 / 4');
   await page.clock.runFor(30_000);
-  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 2/3');
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 3/6');
   await expect(page.locator('.zoom-info')).toContainText('Série 2 / 4');
+});
+
+test('chrono agrandi : bloc de travail répété 7 fois, le coin compte les passages', async ({ page }) => {
+  const w: Workout = {
+    id: 'w7', name: 'Sept passages', tags: [], favorite: false, prepSeconds: 0, createdAt: 0, updatedAt: 0,
+    blocks: [{
+      id: 'b', mode: 'custom', restAfter: 0, exercises: [],
+      params: { timeline: [{
+        id: 'g', type: 'group', name: 'Circuit', reps: 7, between: 0,
+        children: [{ id: 's', type: 'series', reps: 5, between: 0, children: [{ id: 'e', type: 'effort', duration: 10, note: 'Squats' }] }],
+      }] },
+    }],
+  };
+  await page.goto(`./#/partage/${encodeWorkout(w)}`);
+  await page.getByRole('button', { name: 'Ajouter à mes séances' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Démarrer' }).click();
+  await page.getByRole('button', { name: 'Agrandir le chrono' }).click();
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 1/7');
+  await expect(page.locator('.zoom-info')).toContainText('Série 1 / 5');
+  // Après un passage complet (5 × 10 s), le compteur avance.
+  await page.clock.runFor(50_500);
+  await expect(page.getByTestId('zoom-count')).toHaveText('Bloc : 2/7');
+  await expect(page.locator('.zoom-info')).toContainText('Série 1 / 5');
 });
