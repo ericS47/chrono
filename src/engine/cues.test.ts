@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeCues, entryEvent } from './cues';
+import { computeCues, entryEvent, entrySpeech } from './cues';
 import { buildPhases } from './phases';
 import { defaultBlock, DEFAULT_SOUND } from '../data/defaults';
 import type { SoundSettings } from '../data/types';
@@ -73,6 +73,29 @@ describe('signaux programmés', () => {
     ] } }] }, 10);
     const says = computeCues(ph, 0, 0, DEFAULT_SOUND, true).filter((c) => c.say && !/^\d|secondes|un$|deux$|trois$/.test(c.say)).map((c) => c.say);
     expect(says).toEqual(['Préparation', 'Go', 'Mi-temps', 'On change. Squats', 'Mi-temps', 'Repos', 'Go', 'Mi-temps', 'Séance terminée']);
+  });
+
+  it('créateur : la série en cours est annoncée, le bloc seulement au début de chaque passage', () => {
+    const ph = buildPhases({ blocks: [{ ...defaultBlock('custom'), params: { timeline: [
+      { id: 'g', type: 'group', name: 'Haut', reps: 2, between: 0, children: [
+        { id: 's', type: 'series', reps: 2, between: 0, children: [
+          { id: 'a', type: 'effort', duration: 20, note: 'Pompes' }, { id: 'b', type: 'effort', duration: 20, note: 'Dips' },
+          { id: 'r', type: 'rest', duration: 10 },
+        ] },
+      ] },
+    ] } }] }, 0);
+    const says = ph.map((_, i) => entrySpeech(ph, i, DEFAULT_SOUND)).filter((_x, i) => ph[i].kind === 'work');
+    expect(says).toEqual([
+      'Pompes. Tour 1 sur 2. Série 1 sur 2', 'On change. Dips',
+      'Pompes. Série 2 sur 2', 'On change. Dips',
+      'On change. Pompes. Tour 2 sur 2. Série 1 sur 2', 'On change. Dips',
+      'Pompes. Série 2 sur 2', 'On change. Dips',
+    ]);
+  });
+
+  it('hors créateur, le tour reste annoncé à chaque effort', () => {
+    expect(entrySpeech(phases, 1, DEFAULT_SOUND)).toMatch(/Tour 1 sur 2$/);
+    expect(entrySpeech(phases, 3, DEFAULT_SOUND)).toMatch(/Tour 2 sur 2$/);
   });
 
   it('mi-temps au repos : le bip seul, sans la voix', () => {

@@ -27,6 +27,30 @@ export function entryEvent(phases: Phase[], i: number): SoundEvent | null {
   return prevPh.kind === 'rest' ? 'restEnd' : 'workEnd';
 }
 
+/** Effort précédent (les repos sont sautés). */
+function prevWork(phases: Phase[], i: number): Phase | undefined {
+  for (let k = i - 1; k >= 0; k--) if (phases[k].kind === 'work') return phases[k];
+  return undefined;
+}
+
+/**
+ * Créateur de séance : on annonce la série en cours (« Série 2 sur 4 ») une fois par
+ * répétition de série ; le passage du bloc de travail répété (« Tour 2 sur 3 ») n'est
+ * annoncé qu'au premier effort de chaque passage, avant la série.
+ */
+function timelineCount(phases: Phase[], i: number): string[] {
+  const ph = phases[i];
+  const prev = prevWork(phases, i);
+  const out: string[] = [];
+  const hasRound = !!ph.rounds && ph.rounds > 1 && !!ph.round;
+  const hasSet = !!ph.sets && ph.sets > 1 && !!ph.set;
+  const newPass = hasRound && (!prev || prev.round !== ph.round || prev.rounds !== ph.rounds || prev.detail !== ph.detail);
+  const newSet = hasSet && (newPass || !prev || prev.set !== ph.set || prev.sets !== ph.sets);
+  if (newPass) out.push(`Tour ${ph.round} sur ${ph.rounds}`);
+  if (newSet) out.push(`Série ${ph.set} sur ${ph.sets}`);
+  return out;
+}
+
 /** Annonce vocale à l'entrée dans la phase i. */
 export function entrySpeech(phases: Phase[], i: number, s: SoundSettings): string | undefined {
   const ph = phases[i];
@@ -44,7 +68,8 @@ export function entrySpeech(phases: Phase[], i: number, s: SoundSettings): strin
     }
   }
   if (s.announceRound && ph.kind === 'work') {
-    if (ph.rounds && ph.rounds > 1 && ph.round) parts.push(`Tour ${ph.round} sur ${ph.rounds}`);
+    if (ph.mode === 'custom') parts.push(...timelineCount(phases, i));
+    else if (ph.rounds && ph.rounds > 1 && ph.round) parts.push(`Tour ${ph.round} sur ${ph.rounds}`);
     else if (ph.sets && ph.sets > 1 && ph.set) parts.push(`Série ${ph.set} sur ${ph.sets}`);
   }
   return parts.length ? parts.join('. ') : undefined;

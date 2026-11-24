@@ -49,7 +49,7 @@ Une PWA installable sur le téléphone (iPhone ou Android) qui sert de chrono de
 ## Son
 
 - **Bips** : programmés à l’avance dans Web Audio (`src/engine/cues.ts`). Décompte final (0 à 5 bips), début et fin de phase, bip à la moitié de chaque effort et de chaque repos d’au moins 20 s.
-- **Annonces vocales** : « Go », « Repos », « Tour 3 sur 8 », « 30 secondes »… « Mi-temps » n’est dit que pendant un effort (un simple bip pendant un repos). « On change » est dit quand un effort suit directement un autre effort.
+- **Annonces vocales** : « Go », « Repos », « Tour 3 sur 8 », « 30 secondes »… « Mi-temps » n’est dit que pendant un effort (un simple bip pendant un repos). « On change » est dit quand un effort suit directement un autre effort. Séance du créateur : la série en cours est annoncée (« Série 2 sur 4 ») au premier effort de chaque répétition ; le passage d’un bloc de travail répété (« Tour 2 sur 3 ») n’est dit qu’au premier effort du passage, avant la série (l’affichage, lui, ne change pas).
 - **Voix enregistrée** : les annonces sont des extraits enregistrés (voix Piper « siwis ») réunis dans `public/voix-fr.mp3`, avec leur index dans `src/audio/voix-fr.json`. Ils sont joués comme les bips, donc ils ne coupent pas la musique. Phrases fixes, nombres 1 à 60, « Tour / Série / Minute N sur M » composés, noms des exercices. Un commentaire libre n’est pas lu. La voix du téléphone ne sert qu’en secours tant que le fichier n’est pas chargé. Régénération : `scripts/voix/generer.py`.
 - **Réglage « Son en arrière-plan »** :
   - coupé : le son se mélange à la musique d’une autre app (Spotify…), app ouverte ; sur iPhone, le bouton silencieux le coupe ;
